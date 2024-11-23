@@ -1,4 +1,4 @@
-import AppButton from "./common/AppButton";
+import AppButton from './common/AppButton';
 
 export default function Test() {
   return (

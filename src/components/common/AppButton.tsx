@@ -1,5 +1,5 @@
-import { Button, Title, useMantineTheme } from "@mantine/core";
-import { useState } from "react";
+import { Button, Title, useMantineTheme } from '@mantine/core';
+import { useState } from 'react';
 
 export default function AppButton() {
   const [count, setCount] = useState(0);

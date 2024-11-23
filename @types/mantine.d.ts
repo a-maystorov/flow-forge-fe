@@ -1,8 +1,8 @@
-import { MantineColorsTuple, DefaultMantineColor } from "@mantine/core";
+import { MantineColorsTuple, DefaultMantineColor } from '@mantine/core';
 
-type ExtendedCustomColors = "deepBlue" | DefaultMantineColor;
+type ExtendedCustomColors = 'deepBlue' | DefaultMantineColor;
 
-declare module "@mantine/core" {
+declare module '@mantine/core' {
   export interface MantineThemeColorsOverride {
     colors: Record<ExtendedCustomColors, MantineColorsTuple>;
   }
