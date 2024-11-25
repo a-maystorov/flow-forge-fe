@@ -1,6 +1,8 @@
-import { colorsTuple, createTheme, rem } from '@mantine/core';
+import { colorsTuple, createTheme, DEFAULT_THEME, rem } from '@mantine/core';
 
 const theme = createTheme({
+  fontFamily: 'Plus Jakarta Sans, sans-serif',
+  fontFamilyMonospace: 'Monaco, Courier, monospace',
   primaryColor: 'main-purple',
   colors: {
     black: colorsTuple('#000112'),
@@ -16,12 +18,16 @@ const theme = createTheme({
     red: colorsTuple('#EA5555'),
     'red-hover': colorsTuple('#FF9898'),
   },
-
   headings: {
-    fontFamily: 'Roboto, sans-serif',
+    // fallback
+    fontFamily: `Plus Jakarta Sans, sans-serif, ${DEFAULT_THEME.fontFamily}`,
     sizes: {
-      h1: { fontSize: rem(36) },
+      h1: { fontSize: rem(24), lineHeight: rem(30) },
+      h2: { fontSize: rem(18), lineHeight: rem(23) },
+      h3: { fontSize: rem(15), lineHeight: rem(19) },
+      h4: { fontSize: rem(12), lineHeight: rem(15) },
     },
+    fontWeight: 'bold',
   },
 });
 

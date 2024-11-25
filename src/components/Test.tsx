@@ -1,9 +1,12 @@
+import { Text } from '@mantine/core';
 import AppButton from './common/AppButton';
 
 export default function Test() {
   return (
     <>
-      <div>Test</div>
+      <Text fw="normal" fz="xl">
+        Test
+      </Text>
       <AppButton />
     </>
   );
