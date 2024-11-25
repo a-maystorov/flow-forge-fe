@@ -1,20 +1,20 @@
-import { createTheme, rem } from '@mantine/core';
+import { colorsTuple, createTheme, rem } from '@mantine/core';
 
 const theme = createTheme({
+  primaryColor: 'main-purple',
   colors: {
-    // Custom color test
-    deepBlue: [
-      '#eef3ff',
-      '#dce4f5',
-      '#b9c7e2',
-      '#94a8d0',
-      '#748dc1',
-      '#5f7cb8',
-      '#5474b4',
-      '#44639f',
-      '#39588f',
-      '#2d4b81',
-    ],
+    black: colorsTuple('#000112'),
+    'very-dark-gray': colorsTuple('#20212C'),
+    'dark-gray': colorsTuple('#2B2C37'),
+    'lines-dark': colorsTuple('#3E3F4E'),
+    'medium-gray': colorsTuple('#828FA3'),
+    'lines-light': colorsTuple('#E4EBFA'),
+    'light-gray': colorsTuple('#F4F7FD'),
+    white: colorsTuple('#FFFFFF'),
+    'main-purple': colorsTuple('#635FC7'),
+    'main-purple-hover': colorsTuple('#A8A4FF'),
+    red: colorsTuple('#EA5555'),
+    'red-hover': colorsTuple('#FF9898'),
   },
 
   headings: {
