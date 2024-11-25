@@ -1,10 +1,9 @@
-import Test from '../components/Test';
+import { Flex, Title } from '@mantine/core';
 
 export default function Home() {
   return (
-    <>
-      <div>Home</div>
-      <Test />
-    </>
+    <Flex align="center" justify="center" h="100vh" w="100%">
+      <Title order={1}>Home</Title>
+    </Flex>
   );
 }
