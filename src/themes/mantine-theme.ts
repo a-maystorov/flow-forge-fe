@@ -29,6 +29,13 @@ const theme = createTheme({
     },
     fontWeight: 'bold',
   },
+  radius: {
+    xs: rem(14),
+    sm: rem(16),
+    md: rem(18),
+    lg: rem(20),
+    xl: rem(24),
+  },
 });
 
 export default theme;
