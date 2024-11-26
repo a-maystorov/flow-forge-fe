@@ -1,8 +1,10 @@
-import { AppShell, Burger, Group, ScrollArea, Skeleton } from '@mantine/core';
+import { AppShell, Burger, Group, ScrollArea, Skeleton, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ReactNode } from 'react';
-import KanbanLogo from '../assets/svgs/KanbanLogo';
-import ColorSchemeToggle from '../components/ColorSchemeToggle';
+import KanbanLogo from '../assets/icons/KanbanLogo';
+import ColorSchemeToggle from '../components/color-scheme-toggle';
+import HideSidebarButton from '../components/hide-sidebar-button';
+import ShowSidebarButton from '../components/show-sidebar-button';
 
 export default function NavbarLayout({ children }: { children: ReactNode }) {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -25,7 +27,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
         <Group h="100%" px="md">
           <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
           <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
-          <KanbanLogo w={24} h={25} title="Kanban Logo" />
+          <KanbanLogo w={24} h={24} />
         </Group>
       </AppShell.Header>
 
@@ -42,7 +44,10 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
         </AppShell.Section>
 
         <AppShell.Section>
-          <ColorSchemeToggle />
+          <Stack>
+            <ColorSchemeToggle />
+            <HideSidebarButton onClick={toggleDesktop} />
+          </Stack>
         </AppShell.Section>
       </AppShell.Navbar>
 
@@ -50,8 +55,8 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       <AppShell.Main>{children}</AppShell.Main>
 
       {/* Footer Section */}
-      <AppShell.Footer p="md" withBorder={false} pl={0}>
-        <ColorSchemeToggle />
+      <AppShell.Footer withBorder={false} pl={0} pb="xl">
+        <ShowSidebarButton onClick={toggleDesktop} />
       </AppShell.Footer>
     </AppShell>
   );

@@ -1,0 +1,9 @@
+.show-sidebar-button {
+  border-top-right-radius: var(--mantine-radius-xl);
+  border-bottom-right-radius: var(--mantine-radius-xl);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: var(--mantine-color-main-purple-hover-0);
+  }
+}

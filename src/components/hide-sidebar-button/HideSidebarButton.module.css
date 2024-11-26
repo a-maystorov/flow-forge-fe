@@ -1,0 +1,17 @@
+.root {
+  color: var(--mantine-color-medium-gray-0);
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: var(--mantine-primary-color-0);
+
+    .section {
+      fill: var(--mantine-primary-color-0);
+    }
+  }
+}
+
+.section {
+  fill: var(--mantine-color-medium-gray-0);
+  transition: all 0.3s ease;
+}

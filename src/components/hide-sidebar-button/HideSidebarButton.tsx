@@ -1,0 +1,20 @@
+import { Button } from '@mantine/core';
+import EyeSlashIcon from '../../assets/icons/EyeSlashIcon';
+import styles from './HideSidebarButton.module.css';
+
+interface Props {
+  onClick: () => void;
+}
+
+export default function HideSidebarButton({ onClick }: Props) {
+  return (
+    <Button
+      onClick={onClick}
+      variant="transparent"
+      leftSection={<EyeSlashIcon w={24} h={24} />}
+      classNames={styles}
+    >
+      Hide Sidebar
+    </Button>
+  );
+}
