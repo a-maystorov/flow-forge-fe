@@ -5,7 +5,7 @@ import theme from './themes/mantine-theme';
 
 function App() {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="auto">
       <Home />
     </MantineProvider>
   );
