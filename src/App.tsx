@@ -1,14 +1,15 @@
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
+import NavbarLayout from './layouts/NavbarLayout';
 import Home from './pages/Home';
 import theme from './themes/mantine-theme';
 
-function App() {
+export default function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <Home />
+      <NavbarLayout>
+        <Home />
+      </NavbarLayout>
     </MantineProvider>
   );
 }
-
-export default App;
