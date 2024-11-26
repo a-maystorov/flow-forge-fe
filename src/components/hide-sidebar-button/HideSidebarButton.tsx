@@ -11,7 +11,7 @@ export default function HideSidebarButton({ onClick }: Props) {
     <Button
       onClick={onClick}
       variant="transparent"
-      leftSection={<EyeSlashIcon w={24} h={24} />}
+      leftSection={<EyeSlashIcon w={20} h={20} />}
       classNames={styles}
     >
       Hide Sidebar

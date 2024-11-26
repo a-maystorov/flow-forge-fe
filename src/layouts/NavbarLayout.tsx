@@ -1,4 +1,4 @@
-import { AppShell, Burger, Group, ScrollArea, Skeleton, Stack } from '@mantine/core';
+import { AppShell, Group, ScrollArea, Skeleton, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ReactNode } from 'react';
 import KanbanLogo from '../assets/icons/KanbanLogo';
@@ -7,7 +7,7 @@ import HideSidebarButton from '../components/hide-sidebar-button';
 import ShowSidebarButton from '../components/show-sidebar-button';
 
 export default function NavbarLayout({ children }: { children: ReactNode }) {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [mobileOpened] = useDisclosure(false);
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure();
 
   return (
@@ -25,8 +25,6 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       {/* Header Section */}
       <AppShell.Header>
         <Group h="100%" px="md">
-          <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-          <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
           <KanbanLogo w={24} h={24} />
         </Group>
       </AppShell.Header>
@@ -55,7 +53,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       <AppShell.Main>{children}</AppShell.Main>
 
       {/* Footer Section */}
-      <AppShell.Footer withBorder={false} pl={0} pb="xl">
+      <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm">
         <ShowSidebarButton onClick={toggleDesktop} />
       </AppShell.Footer>
     </AppShell>

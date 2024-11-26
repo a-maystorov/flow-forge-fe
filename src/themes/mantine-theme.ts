@@ -1,6 +1,7 @@
 import { colorsTuple, createTheme, DEFAULT_THEME, rem } from '@mantine/core';
 
 const theme = createTheme({
+  cursorType: 'pointer',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   fontFamilyMonospace: 'Monaco, Courier, monospace',
   primaryColor: 'main-purple',
