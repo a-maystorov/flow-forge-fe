@@ -23,7 +23,11 @@ export default function ColorSchemeToggle() {
       style={{ borderRadius: theme.radius.md }}
     >
       <SunIcon w={20} h={20} />
-      <Switch onClick={toggleColorScheme} checked={isDarkColorScheme} />
+      <Switch
+        onClick={toggleColorScheme}
+        checked={isDarkColorScheme}
+        aria-label="Toggle color scheme"
+      />
       <MoonIcon w={20} h={20} />
     </Group>
   );

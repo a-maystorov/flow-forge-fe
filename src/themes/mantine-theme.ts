@@ -29,7 +29,7 @@ const overrides = createTheme({
       h3: { fontSize: rem(15), lineHeight: rem(19) },
       h4: { fontSize: rem(12), lineHeight: rem(15) },
     },
-    fontWeight: 'bold',
+    fontWeight: 'bold', // 700
   },
   radius: {
     lg: rem(20),

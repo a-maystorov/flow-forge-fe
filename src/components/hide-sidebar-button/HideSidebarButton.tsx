@@ -14,6 +14,7 @@ export default function HideSidebarButton({ onClick }: Props) {
       leftSection={<EyeSlashIcon w={20} h={20} />}
       classNames={styles}
       visibleFrom="sm"
+      aria-label="Toggle navigation"
     >
       Hide Sidebar
     </Button>
