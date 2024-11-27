@@ -1,9 +1,10 @@
-import { colorsTuple, createTheme, DEFAULT_THEME, rem } from '@mantine/core';
+import { colorsTuple, createTheme, DEFAULT_THEME, mergeMantineTheme, rem } from '@mantine/core';
 
-const theme = createTheme({
+const overrides = createTheme({
   cursorType: 'pointer',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   fontFamilyMonospace: 'Monaco, Courier, monospace',
+  black: '#828FA3',
   primaryColor: 'main-purple',
   colors: {
     black: colorsTuple('#000112'),
@@ -35,5 +36,7 @@ const theme = createTheme({
     xl: rem(24),
   },
 });
+
+const theme = mergeMantineTheme(DEFAULT_THEME, overrides);
 
 export default theme;
