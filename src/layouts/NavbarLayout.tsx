@@ -54,7 +54,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       <AppShell.Main>{children}</AppShell.Main>
 
       {/* Footer Section */}
-      <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm">
+      <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm" hidden={desktopOpened}>
         <ShowSidebarButton onClick={toggleDesktop} />
       </AppShell.Footer>
     </AppShell>
