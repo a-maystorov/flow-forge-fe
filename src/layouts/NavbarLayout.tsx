@@ -42,6 +42,11 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       {/* Header Section */}
       <AppShell.Header
         bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
+        style={{
+          borderColor: isDarkColorScheme
+            ? theme.colors['lines-dark'][0]
+            : theme.colors['lines-light'][0],
+        }}
       >
         <Group h="100%" px="md" justify="space-between">
           <Title visibleFrom="sm">Board Name Goes Here</Title>
@@ -65,6 +70,11 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       <AppShell.Navbar
         p="md"
         bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
+        style={{
+          borderColor: isDarkColorScheme
+            ? theme.colors['lines-dark'][0]
+            : theme.colors['lines-light'][0],
+        }}
       >
         <AppShell.Section>
           <Flex align="center" gap="md" visibleFrom="sm">
