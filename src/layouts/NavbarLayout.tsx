@@ -71,9 +71,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
         <AppShell.Section>
           <Flex align="center" gap="md" visibleFrom="sm">
             <KanbanLogo w={24} h={24} />
-            <Title c={isDarkColorScheme ? theme.colors.white[0] : theme.colors.black[0]}>
-              flowforge
-            </Title>
+            <Title>flowforge</Title>
           </Flex>
         </AppShell.Section>
 

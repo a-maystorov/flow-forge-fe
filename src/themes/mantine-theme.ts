@@ -4,7 +4,6 @@ const overrides = createTheme({
   cursorType: 'pointer',
   fontFamily: 'Plus Jakarta Sans, sans-serif',
   fontFamilyMonospace: 'Monaco, Courier, monospace',
-  black: '#828FA3',
   primaryColor: 'main-purple',
   colors: {
     black: colorsTuple('#000112'),
