@@ -23,9 +23,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
 
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { colorScheme } = useMantineColorScheme({
-    keepTransitions: true,
-  });
+  const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
 
   return (
