@@ -23,10 +23,10 @@ const overrides = createTheme({
     // fallback
     fontFamily: `Plus Jakarta Sans, sans-serif, ${DEFAULT_THEME.fontFamily}`,
     sizes: {
-      h1: { fontSize: rem(24), lineHeight: rem(30) },
-      h2: { fontSize: rem(18), lineHeight: rem(23) },
-      h3: { fontSize: rem(15), lineHeight: rem(19) },
-      h4: { fontSize: rem(12), lineHeight: rem(15) },
+      h1: { fontSize: rem(24), lineHeight: rem(30) }, // XL
+      h2: { fontSize: rem(18), lineHeight: rem(23) }, // L
+      h3: { fontSize: rem(15), lineHeight: rem(19) }, // M
+      h4: { fontSize: rem(12), lineHeight: rem(15) }, // S
     },
     fontWeight: 'bold', // 700
   },

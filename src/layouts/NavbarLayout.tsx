@@ -4,7 +4,6 @@ import {
   Flex,
   Group,
   ScrollArea,
-  Skeleton,
   Stack,
   Title,
   useMantineColorScheme,
@@ -15,6 +14,7 @@ import { ReactNode } from 'react';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
+import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
 
 export default function NavbarLayout({ children }: { children: ReactNode }) {
@@ -84,11 +84,13 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
         </AppShell.Section>
 
         <AppShell.Section grow my="md" component={ScrollArea}>
-          {Array(60)
-            .fill(0)
-            .map((_, index) => (
-              <Skeleton key={index} h={28} mt="sm" animate={false} />
-            ))}
+          <Stack gap="lg">
+            {Array(60)
+              .fill(0)
+              .map((_, index) => (
+                <NavbarItem key={index} />
+              ))}
+          </Stack>
         </AppShell.Section>
 
         <AppShell.Section>
