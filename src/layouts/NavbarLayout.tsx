@@ -2,7 +2,6 @@ import {
   AppShell,
   Burger,
   Flex,
-  Group,
   rem,
   ScrollArea,
   Stack,
@@ -30,7 +29,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
   return (
     <AppShell
       layout={isMobile ? 'default' : 'alt'}
-      header={{ height: 60 }}
+      header={{ height: 80 }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
@@ -48,13 +47,14 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
             ? theme.colors['lines-dark'][0]
             : theme.colors['lines-light'][0],
         }}
+        px="2lg"
       >
-        <Group h="100%" px="md" justify="space-between">
+        <Flex h="100%" justify="space-between" align="center">
           <Title visibleFrom="sm">Board Name Goes Here</Title>
 
           <Flex hiddenFrom="sm" align="center" gap="md">
             <KanbanLogo w={24} h={24} />
-            <Title>Board Name Goes Here</Title>
+            <Title lineClamp={1}>Board Name Goes Here</Title>
           </Flex>
 
           <Burger
@@ -64,7 +64,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
             size="sm"
             aria-label="Toggle navigation"
           />
-        </Group>
+        </Flex>
       </AppShell.Header>
 
       {/* Navigation Section */}
