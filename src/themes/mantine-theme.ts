@@ -34,6 +34,9 @@ const overrides = createTheme({
     lg: rem(20),
     xl: rem(24),
   },
+  spacing: {
+    '2lg': rem(24),
+  },
 });
 
 const theme = mergeMantineTheme(DEFAULT_THEME, overrides);

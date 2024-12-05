@@ -12,9 +12,10 @@ export default function NavbarItem() {
       label={<Title order={3}>Navbar Item</Title>}
       active={active}
       onClick={() => setActive(!active)} // Testing purpose only.
-      leftSection={<SplitBoardIcon h={20} w={20} />}
+      leftSection={<SplitBoardIcon h={16} w={16} />}
       classNames={styles}
-      p="md"
+      py="md"
+      px={{ base: '2lg', md: 'xl' }}
     />
   );
 }

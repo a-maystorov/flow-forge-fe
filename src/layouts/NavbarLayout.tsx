@@ -3,6 +3,7 @@ import {
   Burger,
   Flex,
   Group,
+  rem,
   ScrollArea,
   Stack,
   Title,
@@ -68,7 +69,6 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
 
       {/* Navigation Section */}
       <AppShell.Navbar
-        p="md"
         bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
         style={{
           borderColor: isDarkColorScheme
@@ -76,15 +76,35 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
             : theme.colors['lines-light'][0],
         }}
       >
-        <AppShell.Section>
-          <Flex align="center" gap="md" visibleFrom="sm">
+        <AppShell.Section p={{ base: '2lg', md: 'xl' }} mb="md" visibleFrom="sm">
+          <Flex align="center" gap="md">
             <KanbanLogo w={24} h={24} />
             <Title>flowforge</Title>
           </Flex>
         </AppShell.Section>
 
-        <AppShell.Section grow my="md" component={ScrollArea}>
-          <Stack gap="lg">
+        <AppShell.Section px={{ base: '2lg', md: 'xl' }} mb="lg" mt={{ base: 'lg', sm: 0 }}>
+          {/* TODO: Temporary hard coded value. */}
+          <Title
+            order={4}
+            tt="uppercase"
+            style={{ letterSpacing: rem(2.4) }}
+            c={theme.colors['medium-gray'][0]}
+          >
+            All boards (60)
+          </Title>
+        </AppShell.Section>
+
+        <AppShell.Section
+          grow
+          component={ScrollArea}
+          pr={{ base: 'lg', md: '2lg' }}
+          offsetScrollbars
+          scrollHideDelay={150}
+          scrollbarSize={4}
+          type={isMobile ? 'never' : 'hover'}
+        >
+          <Stack gap={0}>
             {Array(60)
               .fill(0)
               .map((_, index) => (
@@ -93,7 +113,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
           </Stack>
         </AppShell.Section>
 
-        <AppShell.Section>
+        <AppShell.Section px={{ base: 'sm', md: '2lg' }} py="xl">
           <Stack>
             <ColorSchemeToggle />
             <HideSidebarButton onClick={toggleDesktop} />
