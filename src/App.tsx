@@ -1,7 +1,7 @@
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import NavbarLayout from './layouts/NavbarLayout';
-import Home from './pages/Home';
+import { Home } from './pages';
 import theme from './themes/mantine-theme';
 
 export default function App() {
