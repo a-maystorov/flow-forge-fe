@@ -10,14 +10,14 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
 
-export default function NavbarLayout({ children }: { children: ReactNode }) {
+export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
@@ -125,7 +125,7 @@ export default function NavbarLayout({ children }: { children: ReactNode }) {
       <AppShell.Main
         bg={isDarkColorScheme ? theme.colors['very-dark-gray'][0] : theme.colors['light-gray'][0]}
       >
-        {children}
+        <Outlet />
       </AppShell.Main>
 
       {/* Footer Section */}
