@@ -17,7 +17,7 @@ export default function Login() {
 
       <Text c="dimmed" size="sm" ta="center" mt={5}>
         Already have an account?{' '}
-        <Anchor size="sm" href="/signup">
+        <Anchor size="sm" href="/login">
           Sign in
         </Anchor>
       </Text>
