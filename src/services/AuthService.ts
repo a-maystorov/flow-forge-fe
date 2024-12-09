@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import User from '../models/User';
 
 const key = 'authToken';
 
@@ -8,7 +9,7 @@ class AuthService {
     baseURL: import.meta.env.VITE_API_BASE_URL,
   });
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string): Promise<string> {
     const { data } = await this.http.post<{ token: string }>('/auth/login', {
       email,
       password,
@@ -20,12 +21,11 @@ class AuthService {
     return data.token;
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem(key);
-    window.location.href = '/';
   }
 
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem(key);
   }
 
@@ -37,7 +37,8 @@ class AuthService {
     }
 
     try {
-      return jwtDecode(token);
+      const decoded = jwtDecode<User>(token);
+      return decoded;
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;
