@@ -3,7 +3,7 @@ import AuthService from '../services/AuthService';
 const TestAuthService = () => {
   const handleLogin = async () => {
     try {
-      const token = await AuthService.login('a', 'b');
+      const token = await AuthService.login('dev.test@gmail.com', 'start123');
       console.log('JWT:', token);
       console.log('Decoded User:', AuthService.getUser());
     } catch (error) {

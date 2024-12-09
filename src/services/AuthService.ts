@@ -9,15 +9,15 @@ class AuthService {
   });
 
   async login(email: string, password: string) {
-    const { data: jwt } = await this.http.post<{ token: string }>('/auth/login', {
+    const { data } = await this.http.post<{ token: string }>('/auth/login', {
       email,
       password,
     });
 
-    localStorage.setItem(key, jwt.token);
-    this.setJwt(jwt.token);
+    localStorage.setItem(key, data.token);
+    this.setJwt(data.token);
 
-    return jwt.token;
+    return data.token;
   }
 
   logout() {
