@@ -1,16 +1,19 @@
 import {
   AppShell,
   Burger,
+  Button,
   Flex,
+  Group,
   rem,
   ScrollArea,
   Stack,
+  Text,
   Title,
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
@@ -64,6 +67,19 @@ export default function NavbarLayout() {
             size="sm"
             aria-label="Toggle navigation"
           />
+
+          {/* TODO: Handle Login/Signup responsive styles */}
+          <Group visibleFrom="sm">
+            <Button size="xs" variant="outline" component={Link} to="/login">
+              <Text tt="uppercase">Login</Text>
+            </Button>
+
+            <Button size="xs" component={Link} to="/signup">
+              <Text tt="uppercase" ta="center">
+                Signup
+              </Text>
+            </Button>
+          </Group>
         </Flex>
       </AppShell.Header>
 
@@ -122,21 +138,12 @@ export default function NavbarLayout() {
       </AppShell.Navbar>
 
       {/* Main Content Area */}
-      <AppShell.Main
-        bg={isDarkColorScheme ? theme.colors['very-dark-gray'][0] : theme.colors['light-gray'][0]}
-      >
+      <AppShell.Main>
         <Outlet />
       </AppShell.Main>
 
       {/* Footer Section */}
-      <AppShell.Footer
-        withBorder={false}
-        pl={0}
-        pb="xl"
-        visibleFrom="sm"
-        hidden={desktopOpened}
-        bg={isDarkColorScheme ? theme.colors['very-dark-gray'][0] : theme.colors['light-gray'][0]}
-      >
+      <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm" hidden={desktopOpened}>
         <ShowSidebarButton onClick={toggleDesktop} />
       </AppShell.Footer>
     </AppShell>
