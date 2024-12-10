@@ -7,18 +7,18 @@ import {
   rem,
   ScrollArea,
   Stack,
-  Text,
   Title,
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
+import { useAuth } from '../hooks/useAuth';
 
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -26,8 +26,12 @@ export default function NavbarLayout() {
 
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
+
+  const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <AppShell
@@ -69,16 +73,28 @@ export default function NavbarLayout() {
           />
 
           {/* TODO: Handle Login/Signup responsive styles */}
-          <Group visibleFrom="sm">
-            <Button size="xs" variant="outline" component={Link} to="/login">
-              <Text tt="uppercase">Login</Text>
-            </Button>
+          <Group>
+            {isAuthenticated ? (
+              <Button size="sm" variant="outline" onClick={logout}>
+                Logout
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  component={Link}
+                  to="/login"
+                  state={{ from: location }}
+                >
+                  Login
+                </Button>
 
-            <Button size="xs" component={Link} to="/signup">
-              <Text tt="uppercase" ta="center">
-                Signup
-              </Text>
-            </Button>
+                <Button size="sm" component={Link} to="/signup">
+                  Signup
+                </Button>
+              </>
+            )}
           </Group>
         </Flex>
       </AppShell.Header>

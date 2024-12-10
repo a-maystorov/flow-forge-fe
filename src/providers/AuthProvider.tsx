@@ -14,7 +14,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       }
       return null;
     },
-    initialData: null,
+    initialData: AuthService.getUser(),
     staleTime: Infinity,
   });
 
