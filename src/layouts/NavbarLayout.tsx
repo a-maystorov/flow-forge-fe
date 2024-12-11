@@ -1,9 +1,8 @@
 import {
   AppShell,
+  Box,
   Burger,
-  Button,
   Flex,
-  Group,
   rem,
   ScrollArea,
   Stack,
@@ -12,13 +11,13 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
+import AuthButtons from '../components/auth-buttons';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
-import { useAuth } from '../hooks/useAuth';
 
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -29,9 +28,6 @@ export default function NavbarLayout() {
 
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
-
-  const location = useLocation();
-  const { isAuthenticated, logout } = useAuth();
 
   return (
     <AppShell
@@ -57,7 +53,9 @@ export default function NavbarLayout() {
         px="2lg"
       >
         <Flex h="100%" justify="space-between" align="center">
-          <Title visibleFrom="sm">Board Name Goes Here</Title>
+          <Title visibleFrom="sm" lineClamp={1}>
+            Board Name Goes Here
+          </Title>
 
           <Flex hiddenFrom="sm" align="center" gap="md">
             <KanbanLogo w={24} h={24} />
@@ -72,30 +70,9 @@ export default function NavbarLayout() {
             aria-label="Toggle navigation"
           />
 
-          {/* TODO: Handle Login/Signup responsive styles */}
-          <Group>
-            {isAuthenticated ? (
-              <Button size="sm" variant="outline" onClick={logout}>
-                Logout
-              </Button>
-            ) : (
-              <>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  component={Link}
-                  to="/login"
-                  state={{ from: location }}
-                >
-                  Login
-                </Button>
-
-                <Button size="sm" component={Link} to="/signup" state={{ from: location }}>
-                  Signup
-                </Button>
-              </>
-            )}
-          </Group>
+          <Box visibleFrom="sm">
+            <AuthButtons direction="row" size={isMobile ? 'xs' : 'sm'} gap={theme.spacing.md} />
+          </Box>
         </Flex>
       </AppShell.Header>
 
@@ -116,7 +93,6 @@ export default function NavbarLayout() {
         </AppShell.Section>
 
         <AppShell.Section px={{ base: '2lg', md: 'xl' }} mb="lg" mt={{ base: 'lg', sm: 0 }}>
-          {/* TODO: Temporary hard coded value. */}
           <Title
             order={4}
             tt="uppercase"
@@ -147,8 +123,14 @@ export default function NavbarLayout() {
 
         <AppShell.Section px={{ base: 'sm', md: '2lg' }} py="xl">
           <Stack>
-            <ColorSchemeToggle />
-            <HideSidebarButton onClick={toggleDesktop} />
+            <Stack>
+              <ColorSchemeToggle />
+              <HideSidebarButton onClick={toggleDesktop} />
+            </Stack>
+
+            <Box hiddenFrom="sm">
+              <AuthButtons direction="column" size="sm" gap={theme.spacing.md} />
+            </Box>
           </Stack>
         </AppShell.Section>
       </AppShell.Navbar>
