@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import User from '../models/User';
+import { User } from '../models/User';
 
 const key = 'authToken';
 

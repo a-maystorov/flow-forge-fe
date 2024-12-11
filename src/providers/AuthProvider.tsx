@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import AuthContext from '../contexts/AuthContext';
-import User from '../models/User';
+import { User } from '../models/User';
 import AuthService from '../services/AuthService';
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -29,7 +29,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, refetch }}>
       {children}
     </AuthContext.Provider>
   );
