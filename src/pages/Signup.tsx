@@ -11,7 +11,7 @@ import {
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
 import { UserSignupPayload } from '../models/User';
@@ -26,6 +26,9 @@ const signupSchema = z.object({
 export default function Signup() {
   const { refetch } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/';
 
   const form = useForm({
     initialValues: {
@@ -40,7 +43,7 @@ export default function Signup() {
     mutationFn: (values: UserSignupPayload) => UserService.register(values),
     onSuccess: async () => {
       await refetch();
-      navigate('/');
+      navigate(from, { replace: true });
     },
     onError: (error) => {
       console.error('Signup failed: ', error);

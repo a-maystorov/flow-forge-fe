@@ -90,7 +90,7 @@ export default function NavbarLayout() {
                   Login
                 </Button>
 
-                <Button size="sm" component={Link} to="/signup">
+                <Button size="sm" component={Link} to="/signup" state={{ from: location }}>
                   Signup
                 </Button>
               </>

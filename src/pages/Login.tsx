@@ -1,7 +1,16 @@
-import { Button, Container, Paper, PasswordInput, TextInput, Title } from '@mantine/core';
+import {
+  Anchor,
+  Button,
+  Container,
+  Paper,
+  PasswordInput,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
 
@@ -15,10 +24,8 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect to the previous page or home
-  const from = location.state.from.pathname || '/';
+  const from = location.state?.from?.pathname || '/';
 
-  // Form setup with zod validation
   const form = useForm({
     initialValues: {
       email: '',
@@ -47,6 +54,14 @@ export default function Login() {
   return (
     <Container size={420} my={40}>
       <Title ta="center">Welcome back!</Title>
+
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Do not have an account yet?{' '}
+        <Anchor size="sm" component={Link} to="/signup">
+          Create account
+        </Anchor>
+      </Text>
+
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
@@ -62,7 +77,7 @@ export default function Login() {
             mt="md"
             {...form.getInputProps('password')}
           />
-          <Button fullWidth mt="xl" type="submit" loading={isPending}>
+          <Button fullWidth mt="xl" type="submit" loading={isPending} disabled={isPending}>
             Sign in
           </Button>
         </form>
