@@ -51,6 +51,21 @@ class AuthService {
     }
   }
 
+  // TODO: adjust return type
+  async createGuestSession(): Promise<string> {
+    const { data } = await this.http.post<{
+      token: string;
+      isGuest: boolean;
+      expiresAt: string;
+      message: string;
+    }>('/auth/guest-session');
+
+    localStorage.setItem(key, data.token);
+    this.setJwt(data.token);
+
+    return data.token;
+  }
+
   isTokenExpired(token: string) {
     const { exp } = jwtDecode<{ exp: number }>(token);
     return Date.now() >= exp * 1000;

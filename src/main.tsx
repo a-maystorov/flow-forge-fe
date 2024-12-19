@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import './index.css';
 import AuthProvider from './providers/AuthProvider';
-import router from './routes';
+import routes from './router/routes';
 import theme from './themes/mantine-theme';
 
 const queryClient = new QueryClient();
@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-          <RouterProvider router={router} />
+          <RouterProvider router={routes} />
           <ReactQueryDevtools initialIsOpen={false} />
         </MantineProvider>
       </AuthProvider>

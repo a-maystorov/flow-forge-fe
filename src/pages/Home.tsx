@@ -1,6 +1,8 @@
-import { Flex, Title } from '@mantine/core';
+import { Button, Flex, Title } from '@mantine/core';
 import useBoard from '../hooks/useBoard';
 import useBoards from '../hooks/useBoards';
+import authService from '../services/AuthService';
+import { useNavigate } from 'react-router-dom';
 
 const BoardsList = () => {
   const { data: boards, error, isLoading } = useBoards();
@@ -46,11 +48,27 @@ const BoardDetails = ({ id }: { id: string }) => {
   );
 };
 
-export default function Home() {
+const Home = () => {
+  const navigate = useNavigate();
+
+  const handleGuestSession = async () => {
+    try {
+      await authService.createGuestSession();
+      navigate('/boards');
+    } catch (error) {
+      console.error('Error creating guest session:', error);
+    }
+  };
+
   return (
-    <Flex align="center" justify="center" direction="column" gap="lg" h="100vh" w="100%">
-      <Title order={1}>Home</Title>
+    <Flex direction="column" align="center" gap="md">
+      <Title>Welcome to Flow Forge</Title>
+      <Button onClick={handleGuestSession} variant="light" color="blue">
+        Continue as Guest
+      </Button>
       <BoardsList />
     </Flex>
   );
-}
+};
+
+export default Home;
