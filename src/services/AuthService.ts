@@ -4,41 +4,86 @@ import { User } from '../models/User';
 
 const key = 'authToken';
 
+interface GuestSessionResponse {
+  token: string;
+  isGuest: boolean;
+  expiresAt: string;
+  message: string;
+}
+
+interface StoredSession {
+  token: string;
+  isGuest: boolean;
+  expiresAt?: string;
+}
+
 class AuthService {
   http = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
   });
 
   async login(email: string, password: string): Promise<string> {
-    const { data } = await this.http.post<{ token: string }>('/auth/login', {
+    const { data } = await this.http.post<{ token: string; isGuest: boolean }>('/auth/login', {
       email,
       password,
     });
 
-    localStorage.setItem(key, data.token);
+    this.storeSession({ token: data.token, isGuest: false });
     this.setJwt(data.token);
 
     return data.token;
   }
 
-  logout(): void {
+  private storeSession(session: StoredSession): void {
+    localStorage.setItem(key, JSON.stringify(session));
+  }
+
+  private getStoredSession(): StoredSession | null {
+    const data = localStorage.getItem(key);
+    if (!data) {
+      return null;
+    }
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    const session = this.getStoredSession();
+
+    if (session?.isGuest) {
+      try {
+        this.setJwt(session.token);
+        await this.http.post('/auth/guest-logout');
+      } catch (error) {
+        console.error('Error during guest logout:', error);
+      }
+    }
+
     localStorage.removeItem(key);
+    if (this.http.defaults.headers && this.http.defaults.headers.common) {
+      delete this.http.defaults.headers.common['x-auth-token'];
+    }
   }
 
   getToken(): string | null {
-    return localStorage.getItem(key);
+    const session = this.getStoredSession();
+    return session?.token || null;
   }
 
   getUser() {
-    const token = this.getToken();
-
-    if (!token) {
-      return null;
-    }
+    const session = this.getStoredSession();
+    if (!session?.token) return null;
 
     try {
-      const decoded = jwtDecode<User>(token);
-      return decoded;
+      const decoded = jwtDecode<User & { isGuest?: boolean }>(session.token);
+      return {
+        ...decoded,
+        isGuest: session.isGuest,
+        guestExpiresAt: session.expiresAt,
+      };
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;
@@ -46,24 +91,35 @@ class AuthService {
   }
 
   setJwt(jwt: string) {
-    if (axios.defaults.headers && axios.defaults.headers.common) {
-      axios.defaults.headers.common['x-auth-token'] = jwt;
+    if (this.http.defaults.headers && this.http.defaults.headers.common) {
+      this.http.defaults.headers.common['x-auth-token'] = jwt;
     }
   }
 
-  // TODO: adjust return type
   async createGuestSession(): Promise<string> {
-    const { data } = await this.http.post<{
-      token: string;
-      isGuest: boolean;
-      expiresAt: string;
-      message: string;
-    }>('/auth/guest-session');
+    let attempts = 0;
+    const maxAttempts = 2;
 
-    localStorage.setItem(key, data.token);
-    this.setJwt(data.token);
+    while (attempts < maxAttempts) {
+      try {
+        const { data } = await this.http.post<GuestSessionResponse>('/auth/guest-session');
 
-    return data.token;
+        this.storeSession({
+          token: data.token,
+          isGuest: true,
+          expiresAt: data.expiresAt,
+        });
+        this.setJwt(data.token);
+
+        return data.token;
+      } catch (error) {
+        attempts++;
+        if (attempts === maxAttempts) throw error;
+        // Wait a short time before retrying
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+    throw new Error('Failed to create guest session');
   }
 
   isTokenExpired(token: string) {

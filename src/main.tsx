@@ -15,12 +15,12 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <MantineProvider theme={theme} defaultColorScheme="dark">
+      <MantineProvider theme={theme} defaultColorScheme="dark">
+        <AuthProvider>
           <RouterProvider router={routes} />
           <ReactQueryDevtools initialIsOpen={false} />
-        </MantineProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </MantineProvider>
     </QueryClientProvider>
   </StrictMode>
 );
