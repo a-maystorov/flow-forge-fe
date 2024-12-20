@@ -30,19 +30,19 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     await loginMutation.mutateAsync({ email, password });
   };
 
-  const handleLogout = useCallback(async () => {
+  const handleLogout = async () => {
     if (user?.isGuest) {
       openLogoutModal();
       return;
     }
 
     await logoutMutation.mutateAsync();
-  }, [user?.isGuest, openLogoutModal, logoutMutation]);
+  };
 
-  const performLogout = useCallback(async () => {
+  const performLogout = async () => {
     await logoutMutation.mutateAsync();
     closeLogoutModal();
-  }, [logoutMutation, closeLogoutModal]);
+  };
 
   return (
     <AuthContext.Provider
