@@ -4,6 +4,7 @@ import { User } from '../models/User';
 
 const key = 'authToken';
 
+// TODO: Adjust response type
 interface GuestSessionResponse {
   token: string;
   isGuest: boolean;
