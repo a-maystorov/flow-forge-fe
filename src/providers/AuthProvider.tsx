@@ -11,7 +11,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [showLogoutModal, { open: openLogoutModal, close: closeLogoutModal }] =
     useDisclosure(false);
 
-  const { data: user, refetch } = useQuery<User | null>({
+  const { data: user } = useQuery<User | null>({
     queryKey: ['authUser'],
     queryFn: async () => {
       const token = AuthService.getToken();
@@ -45,9 +45,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, login, logout: handleLogout, isAuthenticated: !!user, refetch }}
-    >
+    <AuthContext.Provider value={{ user, login, logout: handleLogout, isAuthenticated: !!user }}>
       {children}
       <GuestLogoutModal
         isOpen={showLogoutModal}

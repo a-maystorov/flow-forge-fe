@@ -10,10 +10,9 @@ import {
   Title,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import useAuth from '../hooks/useAuth';
 import { UserSignupPayload } from '../models/User';
 import UserService from '../services/UserService';
 
@@ -24,9 +23,9 @@ const signupSchema = z.object({
 });
 
 export default function Signup() {
-  const { refetch } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const from = location.state?.from?.pathname || '/';
 
@@ -42,7 +41,7 @@ export default function Signup() {
   const { mutate, isPending } = useMutation({
     mutationFn: (values: UserSignupPayload) => UserService.register(values),
     onSuccess: async () => {
-      await refetch();
+      queryClient.invalidateQueries({ queryKey: ['authUser'], exact: true });
       navigate(from, { replace: true });
     },
     onError: (error) => {

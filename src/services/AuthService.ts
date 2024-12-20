@@ -75,7 +75,9 @@ class AuthService {
 
   getUser() {
     const session = this.getStoredSession();
-    if (!session?.token) return null;
+    if (!session?.token) {
+      return null;
+    }
 
     try {
       const decoded = jwtDecode<User & { isGuest?: boolean }>(session.token);
@@ -94,6 +96,11 @@ class AuthService {
     if (this.http.defaults.headers && this.http.defaults.headers.common) {
       this.http.defaults.headers.common['x-auth-token'] = jwt;
     }
+  }
+
+  setUserSession(token: string) {
+    this.storeSession({ token, isGuest: false });
+    this.setJwt(token);
   }
 
   async createGuestSession(): Promise<string> {

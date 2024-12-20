@@ -18,8 +18,8 @@ class UserService {
       throw new Error('Authentication token missing from response');
     }
 
-    AuthService.setJwt(token);
-    localStorage.setItem('authToken', token);
+    AuthService.setUserSession(token);
+    return token;
   }
 }
 
