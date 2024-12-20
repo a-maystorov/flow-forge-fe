@@ -1,6 +1,6 @@
 import { useDisclosure } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
-import { ReactNode, useCallback } from 'react';
+import { ReactNode } from 'react';
 import GuestLogoutModal from '../components/modals/GuestLogoutModal';
 import AuthContext from '../contexts/AuthContext';
 import useAuthMutations from '../hooks/useAuthMutations';
