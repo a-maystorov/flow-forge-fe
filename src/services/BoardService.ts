@@ -22,6 +22,11 @@ class BoardService {
     const res = await this.http.get<Board>('/boards/' + id, { headers: this.getHeaders() });
     return res.data;
   }
+
+  async createBoard(data: { name: string }) {
+    const res = await this.http.post<Board>('/boards', data, { headers: this.getHeaders() });
+    return res.data;
+  }
 }
 
 export default new BoardService();

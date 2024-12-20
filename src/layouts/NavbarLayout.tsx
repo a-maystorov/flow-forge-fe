@@ -2,10 +2,13 @@ import {
   AppShell,
   Box,
   Burger,
+  Center,
   Flex,
   rem,
   ScrollArea,
+  Skeleton,
   Stack,
+  Text,
   Title,
   useMantineColorScheme,
   useMantineTheme,
@@ -17,7 +20,9 @@ import AuthButtons from '../components/auth-buttons';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
+import CreateBoardButton from '../components/navbar-item/CreateBoardButton';
 import ShowSidebarButton from '../components/show-sidebar-button';
+import useBoards from '../hooks/useBoards';
 
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -28,6 +33,8 @@ export default function NavbarLayout() {
 
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
+
+  const { data, isLoading } = useBoards();
 
   return (
     <AppShell
@@ -99,7 +106,7 @@ export default function NavbarLayout() {
             style={{ letterSpacing: rem(2.4) }}
             c={theme.colors['medium-gray'][0]}
           >
-            All boards (60)
+            All boards ({data?.length ?? 0})
           </Title>
         </AppShell.Section>
 
@@ -112,17 +119,32 @@ export default function NavbarLayout() {
           scrollbarSize={4}
           type={isMobile ? 'never' : 'hover'}
         >
-          <Stack gap={0}>
-            {Array(60)
-              .fill(0)
-              .map((_, index) => (
-                <NavbarItem key={index} />
+          {isLoading ? (
+            <Stack gap="sm" px={{ base: '2lg', md: 'xl' }}>
+              <Skeleton height={48} radius="xl" />
+              <Skeleton height={48} radius="xl" />
+              <Skeleton height={48} radius="xl" />
+            </Stack>
+          ) : !data?.length ? (
+            <Center h={200}>
+              <Text c="dimmed" ta="center">
+                No boards found.
+                <br />
+                Create your first board to get started!
+              </Text>
+            </Center>
+          ) : (
+            <Stack gap={0}>
+              {data.map((board) => (
+                <NavbarItem key={board._id} name={board.name} />
               ))}
-          </Stack>
+            </Stack>
+          )}
         </AppShell.Section>
 
-        <AppShell.Section px={{ base: 'sm', md: '2lg' }} py="xl">
+        <AppShell.Section px={{ base: '2lg', md: 'xl' }} py="xl">
           <Stack>
+            <CreateBoardButton />
             <Stack>
               <ColorSchemeToggle />
               <HideSidebarButton onClick={toggleDesktop} />
