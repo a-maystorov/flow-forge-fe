@@ -1,14 +1,19 @@
-import { Group, NavLink, Text, Title } from '@mantine/core';
+import { Box, Group, NavLink, Text, Title, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import SplitBoardIcon from '../../assets/icons/SplitBoardIcon';
+import useBoards from '../../hooks/useBoards';
+import AuthService from '../../services/AuthService';
 import CreateBoardModal from '../modals/CreateBoardModal';
 import styles from './CreateBoardButton.module.css';
 
 export default function CreateBoardButton() {
   const [opened, { open, close }] = useDisclosure(false);
+  const user = AuthService.getUser();
+  const { data: boards } = useBoards();
+  const isGuestWithMaxBoards = user?.isGuest && (boards?.length ?? 0) >= 1;
 
-  return (
-    <>
+  const button = (
+    <Box style={{ cursor: isGuestWithMaxBoards ? 'not-allowed' : 'pointer' }}>
       <NavLink
         href="#"
         label={
@@ -20,11 +25,30 @@ export default function CreateBoardButton() {
           </Group>
         }
         leftSection={<SplitBoardIcon h={16} w={16} />}
-        onClick={open}
+        onClick={isGuestWithMaxBoards ? undefined : open}
         classNames={styles}
         py="md"
         px={{ base: '2lg', md: 'xl' }}
+        disabled={isGuestWithMaxBoards}
       />
+    </Box>
+  );
+
+  return (
+    <>
+      {isGuestWithMaxBoards ? (
+        <Tooltip
+          label="Guest users are limited to 1 board"
+          position="right"
+          withArrow
+          offset={-32}
+          arrowOffset={16}
+        >
+          {button}
+        </Tooltip>
+      ) : (
+        button
+      )}
       <CreateBoardModal isOpen={opened} onClose={close} />
     </>
   );

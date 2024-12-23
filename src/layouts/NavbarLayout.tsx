@@ -2,13 +2,11 @@ import {
   AppShell,
   Box,
   Burger,
-  Center,
   Flex,
   rem,
   ScrollArea,
   Skeleton,
   Stack,
-  Text,
   Title,
   useMantineColorScheme,
   useMantineTheme,
@@ -18,9 +16,9 @@ import { Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthButtons from '../components/auth-buttons';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
+import CreateBoardButton from '../components/create-board-button';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
-import CreateBoardButton from '../components/create-board-button';
 import ShowSidebarButton from '../components/show-sidebar-button';
 import useBoards from '../hooks/useBoards';
 
@@ -125,19 +123,9 @@ export default function NavbarLayout() {
               <Skeleton height={48} radius="xl" />
               <Skeleton height={48} radius="xl" />
             </Stack>
-          ) : !data?.length ? (
-            <Center h={200}>
-              <Text c="dimmed" ta="center">
-                No boards found.
-                <br />
-                Create your first board to get started!
-              </Text>
-            </Center>
           ) : (
             <Stack gap={0}>
-              {data.map((board) => (
-                <NavbarItem key={board._id} name={board.name} />
-              ))}
+              {data?.map((board) => <NavbarItem key={board._id} name={board.name} />)}
               <CreateBoardButton />
             </Stack>
           )}

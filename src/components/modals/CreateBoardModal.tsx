@@ -1,11 +1,20 @@
-import { Button, Group, Modal, Stack, TextInput } from '@mantine/core';
+import { Box, Button, Group, Modal, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import AuthService from '../../services/AuthService';
 import BoardService from '../../services/BoardService';
+import ColumnService from '../../services/ColumnService';
 
 const createBoardSchema = z.object({
   name: z.string().min(1, 'Board name is required'),
+  columns: z
+    .array(
+      z.object({
+        name: z.string().min(1, 'Column name is required'),
+      })
+    )
+    .default([]),
 });
 
 type FormValues = z.infer<typeof createBoardSchema>;
@@ -17,16 +26,27 @@ interface Props {
 
 export default function CreateBoardModal({ isOpen, onClose }: Props) {
   const queryClient = useQueryClient();
+  const user = AuthService.getUser();
 
   const form = useForm({
     initialValues: {
       name: '',
+      columns: [],
     },
     validate: zodResolver(createBoardSchema),
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (values: FormValues) => BoardService.createBoard(values),
+    mutationFn: async (values: FormValues) => {
+      const board = await BoardService.createBoard({ name: values.name });
+      if (values.columns.length > 0) {
+        await ColumnService.createColumns(
+          board._id,
+          values.columns.map((col) => col.name)
+        );
+      }
+      return board;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boards'] });
       form.reset();
@@ -34,7 +54,11 @@ export default function CreateBoardModal({ isOpen, onClose }: Props) {
     },
     onError: (error) => {
       console.error('Failed to create board:', error);
-      form.setFieldError('name', 'Failed to create board');
+      if (error instanceof Error) {
+        form.setFieldError('columns', error.message);
+      } else {
+        form.setFieldError('name', 'Failed to create board');
+      }
     },
   });
 
@@ -42,28 +66,87 @@ export default function CreateBoardModal({ isOpen, onClose }: Props) {
     mutate(values);
   };
 
+  const addColumn = () => {
+    form.insertListItem('columns', { name: '' });
+  };
+
+  const removeColumn = (index: number) => {
+    form.removeListItem('columns', index);
+  };
+
   return (
-    <Modal opened={isOpen} onClose={onClose} title="Create Board" centered>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack>
-          <TextInput
-            label="Board Name"
-            placeholder="Enter board name"
-            withAsterisk
-            {...form.getInputProps('name')}
-          />
+    <Modal.Root opened={isOpen} onClose={onClose} size={480} centered p="xl">
+      <Modal.Overlay />
+      <Modal.Content>
+        <Modal.Header p="md">
+          <Modal.Title fw={500} fz="h2">
+            Add New Board
+          </Modal.Title>
+          <Modal.CloseButton />
+        </Modal.Header>
 
-          <Group justify="flex-end" mt="md">
-            <Button variant="light" onClick={onClose} disabled={isPending}>
-              Cancel
-            </Button>
+        <Modal.Body p="md">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="lg">
+              <Stack gap="xs">
+                <Text size="sm" fw={500}>
+                  Board Name
+                </Text>
+                <TextInput placeholder="e.g. Web Design" {...form.getInputProps('name')} />
+              </Stack>
 
-            <Button type="submit" loading={isPending}>
-              Create
-            </Button>
-          </Group>
-        </Stack>
-      </form>
-    </Modal>
+              <Stack gap="xs">
+                <Text size="sm" fw={500} hidden={form.values.columns.length === 0}>
+                  Board Columns
+                </Text>
+                <Stack gap="xs">
+                  {form.values.columns.map((_, index) => (
+                    <Group key={index} wrap="nowrap" align="flex-start">
+                      <Box style={{ flex: 1 }}>
+                        <TextInput {...form.getInputProps(`columns.${index}.name`)} />
+                      </Box>
+
+                      <Button
+                        variant="subtle"
+                        color="gray"
+                        onClick={() => removeColumn(index)}
+                        px="xs"
+                        style={{ marginTop: 1 }}
+                      >
+                        X
+                      </Button>
+                    </Group>
+                  ))}
+
+                  <Tooltip
+                    label="Guest users are limited to 3 columns"
+                    position="bottom"
+                    disabled={!user?.isGuest || form.values.columns.length < 3}
+                  >
+                    <Button
+                      variant="light"
+                      fullWidth
+                      onClick={addColumn}
+                      disabled={user?.isGuest && form.values.columns.length >= 3}
+                    >
+                      <Group gap={4} align="center">
+                        <Text component="span" size="md" style={{ top: 1 }}>
+                          +
+                        </Text>
+                        <Title order={3}>Add New Column</Title>
+                      </Group>
+                    </Button>
+                  </Tooltip>
+                </Stack>
+              </Stack>
+
+              <Button type="submit" loading={isPending} fullWidth>
+                Create New Board
+              </Button>
+            </Stack>
+          </form>
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 }
