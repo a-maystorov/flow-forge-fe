@@ -1,6 +1,7 @@
 import { Box, Button, Group, Modal, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import AuthService from '../../services/AuthService';
 import BoardService from '../../services/BoardService';
@@ -26,6 +27,7 @@ interface Props {
 
 export default function CreateBoardModal({ isOpen, onClose }: Props) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const user = AuthService.getUser();
 
   const form = useForm({
@@ -36,34 +38,44 @@ export default function CreateBoardModal({ isOpen, onClose }: Props) {
     validate: zodResolver(createBoardSchema),
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync: createBoard, isPending } = useMutation({
     mutationFn: async (values: FormValues) => {
       const board = await BoardService.createBoard({ name: values.name });
-      if (values.columns.length > 0) {
-        await ColumnService.createColumns(
-          board._id,
-          values.columns.map((col) => col.name)
-        );
-      }
       return board;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['boards'] });
       form.reset();
-      onClose();
     },
     onError: (error) => {
       console.error('Failed to create board:', error);
-      if (error instanceof Error) {
-        form.setFieldError('columns', error.message);
-      } else {
-        form.setFieldError('name', 'Failed to create board');
-      }
+      form.setFieldError('name', error instanceof Error ? error.message : 'Failed to create board');
     },
   });
 
-  const handleSubmit = (values: FormValues) => {
-    mutate(values);
+  const { mutateAsync: createColumns } = useMutation({
+    mutationFn: async ({ boardId, columnNames }: { boardId: string; columnNames: string[] }) => {
+      await ColumnService.createColumns(boardId, columnNames);
+    },
+    onError: (error) => {
+      console.error('Failed to create columns:', error);
+    },
+  });
+
+  const handleSubmit = async (values: FormValues) => {
+    try {
+      const board = await createBoard(values);
+      if (values.columns?.length) {
+        await createColumns({
+          boardId: board._id,
+          columnNames: values.columns.map((c) => c.name),
+        });
+      }
+      await queryClient.invalidateQueries({ queryKey: ['boards'] });
+      onClose();
+      navigate(`/boards/${board._id}`);
+    } catch (error) {
+      console.error('Error creating board:', error);
+    }
   };
 
   const addColumn = () => {

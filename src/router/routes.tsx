@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import NavbarLayout from '../layouts/NavbarLayout';
-import { Home, Login, NotFound, Signup } from '../pages';
+import Board from '../pages/Board';
+import { Login, NotFound, Signup } from '../pages';
 import Welcome from '../pages/Welcome';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
@@ -34,7 +35,10 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     errorElement: <NotFound />,
-    children: [{ index: true, element: <Home /> }],
+    children: [
+      { path: 'boards/:boardId', element: <Board /> },
+      { index: true, element: <Board /> },
+    ],
   },
 ]);
 

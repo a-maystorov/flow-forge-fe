@@ -58,13 +58,15 @@ export default function NavbarLayout() {
         px="2lg"
       >
         <Flex h="100%" justify="space-between" align="center">
-          <Title visibleFrom="sm" lineClamp={1}>
-            Board Name Goes Here
+          <Title visibleFrom="sm" lineClamp={1} data-board-title>
+            Select a board
           </Title>
 
           <Flex hiddenFrom="sm" align="center" gap="md">
             <KanbanLogo w={24} h={24} />
-            <Title lineClamp={1}>Board Name Goes Here</Title>
+            <Title lineClamp={1} data-board-title>
+              Select a board
+            </Title>
           </Flex>
 
           <Burger
@@ -125,7 +127,9 @@ export default function NavbarLayout() {
             </Stack>
           ) : (
             <Stack gap={0}>
-              {data?.map((board) => <NavbarItem key={board._id} name={board.name} />)}
+              {data?.map((board) => (
+                <NavbarItem key={board._id} id={board._id} name={board.name} />
+              ))}
               <CreateBoardButton />
             </Stack>
           )}
