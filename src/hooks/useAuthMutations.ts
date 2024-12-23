@@ -14,8 +14,9 @@ function useAuthMutations() {
 
   const createGuestSession = useMutation({
     mutationFn: () => AuthService.createGuestSession(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['authUser'], exact: true });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['authUser'], exact: true });
+      await queryClient.refetchQueries({ queryKey: ['authUser'], exact: true });
     },
   });
 

@@ -1,13 +1,14 @@
 import { Button, Container, Divider, Stack, Text, Title } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/AuthService';
+import useAuthMutations from '../hooks/useAuthMutations';
 
 export default function Welcome() {
   const navigate = useNavigate();
+  const { createGuestSession } = useAuthMutations();
 
   const handleGuestSession = async () => {
     try {
-      await authService.createGuestSession();
+      await createGuestSession.mutateAsync();
       navigate('/');
     } catch (error) {
       console.error('Error creating guest session:', error);
@@ -32,7 +33,14 @@ export default function Welcome() {
 
           <Divider label="or" labelPosition="center" mt="lg" />
 
-          <Button variant="subtle" size="lg" fullWidth onClick={handleGuestSession}>
+          <Button
+            variant="subtle"
+            size="lg"
+            fullWidth
+            onClick={handleGuestSession}
+            loading={createGuestSession.isPending}
+            disabled={createGuestSession.isPending}
+          >
             Continue as Guest
           </Button>
 
