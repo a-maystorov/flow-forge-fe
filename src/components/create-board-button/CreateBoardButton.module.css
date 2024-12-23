@@ -1,0 +1,23 @@
+:root[data-mantine-color-scheme='light'] .root:not([data-active]):hover {
+  background-color: transparent;
+}
+
+:root[data-mantine-color-scheme='dark'] .root:not([data-active]):hover {
+  background-color: transparent;
+}
+
+.root {
+  color: var(--mantine-primary-color-0);
+  transition: transform 0.2s ease;
+  transform: translateY(0);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.section {
+  &[data-position='left'] {
+    fill: var(--mantine-primary-color-0);
+  }
+}

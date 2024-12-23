@@ -20,7 +20,7 @@ import AuthButtons from '../components/auth-buttons';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
-import CreateBoardButton from '../components/navbar-item/CreateBoardButton';
+import CreateBoardButton from '../components/create-board-button';
 import ShowSidebarButton from '../components/show-sidebar-button';
 import useBoards from '../hooks/useBoards';
 
@@ -138,13 +138,13 @@ export default function NavbarLayout() {
               {data.map((board) => (
                 <NavbarItem key={board._id} name={board.name} />
               ))}
+              <CreateBoardButton />
             </Stack>
           )}
         </AppShell.Section>
 
         <AppShell.Section px={{ base: '2lg', md: 'xl' }} py="xl">
           <Stack>
-            <CreateBoardButton />
             <Stack>
               <ColorSchemeToggle />
               <HideSidebarButton onClick={toggleDesktop} />
