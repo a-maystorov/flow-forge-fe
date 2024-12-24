@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
 import CreateColumnModal from '../components/modals/CreateColumnModal';
+import NewColumnButton from '../components/new-column-button';
 import useBoard from '../hooks/useBoard';
 import useBoards from '../hooks/useBoards';
 import { Home } from '../pages';
@@ -68,7 +69,7 @@ export default function Board() {
             {/* TODO: Add tasks list */}
           </Stack>
         ))}
-        <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+        <NewColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
       </Group>
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
