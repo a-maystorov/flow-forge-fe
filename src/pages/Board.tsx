@@ -1,7 +1,8 @@
-import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
-import { useEffect } from 'react';
+import { Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
+import CreateColumnModal from '../components/modals/CreateColumnModal';
 import useBoard from '../hooks/useBoard';
 import useBoards from '../hooks/useBoards';
 import { Home } from '../pages';
@@ -9,6 +10,7 @@ import { Home } from '../pages';
 export default function Board() {
   const { boardId } = useParams();
   const theme = useMantineTheme();
+  const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
   const { data: boards = [] } = useBoards();
   const { data: board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
 
@@ -37,16 +39,42 @@ export default function Board() {
           <Text c={theme.colors['medium-gray'][0]} fz="h2" fw={600} ta="center">
             This board is empty. Create a new column to get started.
           </Text>
-          <AddColumnButton />
+          <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+          <CreateColumnModal
+            isOpen={isCreateColumnModalOpen}
+            onClose={() => setIsCreateColumnModalOpen(false)}
+            boardId={boardId ?? ''}
+          />
         </Stack>
       </Flex>
     );
   }
 
   return (
-    <div>
-      {/* TODO: Add columns layout */}
-      Board content goes here
-    </div>
+    <>
+      <Group align="flex-start" h="100%" p="md">
+        {board.columns.map((column) => (
+          <Stack
+            key={column.name}
+            bg={theme.colors.dark[6]}
+            w={300}
+            mih={200}
+            p="md"
+            style={{ borderRadius: theme.radius.md }}
+          >
+            <Text fw={600} size="lg">
+              {column.name}
+            </Text>
+            {/* TODO: Add tasks list */}
+          </Stack>
+        ))}
+        <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+      </Group>
+      <CreateColumnModal
+        isOpen={isCreateColumnModalOpen}
+        onClose={() => setIsCreateColumnModalOpen(false)}
+        boardId={boardId ?? ''}
+      />
+    </>
   );
 }
