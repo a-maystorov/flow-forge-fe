@@ -19,7 +19,9 @@ class BoardService {
   }
 
   async getBoard(id: string) {
-    const res = await this.http.get<Board>('/boards/' + id, { headers: this.getHeaders() });
+    const res = await this.http.get<Board>(`/boards/${id}`, {
+      headers: this.getHeaders(),
+    });
     return res.data;
   }
 

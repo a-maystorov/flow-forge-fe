@@ -3,6 +3,7 @@ import {
   Box,
   Burger,
   Flex,
+  Group,
   rem,
   ScrollArea,
   Skeleton,
@@ -11,7 +12,6 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthButtons from '../components/auth-buttons';
@@ -21,6 +21,7 @@ import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
 import useBoards from '../hooks/useBoards';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -77,9 +78,9 @@ export default function NavbarLayout() {
             aria-label="Toggle navigation"
           />
 
-          <Box visibleFrom="sm">
+          <Group visibleFrom="sm" wrap="nowrap">
             <AuthButtons direction="row" size={isMobile ? 'xs' : 'sm'} gap={theme.spacing.md} />
-          </Box>
+          </Group>
         </Flex>
       </AppShell.Header>
 

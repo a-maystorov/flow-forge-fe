@@ -1,7 +1,9 @@
-import { Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
+import { Card, Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
+import AddTaskButton from '../components/add-task-button';
+import AddTaskModal from '../components/modals/AddTaskModal';
 import CreateColumnModal from '../components/modals/CreateColumnModal';
 import NewColumnButton from '../components/new-column-button';
 import useBoard from '../hooks/useBoard';
@@ -12,6 +14,7 @@ export default function Board() {
   const { boardId } = useParams();
   const theme = useMantineTheme();
   const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const { data: boards = [] } = useBoards();
   const { data: board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
 
@@ -66,7 +69,21 @@ export default function Board() {
             <Text fw={600} size="lg">
               {column.name}
             </Text>
-            {/* TODO: Add tasks list */}
+            <AddTaskButton onClick={() => setSelectedColumnId(column._id)} />
+            <Stack gap="xs">
+              {column.tasks?.map((task) => (
+                <Card key={task._id} withBorder padding="sm" bg={theme.colors.dark[5]}>
+                  <Text size="sm" fw={500}>
+                    {task.title}
+                  </Text>
+                  {task.description && (
+                    <Text size="xs" c="dimmed" mt={4}>
+                      {task.description}
+                    </Text>
+                  )}
+                </Card>
+              ))}
+            </Stack>
           </Stack>
         ))}
         <NewColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
@@ -74,6 +91,12 @@ export default function Board() {
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
         onClose={() => setIsCreateColumnModalOpen(false)}
+        boardId={boardId ?? ''}
+      />
+      <AddTaskModal
+        isOpen={selectedColumnId !== null}
+        onClose={() => setSelectedColumnId(null)}
+        columnId={selectedColumnId ?? ''}
         boardId={boardId ?? ''}
       />
     </>
