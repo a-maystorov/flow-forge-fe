@@ -9,6 +9,7 @@ import NewColumnButton from '../components/new-column-button';
 import useBoard from '../hooks/useBoard';
 import useBoards from '../hooks/useBoards';
 import { Home } from '../pages';
+import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 
 export default function Board() {
   const { boardId } = useParams();
@@ -83,6 +84,7 @@ export default function Board() {
                   )}
                 </Card>
               ))}
+              <DndListHandle />
             </Stack>
           </Stack>
         ))}
