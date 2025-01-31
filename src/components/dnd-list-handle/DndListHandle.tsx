@@ -1,43 +1,17 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { Text } from '@mantine/core';
+import { Box, Text } from '@mantine/core';
 import { useListState } from '@mantine/hooks';
 import cx from 'clsx';
 import GripVerticalIcon from '../../assets/icons/GripVerticalIcon';
+import Task from '../../models/Task';
 import classes from './DndListHandle.module.css';
 
-const data = [
-  { position: 6, mass: 12.011, symbol: 'C', name: 'Carbon' },
-  { position: 7, mass: 14.007, symbol: 'N', name: 'Nitrogen' },
-  { position: 39, mass: 88.906, symbol: 'Y', name: 'Yttrium' },
-  { position: 56, mass: 137.33, symbol: 'Ba', name: 'Barium' },
-  { position: 58, mass: 140.12, symbol: 'Ce', name: 'Cerium' },
-];
+interface Props {
+  tasks: Task[];
+}
 
-export function DndListHandle() {
-  const [state, handlers] = useListState(data);
-
-  const items = state.map((item, index) => (
-    <Draggable key={item.symbol} index={index} draggableId={item.symbol}>
-      {(provided, snapshot) => (
-        <div
-          className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-        >
-          <div {...provided.dragHandleProps} className={classes.dragHandle}>
-            <GripVerticalIcon w={18} h={18} />
-          </div>
-          <Text className={classes.symbol}>{item.symbol}</Text>
-          <div>
-            <Text>{item.name}</Text>
-            <Text c="dimmed" size="sm">
-              Position: {item.position} • Mass: {item.mass}
-            </Text>
-          </div>
-        </div>
-      )}
-    </Draggable>
-  ));
+export function DndListHandle({ tasks }: Props) {
+  const [state, handlers] = useListState(tasks);
 
   return (
     <DragDropContext
@@ -47,10 +21,34 @@ export function DndListHandle() {
     >
       <Droppable droppableId="dnd-list" direction="vertical">
         {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {items}
+          <Box {...provided.droppableProps} ref={provided.innerRef}>
+            {state.map((task, index) => (
+              <Draggable key={task._id} index={index} draggableId={task._id}>
+                {(provided, snapshot) => (
+                  <Box
+                    className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })}
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                  >
+                    <Box {...provided.dragHandleProps} className={classes.dragHandle}>
+                      <GripVerticalIcon w={18} h={18} />
+                    </Box>
+
+                    <Box>
+                      <Text>{task.title}</Text>
+
+                      {task.subtasks.length > 0 && (
+                        <Text c="dimmed" size="sm">
+                          Subtasks: {task.subtasks.length}
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Draggable>
+            ))}
             {provided.placeholder}
-          </div>
+          </Box>
         )}
       </Droppable>
     </DragDropContext>

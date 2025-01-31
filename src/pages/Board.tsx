@@ -1,15 +1,15 @@
-import { Card, Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
+import { Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
 import AddTaskButton from '../components/add-task-button';
+import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 import AddTaskModal from '../components/modals/AddTaskModal';
 import CreateColumnModal from '../components/modals/CreateColumnModal';
 import NewColumnButton from '../components/new-column-button';
 import useBoard from '../hooks/useBoard';
 import useBoards from '../hooks/useBoards';
 import { Home } from '../pages';
-import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 
 export default function Board() {
   const { boardId } = useParams();
@@ -72,19 +72,7 @@ export default function Board() {
             </Text>
             <AddTaskButton onClick={() => setSelectedColumnId(column._id)} />
             <Stack gap="xs">
-              {column.tasks?.map((task) => (
-                <Card key={task._id} withBorder padding="sm" bg={theme.colors.dark[5]}>
-                  <Text size="sm" fw={500}>
-                    {task.title}
-                  </Text>
-                  {task.description && (
-                    <Text size="xs" c="dimmed" mt={4}>
-                      {task.description}
-                    </Text>
-                  )}
-                </Card>
-              ))}
-              <DndListHandle />
+              <DndListHandle tasks={column.tasks} />
             </Stack>
           </Stack>
         ))}
