@@ -1,4 +1,4 @@
-import { Flex, Group, Stack, Text, useMantineTheme } from '@mantine/core';
+import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
@@ -57,16 +57,9 @@ export default function Board() {
 
   return (
     <>
-      <Group align="flex-start" h="100%" p="md">
+      <Flex align="flex-start" h="100%" p="md" gap={theme.spacing['2lg']}>
         {board.columns.map((column) => (
-          <Stack
-            key={column.name}
-            bg={theme.colors.dark[6]}
-            w={300}
-            mih={200}
-            p="md"
-            style={{ borderRadius: theme.radius.md }}
-          >
+          <Stack key={column._id} w={300}>
             <Text fw={600} size="lg">
               {column.name}
             </Text>
@@ -77,7 +70,7 @@ export default function Board() {
           </Stack>
         ))}
         <NewColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
-      </Group>
+      </Flex>
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
         onClose={() => setIsCreateColumnModalOpen(false)}

@@ -1,5 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { Box, Text } from '@mantine/core';
+import { Box, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import { useListState } from '@mantine/hooks';
 import cx from 'clsx';
 import GripVerticalIcon from '../../assets/icons/GripVerticalIcon';
@@ -12,6 +12,9 @@ interface Props {
 
 export function DndListHandle({ tasks }: Props) {
   const [state, handlers] = useListState(tasks);
+  const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
+  const isDarkColorScheme = colorScheme === 'dark';
+  const theme = useMantineTheme();
 
   return (
     <DragDropContext
@@ -29,18 +32,21 @@ export function DndListHandle({ tasks }: Props) {
                     className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })}
                     ref={provided.innerRef}
                     {...provided.draggableProps}
+                    bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
                   >
                     <Box {...provided.dragHandleProps} className={classes.dragHandle}>
                       <GripVerticalIcon w={18} h={18} />
                     </Box>
 
                     <Box>
-                      <Text>{task.title}</Text>
+                      <Title order={3} className={classes.taskTitle}>
+                        {task.title}
+                      </Title>
 
                       {task.subtasks.length > 0 && (
-                        <Text c="dimmed" size="sm">
+                        <Title order={4} c={theme.colors['medium-gray'][0]} mt="xs">
                           Subtasks: {task.subtasks.length}
-                        </Text>
+                        </Title>
                       )}
                     </Box>
                   </Box>

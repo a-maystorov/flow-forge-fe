@@ -1,35 +1,24 @@
-import { Button, Stack, Text } from '@mantine/core';
+import { Button, Title, useMantineColorScheme } from '@mantine/core';
+import classes from './NewColumnButton.module.css';
 
 interface Props {
   onClick?: () => void;
 }
-
 export default function NewColumnButton({ onClick }: Props) {
+  const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
+  const isDarkColorScheme = colorScheme === 'dark';
+
   return (
     <Button
       variant="default"
-      w={300}
-      h="100%"
-      mih={200}
+      className={classes.button}
+      data-dark={isDarkColorScheme || undefined}
+      data-light={!isDarkColorScheme || undefined}
       onClick={onClick}
-      styles={(theme) => ({
-        root: {
-          backgroundColor: theme.colors.dark[6],
-          border: 'none',
-          '&:hover': {
-            backgroundColor: theme.colors.dark[5],
-          },
-        },
-      })}
     >
-      <Stack align="center" gap={4}>
-        <Text size="xl" fw={300}>
-          +
-        </Text>
-        <Text size="sm" c="dimmed">
-          New Column
-        </Text>
-      </Stack>
+      <Title order={1} fw={600} className={classes.title}>
+        + New Column
+      </Title>
     </Button>
   );
 }
