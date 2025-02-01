@@ -3,7 +3,7 @@ import { useForm } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import TaskService from '../../services/TaskService';
 
-interface AddTaskModalProps {
+interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   columnId: string;
@@ -15,7 +15,12 @@ interface FormValues {
   description: string;
 }
 
-export default function AddTaskModal({ isOpen, onClose, columnId, boardId }: AddTaskModalProps) {
+export default function CreateTaskModal({
+  isOpen,
+  onClose,
+  columnId,
+  boardId,
+}: CreateTaskModalProps) {
   const queryClient = useQueryClient();
   const form = useForm<FormValues>({
     initialValues: {

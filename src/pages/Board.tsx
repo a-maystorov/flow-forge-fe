@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import AddColumnButton from '../components/add-column-button';
 import AddTaskButton from '../components/add-task-button';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
-import AddTaskModal from '../components/modals/AddTaskModal';
+import CreateTaskModal from '../components/modals/CreateTaskModal';
 import CreateColumnModal from '../components/modals/CreateColumnModal';
 import NewColumnButton from '../components/new-column-button';
 import useBoard from '../hooks/useBoard';
@@ -76,7 +76,7 @@ export default function Board() {
         onClose={() => setIsCreateColumnModalOpen(false)}
         boardId={boardId ?? ''}
       />
-      <AddTaskModal
+      <CreateTaskModal
         isOpen={selectedColumnId !== null}
         onClose={() => setSelectedColumnId(null)}
         columnId={selectedColumnId ?? ''}
