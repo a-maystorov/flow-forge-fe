@@ -57,7 +57,7 @@ export default function Board() {
 
   return (
     <>
-      <Flex align="flex-start" h="100%" p="md" gap={theme.spacing['2lg']}>
+      <Flex align="flex-start" h="100%" gap={theme.spacing['2lg']}>
         {board.columns.map((column) => (
           <Stack key={column._id} w={300}>
             <Text fw={600} size="lg">

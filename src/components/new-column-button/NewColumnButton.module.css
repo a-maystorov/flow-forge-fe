@@ -1,6 +1,7 @@
 .button {
   width: 300px;
-  height: calc(100vh - var(--app-shell-header-height));
+  /* 32px accounts for layout padding (16px) on both sides */
+  height: calc(100vh - var(--app-shell-header-height) - 32px);
   min-height: 200px;
   border: none;
 
