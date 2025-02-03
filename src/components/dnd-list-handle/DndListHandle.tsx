@@ -1,6 +1,5 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Box, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
-import { useListState } from '@mantine/hooks';
 import cx from 'clsx';
 import GripVerticalIcon from '../../assets/icons/GripVerticalIcon';
 import Task from '../../models/Task';
@@ -11,21 +10,21 @@ interface Props {
 }
 
 export function DndListHandle({ tasks }: Props) {
-  const [state, handlers] = useListState(tasks);
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
   const theme = useMantineTheme();
 
   return (
     <DragDropContext
-      onDragEnd={({ destination, source }) =>
-        handlers.reorder({ from: source.index, to: destination?.index || 0 })
-      }
+      onDragEnd={({ destination, source }) => {
+        // TODO: Implement task reordering via API
+        console.log('Reorder from', source.index, 'to', destination?.index || 0);
+      }}
     >
       <Droppable droppableId="dnd-list" direction="vertical">
         {(provided) => (
           <Box {...provided.droppableProps} ref={provided.innerRef}>
-            {state.map((task, index) => (
+            {tasks.map((task, index) => (
               <Draggable key={task._id} index={index} draggableId={task._id}>
                 {(provided, snapshot) => (
                   <Box
