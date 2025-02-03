@@ -46,6 +46,17 @@ class TaskService {
     });
     return res.data;
   }
+
+  async reorderTask(boardId: string, columnId: string, taskId: string, newPosition: number) {
+    const res = await this.http.patch(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}/reorder`,
+      { newPosition },
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
+  }
 }
 
 export default new TaskService();

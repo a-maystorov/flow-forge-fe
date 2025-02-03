@@ -65,7 +65,7 @@ export default function Board() {
             </Text>
             <AddTaskButton onClick={() => setSelectedColumnId(column._id)} />
             <Stack gap="xs">
-              <DndListHandle tasks={column.tasks} />
+              <DndListHandle tasks={column.tasks} boardId={boardId ?? ''} columnId={column._id} />
             </Stack>
           </Stack>
         ))}

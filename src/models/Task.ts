@@ -7,4 +7,5 @@ export default interface Task {
   status: 'Todo' | 'Doing' | 'Done';
   subtasks: Subtask[];
   columnId: string;
+  position: number;
 }
