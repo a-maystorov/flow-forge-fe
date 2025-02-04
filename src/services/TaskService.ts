@@ -57,6 +57,17 @@ class TaskService {
     );
     return res.data;
   }
+
+  async moveTask(boardId: string, columnId: string, taskId: string, targetColumnId: string) {
+    const res = await this.http.patch(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}/move`,
+      { targetColumnId },
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
+  }
 }
 
 export default new TaskService();
