@@ -1,10 +1,6 @@
 import axios from 'axios';
 import AuthService from './AuthService';
 
-interface CreateColumnDto {
-  name: string;
-}
-
 class ColumnService {
   http = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -16,16 +12,22 @@ class ColumnService {
     };
   }
 
-  async createColumn(boardId: string, data: CreateColumnDto) {
-    const res = await this.http.post(`/boards/${boardId}/columns`, data, {
-      headers: this.getHeaders(),
-    });
+  async createColumn(boardId: string, name: string) {
+    const res = await this.http.post(
+      `/boards/${boardId}/columns`,
+      { name },
+      { headers: this.getHeaders() }
+    );
     return res.data;
   }
 
-  async createColumns(boardId: string, columnNames: string[]) {
-    const createPromises = columnNames.map((name) => this.createColumn(boardId, { name }));
-    return Promise.all(createPromises);
+  async createBatchColumns(boardId: string, columnNames: string[]) {
+    const res = await this.http.post(
+      `/boards/${boardId}/columns/batch`,
+      { columns: columnNames },
+      { headers: this.getHeaders() }
+    );
+    return res.data;
   }
 }
 

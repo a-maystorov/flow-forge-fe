@@ -54,10 +54,14 @@ export default function CreateBoardModal({ isOpen, onClose }: Props) {
 
   const { mutateAsync: createColumns } = useMutation({
     mutationFn: async ({ boardId, columnNames }: { boardId: string; columnNames: string[] }) => {
-      await ColumnService.createColumns(boardId, columnNames);
+      await ColumnService.createBatchColumns(boardId, columnNames);
     },
     onError: (error) => {
       console.error('Failed to create columns:', error);
+      form.setFieldError(
+        'columns',
+        error instanceof Error ? error.message : 'Failed to create columns'
+      );
     },
   });
 

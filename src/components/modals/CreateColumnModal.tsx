@@ -25,7 +25,7 @@ export default function CreateColumnModal({ isOpen, onClose, boardId }: Props) {
   });
 
   const { mutate: createColumn, isPending } = useMutation({
-    mutationFn: (values: FormValues) => ColumnService.createColumn(boardId, values),
+    mutationFn: (values: FormValues) => ColumnService.createColumn(boardId, values.name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board', boardId] });
       form.reset();
