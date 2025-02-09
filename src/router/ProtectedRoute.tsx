@@ -1,18 +1,7 @@
-import { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import authService from '../services/AuthService';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@features/auth/hooks';
 
-interface Props {
-  children: ReactNode;
-}
-
-export default function ProtectedRoute({ children }: Props) {
-  const user = authService.getUser();
-  const location = useLocation();
-
-  if (!user) {
-    return <Navigate to="/welcome" state={{ from: location }} replace />;
-  }
-
-  return <>{children}</>;
+export default function ProtectedRoute() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Outlet /> : <Navigate to="/welcome" />;
 }

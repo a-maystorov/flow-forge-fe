@@ -4,10 +4,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  isLoading?: boolean;
 }
 
-export default function GuestLogoutModal({ isOpen, onClose, onConfirm, isLoading = false }: Props) {
+export default function GuestLogoutModal({ isOpen, onClose, onConfirm }: Props) {
   return (
     <Modal opened={isOpen} onClose={onClose} title="Confirm Logout" centered>
       <Stack gap="md">
@@ -21,11 +20,11 @@ export default function GuestLogoutModal({ isOpen, onClose, onConfirm, isLoading
         </Text>
 
         <Group justify="flex-end" gap="sm">
-          <Button variant="light" onClick={onClose} disabled={isLoading}>
+          <Button variant="light" onClick={onClose}>
             Cancel
           </Button>
 
-          <Button color="red" onClick={onConfirm} loading={isLoading} disabled={isLoading}>
+          <Button color="red" onClick={onConfirm}>
             Logout & Delete Data
           </Button>
         </Group>

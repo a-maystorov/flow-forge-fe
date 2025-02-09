@@ -1,9 +1,9 @@
 import { Button, Flex, MantineSize } from '@mantine/core';
 import { CSSProperties, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
 import { useBoardMutations } from '../../hooks/useBoardMutations';
 import DeleteBoardModal from '../modals/DeleteBoardModal';
+import { useAuth } from '@/features/auth/hooks';
 
 interface Props {
   size?: MantineSize | `compact-${MantineSize}` | (string & {});
@@ -54,7 +54,7 @@ export default function AuthActions({ direction, size, gap }: Props) {
               Delete Board
             </Button>
           )}
-          <Button size={size} variant="outline" onClick={logout} style={{ flex: 1 }}>
+          <Button size={size} variant="outline" onClick={() => logout()} style={{ flex: 1 }}>
             Logout
           </Button>
         </Flex>

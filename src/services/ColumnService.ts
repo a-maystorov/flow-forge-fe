@@ -1,5 +1,5 @@
+import { authService } from '@features/auth';
 import axios, { AxiosError } from 'axios';
-import AuthService from './AuthService';
 
 class ColumnService {
   http = axios.create({
@@ -8,7 +8,7 @@ class ColumnService {
 
   private getHeaders() {
     return {
-      'x-auth-token': AuthService.getToken(),
+      'x-auth-token': authService.getToken(),
     };
   }
 

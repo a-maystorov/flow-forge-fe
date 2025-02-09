@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import Board from '../models/Board';
-import AuthService from './AuthService';
+import { authService } from '@features/auth';
+import type Board from '../models/Board';
 
 class BoardService {
   http = axios.create({
@@ -9,7 +9,7 @@ class BoardService {
 
   private getHeaders() {
     return {
-      'x-auth-token': AuthService.getToken(),
+      'x-auth-token': authService.getToken(),
     };
   }
 

@@ -10,6 +10,19 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "typeRoots": ["node_modules/@types", "./@types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@features/*": ["src/features/*"],
+      "@shared/*": ["src/shared/*"],
+      "@assets/*": ["src/assets/*"],
+      "@hooks/*": ["src/shared/hooks/*"],
+      "@components/*": ["src/shared/components/*"],
+      "@utils/*": ["src/shared/utils/*"],
+      "@services/*": ["src/shared/services/*"],
+      "@types/*": ["src/shared/types/*"],
+      "@constants/*": ["src/shared/constants/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "Bundler",
@@ -25,5 +38,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "@types"]
+  "include": ["src"]
 }

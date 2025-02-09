@@ -6,7 +6,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import './index.css';
-import AuthProvider from './providers/AuthProvider';
 import routes from './router/routes';
 import theme from './themes/mantine-theme';
 
@@ -14,13 +13,11 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <MantineProvider theme={theme} defaultColorScheme="dark">
-        <AuthProvider>
-          <RouterProvider router={routes} />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </AuthProvider>
-      </MantineProvider>
-    </QueryClientProvider>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={routes} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </MantineProvider>
   </StrictMode>
 );
