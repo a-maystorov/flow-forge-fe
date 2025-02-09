@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { UserSignupPayload } from '../models/User';
 import AuthService from './AuthService';
 
@@ -8,18 +8,25 @@ class UserService {
   });
 
   async register(user: UserSignupPayload) {
-    const res = await this.http.post<{ _id: string; username: string; email: string }>(
-      '/users/signup',
-      user
-    );
+    try {
+      const res = await this.http.post<{ _id: string; username: string; email: string }>(
+        '/users/signup',
+        user
+      );
 
-    const token: string = res.headers['x-auth-token'];
-    if (!token) {
-      throw new Error('Authentication token missing from response');
+      const token: string = res.headers['x-auth-token'];
+      if (!token) {
+        throw new Error('Authentication token missing from response');
+      }
+
+      AuthService.setUserSession(token);
+      return token;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(error.response?.data?.message || 'Failed to register user');
+      }
+      throw error;
     }
-
-    AuthService.setUserSession(token);
-    return token;
   }
 }
 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import AuthService from './AuthService';
 
 class ColumnService {
@@ -13,21 +13,35 @@ class ColumnService {
   }
 
   async createColumn(boardId: string, name: string) {
-    const res = await this.http.post(
-      `/boards/${boardId}/columns`,
-      { name },
-      { headers: this.getHeaders() }
-    );
-    return res.data;
+    try {
+      const res = await this.http.post(
+        `/boards/${boardId}/columns`,
+        { name },
+        { headers: this.getHeaders() }
+      );
+      return res.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(error.response?.data?.message || 'Failed to create column');
+      }
+      throw error;
+    }
   }
 
   async createBatchColumns(boardId: string, columnNames: string[]) {
-    const res = await this.http.post(
-      `/boards/${boardId}/columns/batch`,
-      { columns: columnNames },
-      { headers: this.getHeaders() }
-    );
-    return res.data;
+    try {
+      const res = await this.http.post(
+        `/boards/${boardId}/columns/batch`,
+        { columns: columnNames },
+        { headers: this.getHeaders() }
+      );
+      return res.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(error.response?.data?.message || 'Failed to create columns');
+      }
+      throw error;
+    }
   }
 }
 

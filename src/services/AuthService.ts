@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { User } from '../models/User';
 
@@ -24,15 +24,22 @@ class AuthService {
   });
 
   async login(email: string, password: string): Promise<string> {
-    const { data } = await this.http.post<{ token: string; isGuest: boolean }>('/auth/login', {
-      email,
-      password,
-    });
+    try {
+      const { data } = await this.http.post<{ token: string; isGuest: boolean }>('/auth/login', {
+        email,
+        password,
+      });
 
-    this.storeSession({ token: data.token, isGuest: false });
-    this.setJwt(data.token);
+      this.storeSession({ token: data.token, isGuest: false });
+      this.setJwt(data.token);
 
-    return data.token;
+      return data.token;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(error.response?.data?.message || 'Failed to login');
+      }
+      throw error;
+    }
   }
 
   private storeSession(session: StoredSession): void {
@@ -59,7 +66,14 @@ class AuthService {
         this.setJwt(session.token);
         await this.http.post('/auth/guest-logout');
       } catch (error) {
-        console.error('Error during guest logout:', error);
+        if (error instanceof AxiosError) {
+          console.error(
+            'Error during guest logout:',
+            error.response?.data?.message || error.message
+          );
+        } else {
+          console.error('Error during guest logout:', error);
+        }
       }
     }
 
@@ -122,12 +136,17 @@ class AuthService {
         return data.token;
       } catch (error) {
         attempts++;
-        if (attempts === maxAttempts) throw error;
+        if (attempts === maxAttempts) {
+          if (error instanceof AxiosError) {
+            throw new Error(error.response?.data?.message || 'Failed to create guest session');
+          }
+          throw error;
+        }
         // Wait a short time before retrying
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
-    throw new Error('Failed to create guest session');
+    throw new Error('Failed to create guest session after maximum attempts');
   }
 
   isTokenExpired(token: string) {

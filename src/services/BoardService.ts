@@ -1,8 +1,3 @@
-// TODO: Implement similar error handling pattern in other services (TaskService, AuthService, etc.)
-// Each service should:
-// 1. Use AxiosError for type-safe error handling
-// 2. Extract error messages from response data
-// 3. Provide meaningful fallback messages
 import axios, { AxiosError } from 'axios';
 import Board from '../models/Board';
 import AuthService from './AuthService';
