@@ -1,4 +1,4 @@
-import { useAuth } from '@features/auth/hooks';
+import { useUser } from '@features/auth/hooks';
 import { Box, Button, Group, Modal, Stack, Text, TextInput, Title, Tooltip } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ interface Props {
 export default function CreateBoardModal({ isOpen, onClose }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useUser();
 
   const form = useForm({
     initialValues: {

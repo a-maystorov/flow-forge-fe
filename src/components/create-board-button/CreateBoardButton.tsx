@@ -2,14 +2,15 @@ import { Box, Group, NavLink, Text, Title, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import SplitBoardIcon from '../../assets/icons/SplitBoardIcon';
 import useBoards from '../../hooks/useBoards';
-import { useAuth } from '@features/auth/hooks';
+import { useUser } from '@features/auth/hooks';
 import CreateBoardModal from '../modals/CreateBoardModal';
 import styles from './CreateBoardButton.module.css';
 
 export default function CreateBoardButton() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { user } = useAuth();
+  const { user } = useUser();
   const { data: boards } = useBoards();
+
   const isGuestWithMaxBoards = user?.isGuest && (boards?.length ?? 0) >= 1;
 
   const button = (

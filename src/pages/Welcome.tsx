@@ -1,10 +1,10 @@
+import { useGuestSession } from '@features/auth/hooks';
 import { Button, Container, Divider, Stack, Text, Title } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@features/auth/hooks';
 
 export default function Welcome() {
   const navigate = useNavigate();
-  const { createGuestSession, isLoading } = useAuth();
+  const { createGuestSession, isLoading } = useGuestSession();
 
   const handleGuestSession = async () => {
     try {

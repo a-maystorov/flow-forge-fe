@@ -1,9 +1,9 @@
+import { useLogout, useUser } from '@/features/auth/hooks';
 import { Button, Flex, MantineSize } from '@mantine/core';
 import { CSSProperties, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useBoardMutations } from '../../hooks/useBoardMutations';
 import DeleteBoardModal from '../modals/DeleteBoardModal';
-import { useAuth } from '@/features/auth/hooks';
 
 interface Props {
   size?: MantineSize | `compact-${MantineSize}` | (string & {});
@@ -12,12 +12,15 @@ interface Props {
 }
 
 export default function AuthActions({ direction, size, gap }: Props) {
-  const { isAuthenticated, logout } = useAuth();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
   const { boardId } = useParams();
+
+  const { isAuthenticated } = useUser();
+  const { logout } = useLogout();
   const { deleteBoard } = useBoardMutations();
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleDeleteConfirm = () => {
     if (!boardId) {

@@ -11,7 +11,7 @@ import {
 import { useForm, zodResolver } from '@mantine/form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { useAuth } from '../hooks';
+import { useSignup } from '../hooks';
 import type { SignupCredentials } from '../types';
 
 const signupSchema = z
@@ -27,7 +27,7 @@ const signupSchema = z
   });
 
 export function SignupForm() {
-  const { signup, isLoading, error } = useAuth();
+  const { signup, isLoading, error } = useSignup();
 
   const form = useForm({
     initialValues: {
