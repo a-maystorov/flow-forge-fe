@@ -1,4 +1,4 @@
-import { authService } from '@features/auth';
+import { authService } from '@/features/auth/services';
 import axios, { AxiosError } from 'axios';
 
 interface CreateTaskDto {

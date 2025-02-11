@@ -1,7 +1,7 @@
+import { boardService } from '@/features/boards/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/AuthService';
-import BoardService from '@/services/BoardService';
 import type { LoginCredentials } from '../types';
 
 export function useLogin() {
@@ -14,7 +14,7 @@ export function useLogin() {
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['user'] });
 
-      const boards = await BoardService.getBoards();
+      const boards = await boardService.getBoards();
       if (boards.length > 0) {
         navigate(`/boards/${boards[0]._id}`);
       } else {

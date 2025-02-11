@@ -1,14 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type Board from '../models/Board';
-import BoardService from '../services/BoardService';
+import type { Board, BoardInput } from '../types';
+import { boardService } from '../services';
 
 export function useBoardMutations() {
   const queryClient = useQueryClient();
 
+  const createBoard = useMutation({
+    mutationFn: async (data: BoardInput) => {
+      return boardService.createBoard(data);
+    },
+    onSuccess: (newBoard) => {
+      queryClient.setQueryData<Board[]>(['boards'], (old = []) => [...old, newBoard]);
+    },
+  });
+
+  const updateBoard = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: BoardInput }) => {
+      return boardService.updateBoard(id, data);
+    },
+    onSuccess: (updatedBoard) => {
+      queryClient.setQueryData<Board[]>(['boards'], (old = []) =>
+        old.map((board) => (board._id === updatedBoard._id ? updatedBoard : board))
+      );
+      queryClient.setQueryData<Board>(['board', updatedBoard._id], updatedBoard);
+    },
+  });
+
   const deleteBoard = useMutation({
     mutationFn: async (boardId: string) => {
-      const result = await BoardService.deleteBoard(boardId);
-      return result;
+      return boardService.deleteBoard(boardId);
     },
     onMutate: async (boardId) => {
       await queryClient.cancelQueries({ queryKey: ['boards'] });
@@ -37,6 +57,8 @@ export function useBoardMutations() {
   });
 
   return {
+    createBoard,
+    updateBoard,
     deleteBoard,
   };
 }

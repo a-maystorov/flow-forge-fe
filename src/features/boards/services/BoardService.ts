@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import { authService } from '@features/auth';
-import type Board from '../models/Board';
+import { authService } from '@/features/auth/services';
+import type { Board, BoardInput } from '../types';
 
 class BoardService {
   http = axios.create({
@@ -39,7 +39,7 @@ class BoardService {
     }
   }
 
-  async createBoard(data: { name: string }) {
+  async createBoard(data: BoardInput) {
     try {
       const res = await this.http.post<Board>('/boards', data, { headers: this.getHeaders() });
       return res.data;
@@ -51,12 +51,23 @@ class BoardService {
     }
   }
 
-  async deleteBoard(id: string) {
+  async updateBoard(id: string, data: BoardInput) {
     try {
-      const res = await this.http.delete<Board>(`/boards/${id}`, {
+      const res = await this.http.put<Board>(`/boards/${id}`, data, {
         headers: this.getHeaders(),
       });
       return res.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        throw new Error(error.response?.data?.message || 'Failed to update board');
+      }
+      throw error;
+    }
+  }
+
+  async deleteBoard(id: string) {
+    try {
+      await this.http.delete(`/boards/${id}`, { headers: this.getHeaders() });
     } catch (error) {
       if (error instanceof AxiosError) {
         throw new Error(error.response?.data?.message || 'Failed to delete board');
@@ -66,4 +77,4 @@ class BoardService {
   }
 }
 
-export default new BoardService();
+export const boardService = new BoardService();

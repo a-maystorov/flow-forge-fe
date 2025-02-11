@@ -8,19 +8,18 @@ import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 import CreateColumnModal from '../components/modals/CreateColumnModal';
 import CreateTaskModal from '../components/modals/CreateTaskModal';
 import NewColumnButton from '../components/new-column-button';
-import useBoard from '../hooks/useBoard';
-import useBoards from '../hooks/useBoards';
 import useTask from '../hooks/useTask';
 import Task from '../models/Task';
 import { Home } from '../pages';
+import { useBoard, useBoards } from '@/features/boards/hooks';
 
 export default function Board() {
   const { boardId } = useParams();
   const theme = useMantineTheme();
   const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
-  const { data: boards = [] } = useBoards();
-  const { data: board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
+  const { boards = [] } = useBoards();
+  const { board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
   const { reorderTask, moveTask } = useTask(boardId ?? '');
 
   const columnTasksMap = useMemo(() => {

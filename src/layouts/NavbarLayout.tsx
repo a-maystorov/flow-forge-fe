@@ -1,3 +1,5 @@
+import { CreateBoardButton } from '@/features/boards/components';
+import { useBoards } from '@/features/boards/hooks';
 import {
   AppShell,
   Box,
@@ -17,11 +19,9 @@ import { Outlet } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthActions from '../components/auth-actions';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
-import CreateBoardButton from '../components/create-board-button';
 import HideSidebarButton from '../components/hide-sidebar-button';
 import NavbarItem from '../components/navbar-item';
 import ShowSidebarButton from '../components/show-sidebar-button';
-import useBoards from '../hooks/useBoards';
 
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -33,7 +33,7 @@ export default function NavbarLayout() {
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
 
-  const { data, isLoading } = useBoards();
+  const { boards, isLoading } = useBoards();
 
   return (
     <AppShell
@@ -107,7 +107,7 @@ export default function NavbarLayout() {
             style={{ letterSpacing: rem(2.4) }}
             c={theme.colors['medium-gray'][0]}
           >
-            All boards ({data?.length ?? 0})
+            All boards ({boards?.length ?? 0})
           </Title>
         </AppShell.Section>
 
@@ -128,7 +128,7 @@ export default function NavbarLayout() {
             </Stack>
           ) : (
             <Stack gap={0}>
-              {data?.map((board) => (
+              {boards?.map((board) => (
                 <NavbarItem key={board._id} id={board._id} name={board.name} />
               ))}
               <CreateBoardButton />

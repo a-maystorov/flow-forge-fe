@@ -1,14 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ms from 'ms';
-import Board from '../models/Board';
-import BoardService from '../services/BoardService';
+import { boardService } from '../services';
+import type { Board } from '../types';
 
-export default function useBoard(boardId: string) {
+export function useBoard(boardId: string) {
   const queryClient = useQueryClient();
 
-  return useQuery<Board, Error>({
+  const query = useQuery<Board, Error>({
     queryKey: ['board', boardId],
-    queryFn: () => BoardService.getBoard(boardId),
+    queryFn: () => boardService.getBoard(boardId),
     enabled: !!boardId,
     staleTime: ms('1d'),
     initialData: () => {
@@ -16,4 +16,10 @@ export default function useBoard(boardId: string) {
       return boards?.find((b) => b._id === boardId);
     },
   });
+
+  return {
+    board: query.data,
+    isLoading: query.isPending,
+    error: query.error?.message,
+  };
 }

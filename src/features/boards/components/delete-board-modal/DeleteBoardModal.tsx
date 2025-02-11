@@ -7,7 +7,7 @@ interface Props {
   loading?: boolean;
 }
 
-export default function DeleteBoardModal({ opened, onClose, onConfirm, loading }: Props) {
+export function DeleteBoardModal({ opened, onClose, onConfirm, loading }: Props) {
   return (
     <Modal opened={opened} onClose={onClose} title="Delete Board" centered>
       <Stack>
