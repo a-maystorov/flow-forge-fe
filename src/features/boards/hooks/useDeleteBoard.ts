@@ -1,6 +1,6 @@
+import Board from '@/models/Board';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boardService } from '../services';
-import type { Board } from '../types';
 
 export function useDeleteBoard() {
   const queryClient = useQueryClient();

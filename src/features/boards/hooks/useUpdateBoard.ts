@@ -1,13 +1,13 @@
+import Board from '@/models/Board';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boardService } from '../services';
-import type { Board, BoardInput } from '../types';
 
 export function useUpdateBoard() {
   const queryClient = useQueryClient();
 
   const updateBoardMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: BoardInput }) => {
-      return boardService.updateBoard(id, data);
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      return boardService.updateBoard(id, name);
     },
     onSuccess: (updatedBoard) => {
       queryClient.setQueryData<Board[]>(['boards'], (old = []) =>

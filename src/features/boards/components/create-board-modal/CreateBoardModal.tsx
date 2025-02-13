@@ -1,10 +1,19 @@
-import { Button, Group, Modal, Stack, TextInput } from '@mantine/core';
+import { useCreateBatchColumns } from '@/features/columns/hooks';
+import { Box, Button, Flex, Group, Modal, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { z } from 'zod';
 import { useCreateBoard } from '../../hooks';
 
 const createBoardSchema = z.object({
   name: z.string().min(1, 'Board name is required'),
+  columns: z
+    .array(
+      z.object({
+        name: z.string().min(1, 'Column name is required'),
+      })
+    )
+    .optional()
+    .default([]),
 });
 
 type FormValues = z.infer<typeof createBoardSchema>;
@@ -15,19 +24,46 @@ interface Props {
 }
 
 export function CreateBoardModal({ isOpen, onClose }: Props) {
-  const { createBoard, isLoading, error } = useCreateBoard();
+  const { createBoard, isCreatingBoard, error } = useCreateBoard();
+  const { createBatchColumns, isCreatingBatchColumns } = useCreateBatchColumns();
 
   const form = useForm({
     initialValues: {
       name: '',
+      columns: [],
     },
     validate: zodResolver(createBoardSchema),
   });
 
-  const handleSubmit = (values: FormValues) => {
-    createBoard(values);
-    form.reset();
-    onClose();
+  const handleSubmit = async (values: FormValues) => {
+    const columnNames = (values.columns ?? []).map((column) => column.name);
+
+    createBoard(values.name, {
+      onSuccess: (newBoard) => {
+        if (columnNames.length > 0) {
+          createBatchColumns(
+            { boardId: newBoard._id, columnNames },
+            {
+              onSuccess: () => {
+                onClose();
+                form.reset();
+              },
+            }
+          );
+        } else {
+          onClose();
+          form.reset();
+        }
+      },
+    });
+  };
+
+  const addColumn = () => {
+    form.insertListItem('columns', { name: '' });
+  };
+
+  const removeColumn = (index: number) => {
+    form.removeListItem('columns', index);
   };
 
   return (
@@ -42,14 +78,51 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
             data-autofocus
           />
 
-          <Group justify="flex-end" mt="md">
-            <Button variant="subtle" onClick={onClose} type="button">
+          <Stack gap="xs">
+            <Text size="sm" fw={500} hidden={form.values.columns.length === 0}>
+              Board Columns
+            </Text>
+            <Stack gap="xs">
+              {form.values.columns.map((_, index) => (
+                <Group key={index} wrap="nowrap" align="flex-start">
+                  <Box style={{ flex: 1 }}>
+                    <TextInput
+                      placeholder="e.g. To Do, In Progress, Done"
+                      {...form.getInputProps(`columns.${index}.name`)}
+                    />
+                  </Box>
+
+                  <Button
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => removeColumn(index)}
+                    px="xs"
+                    style={{ marginTop: 1 }}
+                  >
+                    X
+                  </Button>
+                </Group>
+              ))}
+
+              <Button variant="light" fullWidth onClick={addColumn}>
+                <Group gap={4} align="center">
+                  <Text component="span" size="md" style={{ top: 1 }}>
+                    +
+                  </Text>
+                  <Title order={3}>Add New Column</Title>
+                </Group>
+              </Button>
+            </Stack>
+          </Stack>
+
+          <Flex mt="md" gap="lg">
+            <Button variant="outline" onClick={onClose} type="button" fullWidth>
               Cancel
             </Button>
-            <Button type="submit" loading={isLoading}>
-              Create Board
+            <Button type="submit" loading={isCreatingBoard || isCreatingBatchColumns} fullWidth>
+              Create New Board
             </Button>
-          </Group>
+          </Flex>
         </Stack>
       </form>
     </Modal>

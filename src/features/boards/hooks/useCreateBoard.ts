@@ -1,15 +1,15 @@
+import Board from '@/models/Board';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { boardService } from '../services';
-import type { Board, BoardInput } from '../types';
 
 export function useCreateBoard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const createBoardMutation = useMutation({
-    mutationFn: async (data: BoardInput) => {
-      return boardService.createBoard(data);
+    mutationFn: async (name: string) => {
+      return boardService.createBoard(name);
     },
     onSuccess: (newBoard) => {
       queryClient.setQueryData<Board[]>(['boards'], (old = []) => [...old, newBoard]);
@@ -19,7 +19,7 @@ export function useCreateBoard() {
 
   return {
     createBoard: createBoardMutation.mutate,
-    isLoading: createBoardMutation.isPending,
+    isCreatingBoard: createBoardMutation.isPending,
     error: createBoardMutation.error?.message,
   };
 }

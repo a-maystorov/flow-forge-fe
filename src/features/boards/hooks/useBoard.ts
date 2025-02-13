@@ -1,7 +1,7 @@
+import Board from '@/models/Board';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ms from 'ms';
 import { boardService } from '../services';
-import type { Board } from '../types';
 
 export function useBoard(boardId: string) {
   const queryClient = useQueryClient();

@@ -1,4 +1,5 @@
 import { authService } from '@/features/auth/services';
+import Column from '@/models/Column';
 import axios from 'axios';
 
 class ColumnService {
@@ -13,7 +14,7 @@ class ColumnService {
   }
 
   async createColumn(boardId: string, name: string) {
-    const res = await this.http.post(
+    const res = await this.http.post<Column>(
       `/boards/${boardId}/columns`,
       { name },
       { headers: this.getHeaders() }
@@ -22,9 +23,9 @@ class ColumnService {
   }
 
   async createBatchColumns(boardId: string, columnNames: string[]) {
-    const res = await this.http.post(
+    const res = await this.http.post<Column[]>(
       `/boards/${boardId}/columns/batch`,
-      { columnNames },
+      { columns: columnNames },
       { headers: this.getHeaders() }
     );
     return res.data;

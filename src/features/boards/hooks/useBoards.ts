@@ -1,7 +1,7 @@
+import Board from '@/models/Board';
 import { QueryKey, useQuery } from '@tanstack/react-query';
 import ms from 'ms';
 import { boardService } from '../services';
-import type { Board } from '../types';
 
 export function useBoards() {
   const query = useQuery<Board[], Error, Board[], QueryKey>({
