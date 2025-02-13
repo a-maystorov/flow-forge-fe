@@ -1,17 +1,19 @@
+import { useBoard, useBoards } from '@/features/boards/hooks';
+import {
+  AddColumnButton,
+  CreateColumnButton,
+  CreateColumnModal,
+} from '@/features/columns/components';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AddColumnButton from '../components/add-column-button';
 import AddTaskButton from '../components/add-task-button';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
-import CreateColumnModal from '../components/modals/CreateColumnModal';
 import CreateTaskModal from '../components/modals/CreateTaskModal';
-import NewColumnButton from '../components/new-column-button';
 import useTask from '../hooks/useTask';
 import Task from '../models/Task';
 import { Home } from '../pages';
-import { useBoard, useBoards } from '@/features/boards/hooks';
 
 export default function Board() {
   const { boardId } = useParams();
@@ -75,7 +77,9 @@ export default function Board() {
           <Text c={theme.colors['medium-gray'][0]} fz="h2" fw={600} ta="center">
             This board is empty. Create a new column to get started.
           </Text>
-          <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+
+          <CreateColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+
           <CreateColumnModal
             isOpen={isCreateColumnModalOpen}
             onClose={() => setIsCreateColumnModalOpen(false)}
@@ -129,13 +133,15 @@ export default function Board() {
             </Stack>
           );
         })}
-        <NewColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+        <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
       </Flex>
+
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
         onClose={() => setIsCreateColumnModalOpen(false)}
         boardId={boardId ?? ''}
       />
+
       <CreateTaskModal
         isOpen={selectedColumnId !== null}
         onClose={() => setSelectedColumnId(null)}

@@ -4,24 +4,33 @@
   height: calc(100vh - var(--app-shell-header-height) - 32px);
   min-height: 200px;
   border: none;
+  transition: background-color 200ms ease;
 
   &[data-dark] {
     background-color: var(--mantine-color-dark-gray-0);
+
+    &:hover {
+      background-color: var(--mantine-color-dark-gray-5);
+    }
   }
 
   &[data-light] {
     background-color: var(--mantine-color-white-0);
+
+    &:hover {
+      background-color: var(--mantine-color-lines-light-0);
+    }
   }
 
   &:hover {
-    background-color: var(--mantine-color-dark-gray-5);
-
-    .title {
+    .text,
+    .icon {
       color: var(--mantine-color-main-purple-0);
     }
   }
 
-  .title {
+  .text,
+  .icon {
     transition: color 200ms ease;
   }
 }
