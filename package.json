@@ -37,7 +37,6 @@
     "@mantine/form": "7.15.1",
     "@mantine/hooks": "7.15.1",
     "@mantine/modals": "7.15.1",
-    "@tabler/icons-react": "3.30.0",
     "@tanstack/react-query": "5.62.3",
     "@tanstack/react-query-devtools": "5.62.3",
     "axios": "1.7.9",
