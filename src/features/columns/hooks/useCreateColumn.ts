@@ -17,6 +17,6 @@ export function useCreateColumn(boardId: string) {
 
   return {
     createColumn: createColumnMutation.mutate,
-    isCreating: createColumnMutation.isPending,
+    isCreatingColumn: createColumnMutation.isPending,
   };
 }

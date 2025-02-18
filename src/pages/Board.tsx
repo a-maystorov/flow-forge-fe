@@ -21,7 +21,7 @@ export default function Board() {
   const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const { boards = [] } = useBoards();
-  const { board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
+  const { board, isFetchingBoard } = useBoard(boardId ?? '');
   const { reorderTask } = useReorderTask(boardId ?? '');
   const { moveTask } = useMoveTask(boardId ?? '');
 
@@ -67,7 +67,7 @@ export default function Board() {
     return <Home />;
   }
 
-  if (isLoadingBoard) {
+  if (isFetchingBoard) {
     return null; // TODO: Add loading state
   }
 

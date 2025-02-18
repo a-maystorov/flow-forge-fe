@@ -20,6 +20,5 @@ export function useCreateBoard() {
   return {
     createBoard: createBoardMutation.mutate,
     isCreatingBoard: createBoardMutation.isPending,
-    error: createBoardMutation.error?.message,
   };
 }

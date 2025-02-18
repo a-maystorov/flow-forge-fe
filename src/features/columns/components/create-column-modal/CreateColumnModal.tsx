@@ -23,7 +23,7 @@ export function CreateColumnModal({ isOpen, onClose, boardId }: Props) {
     },
   });
 
-  const { createColumn, isCreating } = useCreateColumn(boardId);
+  const { createColumn, isCreatingColumn } = useCreateColumn(boardId);
 
   const handleSubmit = (values: FormValues) => {
     createColumn(values.name, {
@@ -39,7 +39,7 @@ export function CreateColumnModal({ isOpen, onClose, boardId }: Props) {
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput label="Name" placeholder="Enter column name" {...form.getInputProps('name')} />
-          <Button type="submit" loading={isCreating}>
+          <Button type="submit" loading={isCreatingColumn}>
             Create Column
           </Button>
         </Stack>

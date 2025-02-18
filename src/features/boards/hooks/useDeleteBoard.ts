@@ -37,7 +37,6 @@ export function useDeleteBoard() {
 
   return {
     deleteBoard: deleteBoardMutation.mutate,
-    isLoading: deleteBoardMutation.isPending,
-    error: deleteBoardMutation.error?.message,
+    isDeletingBoard: deleteBoardMutation.isPending,
   };
 }

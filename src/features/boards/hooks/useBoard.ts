@@ -19,7 +19,6 @@ export function useBoard(boardId: string) {
 
   return {
     board: query.data,
-    isLoading: query.isPending,
-    error: query.error?.message,
+    isFetchingBoard: query.isPending,
   };
 }

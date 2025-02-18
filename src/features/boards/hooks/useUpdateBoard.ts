@@ -19,7 +19,6 @@ export function useUpdateBoard() {
 
   return {
     updateBoard: updateBoardMutation.mutate,
-    isLoading: updateBoardMutation.isPending,
-    error: updateBoardMutation.error?.message,
+    isUpdatingBoard: updateBoardMutation.isPending,
   };
 }
