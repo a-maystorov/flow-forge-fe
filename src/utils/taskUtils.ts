@@ -1,5 +1,5 @@
-import Column from '../models/Column';
-import Task from '../models/Task';
+import Column from '@/models/Column';
+import Task from '@/models/Task';
 
 export const updateTaskPosition = (tasks: Task[], taskId: string, newPosition: number): Task[] => {
   const taskIndex = tasks.findIndex((t) => t._id === taskId);

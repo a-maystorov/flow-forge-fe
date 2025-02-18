@@ -1,9 +1,8 @@
 import { Button, Modal, Stack, TextInput, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import TaskService from '../../services/TaskService';
+import { useCreateTask } from '../../hooks';
 
-interface CreateTaskModalProps {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
   columnId: string;
@@ -15,13 +14,7 @@ interface FormValues {
   description: string;
 }
 
-export default function CreateTaskModal({
-  isOpen,
-  onClose,
-  columnId,
-  boardId,
-}: CreateTaskModalProps) {
-  const queryClient = useQueryClient();
+export function CreateTaskModal({ isOpen, onClose, columnId, boardId }: Props) {
   const form = useForm<FormValues>({
     initialValues: {
       title: '',
@@ -32,17 +25,15 @@ export default function CreateTaskModal({
     },
   });
 
-  const { mutate: createTask, isPending } = useMutation({
-    mutationFn: (values: FormValues) => TaskService.createTask(boardId, columnId, values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['board', boardId] });
-      form.reset();
-      onClose();
-    },
-  });
+  const { createTask, isCreatingTask } = useCreateTask(boardId, columnId);
 
   const handleSubmit = (values: FormValues) => {
-    createTask(values);
+    createTask(values, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      },
+    });
   };
 
   return (
@@ -74,7 +65,7 @@ export default function CreateTaskModal({
             {...form.getInputProps('description')}
           />
 
-          <Button type="submit" fullWidth loading={isPending}>
+          <Button type="submit" fullWidth loading={isCreatingTask}>
             Create Task
           </Button>
         </Stack>

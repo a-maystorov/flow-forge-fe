@@ -4,14 +4,14 @@ import {
   CreateColumnButton,
   CreateColumnModal,
 } from '@/features/columns/components';
+import { AddTaskButton } from '@/features/tasks/components/add-task-button';
+import { CreateTaskModal } from '@/features/tasks/components/create-task-modal';
+import { useMoveTask, useReorderTask } from '@/features/tasks/hooks';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import AddTaskButton from '../components/add-task-button';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
-import CreateTaskModal from '../components/modals/CreateTaskModal';
-import useTask from '../hooks/useTask';
 import Task from '../models/Task';
 import { Home } from '../pages';
 
@@ -22,7 +22,8 @@ export default function Board() {
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const { boards = [] } = useBoards();
   const { board, isLoading: isLoadingBoard } = useBoard(boardId ?? '');
-  const { reorderTask, moveTask } = useTask(boardId ?? '');
+  const { reorderTask } = useReorderTask(boardId ?? '');
+  const { moveTask } = useMoveTask(boardId ?? '');
 
   const columnTasksMap = useMemo(() => {
     if (!board) {
