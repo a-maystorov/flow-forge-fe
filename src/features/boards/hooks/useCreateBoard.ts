@@ -1,4 +1,5 @@
 import Board from '@/models/Board';
+import { notifications } from '@mantine/notifications';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { boardService } from '../services';
@@ -14,6 +15,18 @@ export function useCreateBoard() {
     onSuccess: (newBoard) => {
       queryClient.setQueryData<Board[]>(['boards'], (old = []) => [...old, newBoard]);
       navigate(`/boards/${newBoard._id}`);
+      notifications.show({
+        title: 'Board created',
+        message: 'Board has been successfully created',
+        color: 'green',
+      });
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Board creation failed',
+        message: error.message,
+        color: 'red',
+      });
     },
   });
 
