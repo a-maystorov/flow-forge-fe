@@ -6,13 +6,15 @@ import {
 } from '@/features/columns/components';
 import { AddTaskButton } from '@/features/tasks/components/add-task-button';
 import { CreateTaskModal } from '@/features/tasks/components/create-task-modal';
+import { TaskDetailsModal } from '@/features/tasks/components/task-details-modal';
 import { useMoveTask, useReorderTask } from '@/features/tasks/hooks';
+import Task from '@/models/Task';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
-import Task from '../models/Task';
 import { Home } from '../pages';
 
 export default function Board() {
@@ -20,6 +22,8 @@ export default function Board() {
   const theme = useMantineTheme();
   const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
+  const [taskDetailsOpened, taskDetailsHandlers] = useDisclosure(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { boards = [] } = useBoards();
   const { board, isFetchingBoard } = useBoard(boardId ?? '');
   const { reorderTask } = useReorderTask(boardId ?? '');
@@ -129,7 +133,14 @@ export default function Board() {
               </Text>
               <AddTaskButton onClick={() => setSelectedColumnId(column._id)} />
               <Stack gap="xs">
-                <DndListHandle tasks={columnTasks} columnId={column._id} />
+                <DndListHandle
+                  tasks={columnTasks}
+                  columnId={column._id}
+                  onTaskClick={(task) => {
+                    setSelectedTask(task);
+                    taskDetailsHandlers.open();
+                  }}
+                />
               </Stack>
             </Stack>
           );
@@ -148,6 +159,12 @@ export default function Board() {
         onClose={() => setSelectedColumnId(null)}
         columnId={selectedColumnId ?? ''}
         boardId={boardId ?? ''}
+      />
+
+      <TaskDetailsModal
+        isOpen={taskDetailsOpened}
+        onClose={taskDetailsHandlers.close}
+        task={selectedTask}
       />
     </DragDropContext>
   );
