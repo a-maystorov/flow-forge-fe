@@ -1,6 +1,6 @@
+import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskService } from '../services';
-import { notifications } from '@mantine/notifications';
 
 export const useCreateTask = (boardId: string, columnId: string) => {
   const queryClient = useQueryClient();
@@ -10,19 +10,9 @@ export const useCreateTask = (boardId: string, columnId: string) => {
       taskService.createTask(boardId, columnId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board', boardId] });
-      notifications.show({
-        title: 'Task created',
-        message: 'Task has been successfully created',
-        color: 'green',
-      });
+      notifyUser.success('Task created', 'Task has been successfully created');
     },
-    onError: (error) => {
-      notifications.show({
-        title: 'Task creation failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
+    onError: (error) => notifyUser.error('Task creation failed', error.message),
   });
 
   return {

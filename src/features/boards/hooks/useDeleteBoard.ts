@@ -1,7 +1,7 @@
 import Board from '@/models/Board';
+import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boardService } from '../services';
-import { notifications } from '@mantine/notifications';
 
 export function useDeleteBoard() {
   const queryClient = useQueryClient();
@@ -26,23 +26,14 @@ export function useDeleteBoard() {
 
       return { previousBoards };
     },
-    onError: (_, __, context) => {
+    onError: (error, __, context) => {
       if (context?.previousBoards) {
         queryClient.setQueryData(['boards'], context.previousBoards);
       }
-
-      notifications.show({
-        title: 'Board deletion failed',
-        message: 'An error occurred while deleting the board',
-        color: 'red',
-      });
+      notifyUser.error('Board deletion failed', error.message);
     },
     onSuccess: () => {
-      notifications.show({
-        title: 'Board deleted',
-        message: 'Board has been successfully deleted',
-        color: 'green',
-      });
+      notifyUser.success('Board deleted', 'Board has been successfully deleted');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['boards'] });

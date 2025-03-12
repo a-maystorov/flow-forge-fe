@@ -1,6 +1,6 @@
+import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { columnService } from '../services';
-import { notifications } from '@mantine/notifications';
 
 export function useCreateColumn(boardId: string) {
   const queryClient = useQueryClient();
@@ -9,19 +9,9 @@ export function useCreateColumn(boardId: string) {
     mutationFn: (name: string) => columnService.createColumn(boardId, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board', boardId] });
-      notifications.show({
-        title: 'Column created',
-        message: 'Column has been successfully created',
-        color: 'green',
-      });
+      notifyUser.success('Column created', 'Column has been successfully created');
     },
-    onError: (error) => {
-      notifications.show({
-        title: 'Column creation failed',
-        message: error.message,
-        color: 'red',
-      });
-    },
+    onError: (error) => notifyUser.error('Column creation failed', error.message),
   });
 
   return {
