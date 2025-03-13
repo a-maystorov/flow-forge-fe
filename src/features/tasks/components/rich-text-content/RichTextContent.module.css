@@ -1,0 +1,127 @@
+/* Rich text content styling */
+.container {
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.readOnly {
+  cursor: default;
+}
+
+/* Typography styles */
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6 {
+  font-weight: bold;
+  margin-bottom: var(--mantine-spacing-xs);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.container h1 {
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+}
+
+.container h2 {
+  font-size: 1.125rem;
+  line-height: 1.44rem;
+}
+
+.container h3 {
+  font-size: 0.938rem;
+  line-height: 1.19rem;
+}
+
+.container h4 {
+  font-size: 0.75rem;
+  line-height: 0.94rem;
+}
+
+/* List styles */
+.container ul,
+.container ol {
+  padding-left: var(--mantine-spacing-xl);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.container ul {
+  list-style-type: disc;
+}
+
+.container ol {
+  list-style-type: decimal;
+}
+
+.container li {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+/* Text formatting */
+.container p {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.container a {
+  color: var(--mantine-color-main-purple-0);
+  text-decoration: underline;
+}
+
+.container a:hover {
+  color: var(--mantine-color-main-purple-hover-0);
+}
+
+.container blockquote {
+  border-left: 3px solid var(--mantine-color-medium-gray-0);
+  padding-left: var(--mantine-spacing-sm);
+  font-style: italic;
+  margin: var(--mantine-spacing-xs) 0;
+}
+
+/* Code formatting */
+.container code {
+  background-color: var(--mantine-color-light-gray-0);
+  padding: calc(var(--mantine-spacing-xs) / 2) var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  font-family: 'Monaco, Courier, monospace';
+}
+
+.container pre {
+  background-color: var(--mantine-color-light-gray-0);
+  padding: var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  overflow-x: auto;
+  font-family: 'Monaco, Courier, monospace';
+  margin: var(--mantine-spacing-xs) 0;
+}
+
+/* General spacing */
+.container > *:not(:last-child) {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.container img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Dark mode adjustments */
+:global([data-mantine-color-scheme='dark']) .container code,
+:global([data-mantine-color-scheme='dark']) .container pre {
+  background-color: var(--mantine-color-dark-gray-0);
+  color: var(--mantine-color-light-gray-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .container a {
+  color: var(--mantine-color-main-purple-hover-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .container a:hover {
+  color: var(--mantine-color-main-purple-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .container blockquote {
+  border-left-color: var(--mantine-color-lines-dark-0);
+}

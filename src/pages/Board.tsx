@@ -165,6 +165,8 @@ export default function Board() {
         isOpen={taskDetailsOpened}
         onClose={taskDetailsHandlers.close}
         task={selectedTask}
+        boardId={boardId ?? ''}
+        columnId={selectedTask?.columnId ?? ''}
       />
     </DragDropContext>
   );
