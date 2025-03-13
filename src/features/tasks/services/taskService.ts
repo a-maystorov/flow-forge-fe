@@ -24,6 +24,22 @@ class TaskService {
     return res.data;
   }
 
+  async updateTask(
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    data: { title: string; description?: string }
+  ): Promise<Task> {
+    const res = await this.http.put<Task>(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}`,
+      data,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
+  }
+
   async deleteTask(boardId: string, columnId: string, taskId: string) {
     await this.http.delete(`/boards/${boardId}/columns/${columnId}/tasks/${taskId}`, {
       headers: this.getHeaders(),
