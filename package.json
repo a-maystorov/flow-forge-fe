@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "flow-forge-fe",
   "private": true,
   "version": "0.0.0",
@@ -38,9 +39,20 @@
     "@mantine/hooks": "7.15.1",
     "@mantine/modals": "7.15.1",
     "@mantine/notifications": "7.15.1",
+    "@mantine/tiptap": "7.15.1",
     "@tanstack/react-query": "5.62.3",
     "@tanstack/react-query-devtools": "5.62.3",
-    "axios": "^1.8.3",
+    "@tiptap/extension-highlight": "2.11.5",
+    "@tiptap/extension-link": "2.11.5",
+    "@tiptap/extension-subscript": "2.11.5",
+    "@tiptap/extension-superscript": "2.11.5",
+    "@tiptap/extension-text-align": "2.11.5",
+    "@tiptap/extension-underline": "2.11.5",
+    "@tiptap/pm": "2.11.5",
+    "@tiptap/react": "2.11.5",
+    "@tiptap/starter-kit": "2.11.5",
+    "axios": "1.8.3",
+    "dompurify": "3.2.4",
     "jwt-decode": "4.0.0",
     "ms": "2.1.3",
     "react": "18.3.1",
@@ -51,6 +63,7 @@
   "devDependencies": {
     "@commitlint/cli": "19.6.0",
     "@commitlint/config-conventional": "19.6.0",
+    "@types/dompurify": "3.0.5",
     "@types/ms": "0.7.34",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
@@ -70,6 +83,6 @@
     "postcss-simple-vars": "7.0.1",
     "prettier": "3.3.3",
     "typescript": "5.6.3",
-    "vite": "^6.1.0"
+    "vite": "6.2.1"
   }
 }
