@@ -2,10 +2,11 @@ import Task from '@/models/Task';
 import { DescriptionEditor } from '@/shared/components/description-editor';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
+import { notifyUser } from '@/utils/notificationUtils';
 import { Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDeleteTask, useUpdateTask } from '../../hooks';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: Props) {
+  const editingNotificationRef = useRef(false);
+
   const form = useForm<FormValues>({
     initialValues: {
       title: '',
@@ -103,10 +106,31 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
     [form]
   );
 
+  const handleClose = useCallback(() => {
+    if (form.values.isEditing) {
+      if (!editingNotificationRef.current) {
+        editingNotificationRef.current = true;
+
+        notifyUser.warning(
+          'Unsaved changes',
+          'Please click "Cancel" to exit edit mode before closing this task.'
+        );
+
+        setTimeout(() => {
+          editingNotificationRef.current = false;
+        }, 1000);
+      }
+
+      return;
+    }
+
+    onClose();
+  }, [form.values.isEditing, onClose]);
+
   return (
     <Modal.Root
       opened={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       size="xl"
       aria-labelledby="task-details-title"
       trapFocus
@@ -123,28 +147,24 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
               <Box>
                 <Group justify="space-between" align="flex-start">
                   {form.values.isEditing ? (
-                    <>
-                      <TextInput
-                        label="Title"
-                        placeholder="Task title"
-                        required
-                        {...form.getInputProps('title')}
-                        autoFocus
-                        style={{ flexGrow: 1 }}
-                        aria-required="true"
-                      />
-                    </>
+                    <TextInput
+                      label="Title"
+                      placeholder="Task title"
+                      required
+                      {...form.getInputProps('title')}
+                      autoFocus
+                      style={{ flexGrow: 1 }}
+                      aria-required="true"
+                    />
                   ) : (
-                    <>
-                      <Box>
-                        <Text size="sm" fw={500} c="dimmed" id="task-title-label">
-                          Title
-                        </Text>
-                        <Text size="lg" fw={700} aria-labelledby="task-title-label">
-                          {form.values.title}
-                        </Text>
-                      </Box>
-                    </>
+                    <Box>
+                      <Text size="sm" fw={500} c="dimmed" id="task-title-label">
+                        Title
+                      </Text>
+                      <Text size="lg" fw={700} aria-labelledby="task-title-label">
+                        {form.values.title}
+                      </Text>
+                    </Box>
                   )}
                 </Group>
               </Box>
