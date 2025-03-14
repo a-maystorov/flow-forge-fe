@@ -5,13 +5,14 @@ import { sanitizerConfig } from '@/shared/constants/html';
 import { Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDeleteTask, useUpdateTask } from '../../hooks';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
 interface FormValues {
   title: string;
   description: string;
+  isEditing: boolean;
 }
 
 interface Props {
@@ -23,12 +24,11 @@ interface Props {
 }
 
 export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: Props) {
-  const [isEditing, setIsEditing] = useState(false);
-
   const form = useForm<FormValues>({
     initialValues: {
       title: '',
       description: '',
+      isEditing: false,
     },
     validate: {
       title: (value) => (value.trim() ? null : 'Title is required'),
@@ -46,29 +46,30 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
       form.setValues({
         title: task.title,
         description: sanitizedDescription,
+        isEditing: false,
       });
-      setIsEditing(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]); // Deliberately omitting form from dependencies to prevent infinite updates
 
   const startEditing = () => {
-    setIsEditing(true);
+    form.setFieldValue('isEditing', true);
   };
 
   const cancelEditing = () => {
-    setIsEditing(false);
+    form.setFieldValue('isEditing', false);
   };
 
   const handleSubmit = form.onSubmit((values) => {
     let finalDescription = values.description;
-    if (isEditing) {
+    if (values.isEditing) {
       finalDescription = DOMPurify.sanitize(values.description, sanitizerConfig);
     }
 
     const originalValues = {
       title: task.title,
       description: task.description || '',
+      isEditing: values.isEditing,
     };
 
     updateTask(
@@ -78,10 +79,10 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
       },
       {
         onSuccess: () => {
-          cancelEditing();
           form.setValues({
-            title: values.title,
+            ...values,
             description: finalDescription,
+            isEditing: false,
           });
         },
         onError: () => {
@@ -109,7 +110,7 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
             <Stack gap="md">
               <Box>
                 <Group justify="space-between" align="flex-start">
-                  {isEditing ? (
+                  {form.values.isEditing ? (
                     <>
                       <TextInput
                         label="Title"
@@ -140,7 +141,7 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
                   Description
                 </Text>
 
-                {isEditing ? (
+                {form.values.isEditing ? (
                   <DescriptionEditor
                     content={form.values.description}
                     onChange={(content) => form.setFieldValue('description', content)}
@@ -152,7 +153,7 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
                 )}
               </Box>
 
-              {isEditing && (
+              {form.values.isEditing && (
                 <Group justify="flex-end" mt="md">
                   <Button onClick={cancelEditing} variant="subtle" color="gray">
                     Cancel
