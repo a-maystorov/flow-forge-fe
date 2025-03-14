@@ -40,12 +40,9 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
 
   useEffect(() => {
     if (task) {
-      const sanitizedDescription = task.description
-        ? DOMPurify.sanitize(task.description, sanitizerConfig)
-        : '';
       form.setValues({
         title: task.title,
-        description: sanitizedDescription,
+        description: task.description || '',
         isEditing: false,
       });
     }
@@ -61,10 +58,9 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
   };
 
   const handleSubmit = form.onSubmit((values) => {
-    let finalDescription = values.description;
-    if (values.isEditing) {
-      finalDescription = DOMPurify.sanitize(values.description, sanitizerConfig);
-    }
+    const finalDescription = values.isEditing
+      ? DOMPurify.sanitize(values.description, sanitizerConfig)
+      : values.description;
 
     const originalValues = {
       title: task.title,
