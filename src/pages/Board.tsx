@@ -50,7 +50,7 @@ export default function Board() {
     taskMap.forEach((tasks, columnId) => {
       taskMap.set(
         columnId,
-        tasks.sort((a: Task, b: Task) => a.position - b.position)
+        [...tasks].sort((a, b) => a.position - b.position)
       );
     });
 
@@ -58,26 +58,22 @@ export default function Board() {
   }, [board]);
 
   useEffect(() => {
-    const title = board?.name ?? (boards.length ? 'Select a board' : 'No boards');
-    document.title = `${title} | FlowForge`;
-
-    const titleElements = document.querySelectorAll('[data-board-title]');
-    titleElements.forEach((element) => {
-      element.textContent = title;
-    });
+    if (board?.name && boards.length > 0) {
+      document.title = `${board.name} | Flow Forge`;
+    }
   }, [board?.name, boards.length]);
 
   if (boards.length === 0) {
     return <Home />;
   }
 
-  if (isFetchingBoard) {
-    return null; // TODO: Add loading state
+  if (!board || isFetchingBoard) {
+    return null;
   }
 
-  if (!board?.columns?.length) {
+  if (board.columns.length === 0) {
     return (
-      <Flex h="100vh" justify="center" align="center">
+      <Flex align="center" justify="center" h="100%">
         <Stack align="center" gap="lg">
           <Text c={theme.colors['medium-gray'][0]} fz="h2" fw={600} ta="center">
             This board is empty. Create a new column to get started.
@@ -161,13 +157,15 @@ export default function Board() {
         boardId={boardId ?? ''}
       />
 
-      <TaskDetailsModal
-        isOpen={taskDetailsOpened}
-        onClose={taskDetailsHandlers.close}
-        task={selectedTask}
-        boardId={boardId ?? ''}
-        columnId={selectedTask?.columnId ?? ''}
-      />
+      {selectedTask && (
+        <TaskDetailsModal
+          isOpen={taskDetailsOpened}
+          onClose={taskDetailsHandlers.close}
+          task={selectedTask}
+          boardId={boardId ?? ''}
+          columnId={selectedTask.columnId}
+        />
+      )}
     </DragDropContext>
   );
 }

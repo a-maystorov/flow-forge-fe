@@ -1,11 +1,12 @@
 import Task from '@/models/Task';
 import { DescriptionEditor } from '@/shared/components/description-editor';
+import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
 import { Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
-import { useUpdateTask } from '../../hooks';
+import { useDeleteTask, useUpdateTask } from '../../hooks';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
 interface FormValues {
@@ -14,16 +15,15 @@ interface FormValues {
 }
 
 interface Props {
-  isOpen: boolean;
-  onClose: () => void;
-  task: Task | null;
+  task: Task;
   boardId: string;
   columnId: string;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function TaskDetailsModal({ isOpen, onClose, task, boardId, columnId }: Props) {
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [editingDescription, setEditingDescription] = useState(false);
+export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -36,6 +36,7 @@ export function TaskDetailsModal({ isOpen, onClose, task, boardId, columnId }: P
   });
 
   const { updateTask, isUpdatingTask } = useUpdateTask(boardId, columnId, task?._id || '');
+  const { deleteTask } = useDeleteTask(boardId, columnId);
 
   useEffect(() => {
     if (task) {
@@ -43,21 +44,29 @@ export function TaskDetailsModal({ isOpen, onClose, task, boardId, columnId }: P
         title: task.title,
         description: task.description || '',
       });
-      setEditingTitle(false);
-      setEditingDescription(false);
+      setIsEditing(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]); // Deliberately omitting form from dependencies to prevent infinite updates
 
-  if (!task) {
-    return null;
-  }
+  const startEditing = () => {
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
 
   const handleSubmit = form.onSubmit((values) => {
     let finalDescription = values.description;
-    if (editingDescription) {
+    if (isEditing) {
       finalDescription = DOMPurify.sanitize(values.description, sanitizerConfig);
     }
+
+    const originalValues = {
+      title: task.title,
+      description: task.description || '',
+    };
 
     updateTask(
       {
@@ -66,80 +75,95 @@ export function TaskDetailsModal({ isOpen, onClose, task, boardId, columnId }: P
       },
       {
         onSuccess: () => {
-          setEditingTitle(false);
-          setEditingDescription(false);
+          cancelEditing();
+          form.setValues({
+            title: values.title,
+            description: finalDescription,
+          });
+        },
+        onError: () => {
+          form.setValues(originalValues);
         },
       }
     );
   });
 
-  // Use form values for display instead of task prop directly
-  // This ensures we see updates immediately after saving
-  const displayTitle = form.values.title || task.title;
-
-  // Always use form values for display - they get initialized from task in useEffect
-  // This ensures we don't lose content when toggling edit mode
-  const displayDescription = form.values.description || task.description || '';
+  const handleDeleteTask = () => {
+    deleteTask(task._id);
+    onClose();
+  };
 
   return (
-    <Modal opened={isOpen} onClose={onClose} title="Task Details" size="xl">
-      <form onSubmit={handleSubmit}>
-        <Stack gap="md">
-          {editingTitle ? (
-            <TextInput
-              label="Title"
-              placeholder="Task title"
-              required
-              {...form.getInputProps('title')}
-              autoFocus
-            />
-          ) : (
-            <Box onClick={() => setEditingTitle(true)} style={{ cursor: 'pointer' }}>
-              <Text size="sm" fw={500} c="dimmed">
-                Title
-              </Text>
-              <Text size="lg" fw={700}>
-                {displayTitle}
-              </Text>
-            </Box>
-          )}
-
-          <Box>
-            <Text size="sm" fw={500} c="dimmed">
-              Description
-            </Text>
-
-            {editingDescription ? (
-              <DescriptionEditor
-                content={form.values.description}
-                onChange={(content) => form.setFieldValue('description', content)}
-              />
-            ) : (
-              <Box onClick={() => setEditingDescription(true)} style={{ cursor: 'pointer' }}>
-                <RichTextContent html={displayDescription} />
+    <Modal.Root opened={isOpen} onClose={onClose} size="xl">
+      <Modal.Overlay />
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>Task Details</Modal.Title>
+          <TaskActionMenu onEdit={startEditing} onDelete={handleDeleteTask} />
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={handleSubmit}>
+            <Stack gap="md">
+              <Box>
+                <Group justify="space-between" align="flex-start">
+                  {isEditing ? (
+                    <>
+                      <TextInput
+                        label="Title"
+                        placeholder="Task title"
+                        required
+                        {...form.getInputProps('title')}
+                        autoFocus
+                        style={{ flexGrow: 1 }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Box>
+                        <Text size="sm" fw={500} c="dimmed">
+                          Title
+                        </Text>
+                        <Text size="lg" fw={700}>
+                          {form.values.title}
+                        </Text>
+                      </Box>
+                    </>
+                  )}
+                </Group>
               </Box>
-            )}
-          </Box>
 
-          {(editingTitle || editingDescription) && (
-            <Group justify="flex-end">
-              <Button
-                variant="default"
-                onClick={() => {
-                  form.reset();
-                  setEditingTitle(false);
-                  setEditingDescription(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" loading={isUpdatingTask}>
-                Save Changes
-              </Button>
-            </Group>
-          )}
-        </Stack>
-      </form>
-    </Modal>
+              <Box>
+                <Text size="sm" fw={500} c="dimmed">
+                  Description
+                </Text>
+
+                {isEditing ? (
+                  <DescriptionEditor
+                    content={form.values.description}
+                    onChange={(content) => form.setFieldValue('description', content)}
+                  />
+                ) : (
+                  <Box>
+                    <RichTextContent html={form.values.description} />
+                  </Box>
+                )}
+              </Box>
+
+              {isEditing && (
+                <Group justify="flex-end" mt="md">
+                  <Button onClick={cancelEditing} variant="subtle" color="gray">
+                    Cancel
+                  </Button>
+
+                  <Button type="submit" loading={isUpdatingTask}>
+                    Save Changes
+                  </Button>
+                </Group>
+              )}
+            </Stack>
+          </form>
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 }
