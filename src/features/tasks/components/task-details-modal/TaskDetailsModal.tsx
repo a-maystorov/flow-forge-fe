@@ -40,9 +40,12 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
 
   useEffect(() => {
     if (task) {
+      const sanitizedDescription = task.description
+        ? DOMPurify.sanitize(task.description, sanitizerConfig)
+        : '';
       form.setValues({
         title: task.title,
-        description: task.description || '',
+        description: sanitizedDescription,
       });
       setIsEditing(false);
     }
