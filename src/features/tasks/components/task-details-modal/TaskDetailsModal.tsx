@@ -5,7 +5,7 @@ import { sanitizerConfig } from '@/shared/constants/html';
 import { Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDeleteTask, useUpdateTask } from '../../hooks';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
@@ -49,49 +49,59 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task]); // Deliberately omitting form from dependencies to prevent infinite updates
 
-  const startEditing = () => {
+  const startEditing = useCallback(() => {
     form.setFieldValue('isEditing', true);
-  };
+  }, [form]);
 
-  const cancelEditing = () => {
+  const cancelEditing = useCallback(() => {
     form.setFieldValue('isEditing', false);
-  };
+  }, [form]);
 
-  const handleSubmit = form.onSubmit((values) => {
-    const finalDescription = values.isEditing
-      ? DOMPurify.sanitize(values.description, sanitizerConfig)
-      : values.description;
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      form.onSubmit((values) => {
+        const finalDescription = values.isEditing
+          ? DOMPurify.sanitize(values.description, sanitizerConfig)
+          : values.description;
 
-    const originalValues = {
-      title: task.title,
-      description: task.description || '',
-      isEditing: values.isEditing,
-    };
+        const originalValues = {
+          title: task.title,
+          description: task.description || '',
+          isEditing: values.isEditing,
+        };
 
-    updateTask(
-      {
-        title: values.title,
-        description: finalDescription,
-      },
-      {
-        onSuccess: () => {
-          form.setValues({
-            ...values,
+        updateTask(
+          {
+            title: values.title,
             description: finalDescription,
-            isEditing: false,
-          });
-        },
-        onError: () => {
-          form.setValues(originalValues);
-        },
-      }
-    );
-  });
+          },
+          {
+            onSuccess: () => {
+              form.setValues({
+                ...values,
+                description: finalDescription,
+                isEditing: false,
+              });
+            },
+            onError: () => {
+              form.setValues(originalValues);
+            },
+          }
+        );
+      })(event);
+    },
+    [form, task, updateTask]
+  );
 
-  const handleDeleteTask = () => {
+  const handleDeleteTask = useCallback(() => {
     deleteTask(task._id);
     onClose();
-  };
+  }, [deleteTask, onClose, task._id]);
+
+  const handleDescriptionChange = useCallback(
+    (content: string) => form.setFieldValue('description', content),
+    [form]
+  );
 
   return (
     <Modal.Root opened={isOpen} onClose={onClose} size="xl">
@@ -140,7 +150,7 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
                 {form.values.isEditing ? (
                   <DescriptionEditor
                     content={form.values.description}
-                    onChange={(content) => form.setFieldValue('description', content)}
+                    onChange={handleDescriptionChange}
                   />
                 ) : (
                   <Box>
