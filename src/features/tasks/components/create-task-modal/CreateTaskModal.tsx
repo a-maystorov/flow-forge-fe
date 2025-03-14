@@ -105,12 +105,7 @@ export function CreateTaskModal({ isOpen, onClose, columnId, boardId }: Props) {
   const { createTask, isCreatingTask } = useCreateTask(boardId, columnId);
 
   const handleSubmit = (values: FormValues) => {
-    const sanitizedValues = {
-      ...values,
-      description: DOMPurify.sanitize(values.description, sanitizerConfig),
-    };
-
-    createTask(sanitizedValues, {
+    createTask(values, {
       onSuccess: () => {
         form.reset();
         onClose();
