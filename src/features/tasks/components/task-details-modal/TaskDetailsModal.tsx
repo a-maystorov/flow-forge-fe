@@ -104,11 +104,17 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
   );
 
   return (
-    <Modal.Root opened={isOpen} onClose={onClose} size="xl">
+    <Modal.Root
+      opened={isOpen}
+      onClose={onClose}
+      size="xl"
+      aria-labelledby="task-details-title"
+      trapFocus
+    >
       <Modal.Overlay />
-      <Modal.Content>
+      <Modal.Content role="dialog" aria-modal="true">
         <Modal.Header>
-          <Modal.Title>Task Details</Modal.Title>
+          <Modal.Title id="task-details-title">Task Details</Modal.Title>
           <TaskActionMenu onEdit={startEditing} onDelete={handleDeleteTask} />
         </Modal.Header>
         <Modal.Body>
@@ -125,15 +131,16 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
                         {...form.getInputProps('title')}
                         autoFocus
                         style={{ flexGrow: 1 }}
+                        aria-required="true"
                       />
                     </>
                   ) : (
                     <>
                       <Box>
-                        <Text size="sm" fw={500} c="dimmed">
+                        <Text size="sm" fw={500} c="dimmed" id="task-title-label">
                           Title
                         </Text>
-                        <Text size="lg" fw={700}>
+                        <Text size="lg" fw={700} aria-labelledby="task-title-label">
                           {form.values.title}
                         </Text>
                       </Box>
@@ -143,7 +150,7 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
               </Box>
 
               <Box>
-                <Text size="sm" fw={500} c="dimmed">
+                <Text size="sm" fw={500} c="dimmed" id="task-description-label">
                   Description
                 </Text>
 
@@ -151,21 +158,35 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
                   <DescriptionEditor
                     content={form.values.description}
                     onChange={handleDescriptionChange}
+                    aria-labelledby="task-description-label"
                   />
                 ) : (
                   <Box>
-                    <RichTextContent html={form.values.description} />
+                    <RichTextContent
+                      html={form.values.description}
+                      aria-labelledby="task-description-label"
+                    />
                   </Box>
                 )}
               </Box>
 
               {form.values.isEditing && (
                 <Group justify="flex-end" mt="md">
-                  <Button onClick={cancelEditing} variant="subtle" color="gray">
+                  <Button
+                    onClick={cancelEditing}
+                    variant="subtle"
+                    color="gray"
+                    aria-label="Cancel editing"
+                  >
                     Cancel
                   </Button>
 
-                  <Button type="submit" loading={isUpdatingTask}>
+                  <Button
+                    type="submit"
+                    loading={isUpdatingTask}
+                    aria-label="Save changes"
+                    aria-busy={isUpdatingTask}
+                  >
                     Save Changes
                   </Button>
                 </Group>
