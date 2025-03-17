@@ -33,7 +33,7 @@ export default function NavbarLayout() {
   const { colorScheme } = useMantineColorScheme({ keepTransitions: true });
   const isDarkColorScheme = colorScheme === 'dark';
 
-  const { boards, isLoading } = useBoards();
+  const { boards, isFetchingBoards } = useBoards();
 
   return (
     <AppShell
@@ -120,7 +120,7 @@ export default function NavbarLayout() {
           scrollbarSize={4}
           type={isMobile ? 'never' : 'hover'}
         >
-          {isLoading ? (
+          {isFetchingBoards ? (
             <Stack gap="sm" px={{ base: '2lg', md: 'xl' }}>
               <Skeleton height={48} radius="xl" />
               <Skeleton height={48} radius="xl" />
