@@ -1,0 +1,20 @@
+/* Input styles */
+:root[data-mantine-color-scheme='light'] {
+  --input-background-color: var(--mantine-color-white-0);
+  --input-color: var(--mantine-color-black-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --input-background-color: var(--mantine-color-dark-gray-0);
+  --input-color: var(--mantine-color-dark-gray-text-0);
+}
+
+.input {
+  background-color: var(--input-background-color);
+  color: var(--input-color);
+}
+
+.root {
+  background-color: var(--input-background-color);
+  color: var(--input-color);
+}

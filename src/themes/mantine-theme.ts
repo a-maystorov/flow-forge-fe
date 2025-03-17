@@ -1,4 +1,12 @@
-import { colorsTuple, createTheme, DEFAULT_THEME, mergeMantineTheme, rem } from '@mantine/core';
+import {
+  appShellStyles,
+  inputStyles,
+  menuStyles,
+  modalStyles,
+  notificationStyles,
+  paperStyles,
+} from '@/styles';
+import { DEFAULT_THEME, colorsTuple, createTheme, mergeMantineTheme, rem } from '@mantine/core';
 
 const overrides = createTheme({
   cursorType: 'pointer',
@@ -36,6 +44,41 @@ const overrides = createTheme({
   },
   spacing: {
     '2lg': rem(24),
+  },
+  components: {
+    AppShell: {
+      classNames: {
+        main: appShellStyles.main,
+      },
+    },
+    Input: {
+      classNames: {
+        input: inputStyles.input,
+      },
+    },
+    Menu: {
+      classNames: {
+        dropdown: menuStyles.dropdown,
+        item: menuStyles.item,
+      },
+    },
+    Modal: {
+      classNames: {
+        root: modalStyles.root,
+        header: modalStyles.header,
+        content: modalStyles.content,
+      },
+    },
+    Notification: {
+      classNames: {
+        root: notificationStyles.root,
+      },
+    },
+    Paper: {
+      classNames: {
+        root: paperStyles.root,
+      },
+    },
   },
 });
 

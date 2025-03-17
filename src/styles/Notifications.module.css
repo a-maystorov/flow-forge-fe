@@ -1,3 +1,12 @@
+/* Notification styles */
+:root[data-mantine-color-scheme='light'] {
+  --notification-background-color: var(--mantine-color-white-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --notification-background-color: var(--mantine-color-lines-dark-0);
+}
+
 .root {
-  background-color: var(--mantine-color-lines-dark-0);
+  background-color: var(--notification-background-color);
 }

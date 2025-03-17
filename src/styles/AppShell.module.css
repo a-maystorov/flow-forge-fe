@@ -1,0 +1,11 @@
+:root[data-mantine-color-scheme='light'] {
+  --appshell-background-color: var(--mantine-color-light-gray-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --appshell-background-color: var(--mantine-color-very-dark-gray-0);
+}
+
+.main {
+  background-color: var(--appshell-background-color);
+}

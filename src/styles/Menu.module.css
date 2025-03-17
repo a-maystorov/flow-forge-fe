@@ -1,0 +1,21 @@
+:root[data-mantine-color-scheme='light'] {
+  --menu-background-color: var(--mantine-color-light-gray-0);
+  --menu-hover-color: var(--mantine-color-lines-light-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --menu-background-color: var(--mantine-color-very-dark-gray-0);
+  --menu-hover-color: var(--mantine-color-dark-gray-0);
+}
+
+.dropdown {
+  background-color: var(--menu-background-color);
+  border: none;
+  border-radius: var(--mantine-radius-md);
+}
+
+.item {
+  &[data-hovered] {
+    background-color: var(--menu-hover-color);
+  }
+}

@@ -1,0 +1,12 @@
+/* Paper styles */
+:root[data-mantine-color-scheme='light'] {
+  --paper-background-color: var(--mantine-color-light-gray-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --paper-background-color: var(--mantine-color-dark-gray-0);
+}
+
+.root {
+  background-color: var(--paper-background-color);
+}
