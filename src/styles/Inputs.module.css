@@ -1,4 +1,3 @@
-/* Input styles */
 :root[data-mantine-color-scheme='light'] {
   --input-background-color: var(--mantine-color-white-0);
   --input-color: var(--mantine-color-black-0);

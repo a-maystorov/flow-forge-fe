@@ -1,4 +1,3 @@
-/* Notification styles */
 :root[data-mantine-color-scheme='light'] {
   --notification-background-color: var(--mantine-color-white-0);
 }
