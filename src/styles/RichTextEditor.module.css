@@ -1,0 +1,135 @@
+:root[data-mantine-color-scheme='light'] {
+  --editor-background-color: var(--mantine-color-white-0);
+  --editor-color: var(--mantine-color-black-0);
+  --editor-toolbar-bg: var(--mantine-color-light-gray-0);
+  --editor-border-color: var(--mantine-color-lines-light-0);
+  --editor-control-color: var(--mantine-color-medium-gray-0);
+  --editor-control-hover: var(--mantine-color-main-purple-0);
+  --editor-control-active: var(--mantine-color-main-purple-0);
+  --editor-link-color: var(--mantine-color-main-purple-0);
+  --editor-link-hover: var(--mantine-color-main-purple-hover-0);
+  --editor-group-bg: var(--mantine-color-white-0);
+  --editor-group-border: var(--mantine-color-lines-light-0);
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --editor-background-color: var(--mantine-color-dark-gray-0);
+  --editor-color: var(--mantine-color-white-0);
+  --editor-toolbar-bg: var(--mantine-color-very-dark-gray-0);
+  --editor-border-color: var(--mantine-color-lines-dark-0);
+  --editor-control-color: var(--mantine-color-medium-gray-0);
+  --editor-control-hover: var(--mantine-color-main-purple-hover-0);
+  --editor-control-active: var(--mantine-color-main-purple-0);
+  --editor-link-color: var(--mantine-color-main-purple-hover-0);
+  --editor-link-hover: var(--mantine-color-main-purple-0);
+  --editor-group-bg: var(--mantine-color-dark-gray-0);
+  --editor-group-border: var(--mantine-color-lines-dark-0);
+}
+
+.root {
+  border: 1px solid var(--editor-border-color);
+  border-radius: var(--mantine-radius-sm);
+}
+
+.content {
+  background-color: var(--editor-background-color);
+  color: var(--editor-color);
+  padding: var(--mantine-spacing-md);
+  min-height: 120px;
+}
+
+.toolbar {
+  background-color: var(--editor-toolbar-bg);
+  border-bottom: 1px solid var(--editor-border-color);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+}
+
+.control {
+  background-color: transparent;
+  color: var(--editor-control-color);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+
+  &:hover {
+    background-color: var(--editor-background-color);
+    color: var(--editor-control-hover);
+  }
+
+  &[data-active='true'] {
+    background-color: var(--editor-background-color);
+    color: var(--editor-control-active);
+  }
+}
+
+.controlIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.controlsGroup {
+  background-color: var(--editor-group-bg);
+  border: 1px solid var(--editor-group-border);
+  border-radius: var(--mantine-radius-sm);
+}
+
+.linkEditor {
+  background-color: var(--editor-background-color);
+}
+
+.linkEditorInput {
+  border-color: var(--editor-border-color);
+  color: var(--editor-color);
+}
+
+.linkEditorSave {
+  background-color: var(--editor-control-active);
+  color: var(--mantine-color-white-0);
+
+  &:hover {
+    background-color: var(--editor-control-hover);
+  }
+}
+
+.linkEditorExternalControl {
+  color: var(--editor-control-color);
+
+  &:hover {
+    color: var(--editor-control-hover);
+  }
+}
+
+.linkEditorDropdown {
+  background-color: var(--editor-background-color);
+}
+
+.typographyStylesProvider {
+  a {
+    color: var(--editor-link-color);
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--editor-link-hover);
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid var(--editor-border-color);
+    padding-left: var(--mantine-spacing-md);
+  }
+
+  code {
+    background-color: var(--editor-toolbar-bg);
+    padding: 2px 4px;
+    border-radius: var(--mantine-radius-sm);
+    font-family: var(--mantine-font-family-monospace);
+    font-size: 0.9em;
+  }
+
+  pre {
+    background-color: var(--editor-toolbar-bg);
+    padding: var(--mantine-spacing-xs);
+    border-radius: var(--mantine-radius-sm);
+    overflow-x: auto;
+  }
+}

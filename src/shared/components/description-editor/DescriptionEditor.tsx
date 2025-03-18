@@ -43,7 +43,7 @@ export function DescriptionEditor({ content, onChange, editable = true }: Props)
   return (
     <RichTextEditor editor={editor}>
       {editable && (
-        <RichTextEditor.Toolbar sticky stickyOffset={55}>
+        <RichTextEditor.Toolbar sticky stickyOffset={68}>
           <RichTextEditor.ControlsGroup>
             <RichTextEditor.Bold />
             <RichTextEditor.Italic />

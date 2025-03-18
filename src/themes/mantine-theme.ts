@@ -5,6 +5,7 @@ import {
   modalStyles,
   notificationStyles,
   paperStyles,
+  richTextEditorStyles,
 } from '@/styles';
 import { DEFAULT_THEME, colorsTuple, createTheme, mergeMantineTheme, rem } from '@mantine/core';
 
@@ -77,6 +78,22 @@ const overrides = createTheme({
     Paper: {
       classNames: {
         root: paperStyles.root,
+      },
+    },
+    RichTextEditor: {
+      classNames: {
+        root: richTextEditorStyles.root,
+        content: richTextEditorStyles.content,
+        toolbar: richTextEditorStyles.toolbar,
+        control: richTextEditorStyles.control,
+        controlIcon: richTextEditorStyles.controlIcon,
+        controlsGroup: richTextEditorStyles.controlsGroup,
+        linkEditor: richTextEditorStyles.linkEditor,
+        linkEditorSave: richTextEditorStyles.linkEditorSave,
+        linkEditorInput: richTextEditorStyles.linkEditorInput,
+        linkEditorExternalControl: richTextEditorStyles.linkEditorExternalControl,
+        linkEditorDropdown: richTextEditorStyles.linkEditorDropdown,
+        typographyStylesProvider: richTextEditorStyles.typographyStylesProvider,
       },
     },
   },
