@@ -12,6 +12,13 @@ import { useParams } from 'react-router-dom';
 import { Home } from '../pages';
 import NotFound from './not-found/NotFound';
 
+type ModalAction =
+  | { type: 'openCreateColumn' }
+  | { type: 'closeCreateColumn' }
+  | { type: 'addTask'; columnId: string }
+  | { type: 'closeTaskModal' }
+  | { type: 'openTaskDetails'; task: Task };
+
 export default function Board() {
   const { boardId } = useParams();
 
@@ -25,7 +32,7 @@ export default function Board() {
   const [taskDetailsOpened, taskDetailsHandlers] = useDisclosure(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const hasBoards = Boolean(boards.length);
+  const hasBoards = useMemo(() => Boolean(boards.length), [boards.length]);
 
   const boardTitle = useMemo(() => {
     if (board?.name && hasBoards) {
@@ -38,28 +45,33 @@ export default function Board() {
     document.title = boardTitle;
   }, [boardTitle]);
 
-  const handleOpenCreateColumnModal = useCallback(() => {
-    setIsCreateColumnModalOpen(true);
-  }, []);
-
-  const handleCloseCreateColumnModal = useCallback(() => {
-    setIsCreateColumnModalOpen(false);
-  }, []);
-
-  const handleAddTask = useCallback((columnId: string) => {
-    setSelectedColumnId(columnId);
-  }, []);
-
-  const handleCloseTaskModal = useCallback(() => {
-    setSelectedColumnId(null);
-  }, []);
-
-  const handleTaskClick = useCallback(
-    (task: Task) => {
-      setSelectedTask(task);
-      taskDetailsHandlers.open();
+  const handleModalAction = useCallback(
+    (action: ModalAction) => {
+      switch (action.type) {
+        case 'openCreateColumn':
+          setIsCreateColumnModalOpen(true);
+          break;
+        case 'closeCreateColumn':
+          setIsCreateColumnModalOpen(false);
+          break;
+        case 'addTask':
+          setSelectedColumnId(action.columnId);
+          break;
+        case 'closeTaskModal':
+          setSelectedColumnId(null);
+          break;
+        case 'openTaskDetails':
+          setSelectedTask(action.task);
+          taskDetailsHandlers.open();
+          break;
+      }
     },
     [taskDetailsHandlers]
+  );
+
+  const columnIds = useMemo(
+    () => board?.columns.map((column) => column._id) || [],
+    [board?.columns]
   );
 
   const handleDragEnd = useCallback(
@@ -82,14 +94,17 @@ export default function Board() {
           });
         }
       } else {
-        moveTask({
-          sourceColumnId: sourceColId,
-          taskId: draggableId,
-          targetColumnId: targetColId,
-        });
+        // Verify column IDs are valid before moving
+        if (columnIds.includes(sourceColId) && columnIds.includes(targetColId)) {
+          moveTask({
+            sourceColumnId: sourceColId,
+            taskId: draggableId,
+            targetColumnId: targetColId,
+          });
+        }
       }
     },
-    [moveTask, reorderTask]
+    [moveTask, reorderTask, columnIds]
   );
 
   if (!boardId) {
@@ -112,20 +127,20 @@ export default function Board() {
     <DragDropContext onDragEnd={handleDragEnd}>
       <BoardColumns
         board={board}
-        onAddTask={handleAddTask}
-        onTaskClick={handleTaskClick}
-        onCreateColumn={handleOpenCreateColumnModal}
+        onAddTask={(columnId) => handleModalAction({ type: 'addTask', columnId })}
+        onTaskClick={(task) => handleModalAction({ type: 'openTaskDetails', task })}
+        onCreateColumn={() => handleModalAction({ type: 'openCreateColumn' })}
       />
 
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
-        onClose={handleCloseCreateColumnModal}
+        onClose={() => handleModalAction({ type: 'closeCreateColumn' })}
         boardId={boardId}
       />
 
       <CreateTaskModal
         isOpen={selectedColumnId !== null}
-        onClose={handleCloseTaskModal}
+        onClose={() => handleModalAction({ type: 'closeTaskModal' })}
         columnId={selectedColumnId ?? ''}
         boardId={boardId}
       />
