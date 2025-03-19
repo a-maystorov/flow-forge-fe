@@ -9,10 +9,10 @@ import { CreateTaskModal } from '@/features/tasks/components/create-task-modal';
 import { TaskDetailsModal } from '@/features/tasks/components/task-details-modal';
 import { useMoveTask, useReorderTask } from '@/features/tasks/hooks';
 import Task from '@/models/Task';
-import { DragDropContext } from '@hello-pangea/dnd';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 import { Home } from '../pages';
@@ -74,6 +74,60 @@ export default function Board() {
     document.title = boardTitle;
   }, [boardTitle]);
 
+  const handleOpenCreateColumnModal = useCallback(() => {
+    setIsCreateColumnModalOpen(true);
+  }, []);
+
+  const handleCloseCreateColumnModal = useCallback(() => {
+    setIsCreateColumnModalOpen(false);
+  }, []);
+
+  const handleAddTask = useCallback((columnId: string) => {
+    setSelectedColumnId(columnId);
+  }, []);
+
+  const handleCloseTaskModal = useCallback(() => {
+    setSelectedColumnId(null);
+  }, []);
+
+  const handleTaskClick = useCallback(
+    (task: Task) => {
+      setSelectedTask(task);
+      taskDetailsHandlers.open();
+    },
+    [taskDetailsHandlers]
+  );
+
+  const handleDragEnd = useCallback(
+    (result: DropResult) => {
+      const { destination, source, draggableId } = result;
+
+      if (!destination) {
+        return;
+      }
+
+      const sourceColId = source.droppableId;
+      const targetColId = destination.droppableId;
+
+      if (sourceColId === targetColId) {
+        if (source.index !== destination.index) {
+          reorderTask({
+            columnId: sourceColId,
+            taskId: draggableId,
+            newPosition: destination.index,
+          });
+        }
+      } else {
+        moveTask({
+          sourceColumnId: sourceColId,
+          taskId: draggableId,
+          targetColumnId: targetColId,
+        });
+      }
+    },
+    [moveTask, reorderTask]
+  );
+
   if (!boardId) {
     return <NotFound />;
   }
@@ -94,11 +148,11 @@ export default function Board() {
             This board is empty. Create a new column to get started.
           </Text>
 
-          <CreateColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+          <CreateColumnButton onClick={handleOpenCreateColumnModal} />
 
           <CreateColumnModal
             isOpen={isCreateColumnModalOpen}
-            onClose={() => setIsCreateColumnModalOpen(false)}
+            onClose={handleCloseCreateColumnModal}
             boardId={boardId}
           />
         </Stack>
@@ -107,32 +161,7 @@ export default function Board() {
   }
 
   return (
-    <DragDropContext
-      onDragEnd={({ destination, source, draggableId }) => {
-        if (!destination) {
-          return;
-        }
-
-        const sourceColId = source.droppableId;
-        const targetColId = destination.droppableId;
-
-        if (sourceColId === targetColId) {
-          if (source.index !== destination.index) {
-            reorderTask({
-              columnId: sourceColId,
-              taskId: draggableId,
-              newPosition: destination.index,
-            });
-          }
-        } else {
-          moveTask({
-            sourceColumnId: sourceColId,
-            taskId: draggableId,
-            targetColumnId: targetColId,
-          });
-        }
-      }}
-    >
+    <DragDropContext onDragEnd={handleDragEnd}>
       <Flex align="flex-start" h="100%" gap={theme.spacing['2lg']}>
         {board.columns.map((column) => {
           const columnTasks = columnTasksMap.get(column._id) || [];
@@ -142,32 +171,29 @@ export default function Board() {
               <Text fw={600} size="lg">
                 {column.name}
               </Text>
-              <AddTaskButton onClick={() => setSelectedColumnId(column._id)} />
+              <AddTaskButton onClick={() => handleAddTask(column._id)} />
               <Stack gap="xs">
                 <DndListHandle
                   tasks={columnTasks}
                   columnId={column._id}
-                  onTaskClick={(task) => {
-                    setSelectedTask(task);
-                    taskDetailsHandlers.open();
-                  }}
+                  onTaskClick={handleTaskClick}
                 />
               </Stack>
             </Stack>
           );
         })}
-        <AddColumnButton onClick={() => setIsCreateColumnModalOpen(true)} />
+        <AddColumnButton onClick={handleOpenCreateColumnModal} />
       </Flex>
 
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
-        onClose={() => setIsCreateColumnModalOpen(false)}
+        onClose={handleCloseCreateColumnModal}
         boardId={boardId}
       />
 
       <CreateTaskModal
         isOpen={selectedColumnId !== null}
-        onClose={() => setSelectedColumnId(null)}
+        onClose={handleCloseTaskModal}
         columnId={selectedColumnId ?? ''}
         boardId={boardId}
       />
