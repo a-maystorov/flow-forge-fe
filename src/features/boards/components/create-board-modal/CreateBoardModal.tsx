@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function CreateBoardModal({ isOpen, onClose }: Props) {
-  const { createBoard, isCreatingBoard, error } = useCreateBoard();
+  const { createBoard, isCreatingBoard } = useCreateBoard();
   const { createBatchColumns, isCreatingBatchColumns } = useCreateBatchColumns();
 
   const form = useForm({
@@ -73,7 +73,6 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
           <TextInput
             label="Board Name"
             placeholder="Enter board name"
-            error={error}
             {...form.getInputProps('name')}
             data-autofocus
           />
