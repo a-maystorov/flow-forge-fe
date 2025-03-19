@@ -16,18 +16,24 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DndListHandle } from '../components/dnd-list-handle/DndListHandle';
 import { Home } from '../pages';
+import NotFound from './not-found/NotFound';
 
 export default function Board() {
   const { boardId } = useParams();
+
   const theme = useMantineTheme();
+
+  const { boards = [] } = useBoards();
+  const { board, isFetchingBoard } = useBoard(boardId);
+  const { reorderTask } = useReorderTask(boardId);
+  const { moveTask } = useMoveTask(boardId);
+
   const [isCreateColumnModalOpen, setIsCreateColumnModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null);
   const [taskDetailsOpened, taskDetailsHandlers] = useDisclosure(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const { boards = [] } = useBoards();
-  const { board, isFetchingBoard } = useBoard(boardId ?? '');
-  const { reorderTask } = useReorderTask(boardId ?? '');
-  const { moveTask } = useMoveTask(boardId ?? '');
+
+  const hasBoards = Boolean(boards.length);
 
   const columnTasksMap = useMemo(() => {
     if (!board) {
@@ -57,7 +63,6 @@ export default function Board() {
     return taskMap;
   }, [board]);
 
-  const hasBoards = Boolean(boards.length);
   const boardTitle = useMemo(() => {
     if (board?.name && hasBoards) {
       return `${board.name} | Flow Forge`;
@@ -69,6 +74,10 @@ export default function Board() {
     document.title = boardTitle;
   }, [boardTitle]);
 
+  if (!boardId) {
+    return <NotFound />;
+  }
+
   if (!hasBoards) {
     return <Home />;
   }
@@ -79,7 +88,7 @@ export default function Board() {
 
   if (board.columns.length === 0) {
     return (
-      <Flex align="center" justify="center" h="100%">
+      <Flex align="center" justify="center" h="100vh">
         <Stack align="center" gap="lg">
           <Text c={theme.colors['medium-gray'][0]} fz="h2" fw={600} ta="center">
             This board is empty. Create a new column to get started.
@@ -90,7 +99,7 @@ export default function Board() {
           <CreateColumnModal
             isOpen={isCreateColumnModalOpen}
             onClose={() => setIsCreateColumnModalOpen(false)}
-            boardId={boardId ?? ''}
+            boardId={boardId}
           />
         </Stack>
       </Flex>
@@ -153,14 +162,14 @@ export default function Board() {
       <CreateColumnModal
         isOpen={isCreateColumnModalOpen}
         onClose={() => setIsCreateColumnModalOpen(false)}
-        boardId={boardId ?? ''}
+        boardId={boardId}
       />
 
       <CreateTaskModal
         isOpen={selectedColumnId !== null}
         onClose={() => setSelectedColumnId(null)}
         columnId={selectedColumnId ?? ''}
-        boardId={boardId ?? ''}
+        boardId={boardId}
       />
 
       {selectedTask && (
@@ -168,7 +177,7 @@ export default function Board() {
           isOpen={taskDetailsOpened}
           onClose={taskDetailsHandlers.close}
           task={selectedTask}
-          boardId={boardId ?? ''}
+          boardId={boardId}
           columnId={selectedTask.columnId}
         />
       )}

@@ -1,7 +1,8 @@
+import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskService } from '../services';
 
-export const useMoveTask = (boardId: string) => {
+export const useMoveTask = (boardId?: string) => {
   const queryClient = useQueryClient();
 
   const moveTaskMutation = useMutation({
@@ -13,18 +14,25 @@ export const useMoveTask = (boardId: string) => {
       sourceColumnId: string;
       taskId: string;
       targetColumnId: string;
-    }) => taskService.moveTask(boardId, sourceColumnId, taskId, targetColumnId),
+    }) => {
+      if (!boardId) {
+        throw new Error('Board ID is required');
+      }
+      return taskService.moveTask(boardId, sourceColumnId, taskId, targetColumnId);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['board', boardId] });
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ['board', boardId] });
+      }
+      notifyUser.success('Task column changed', 'Task column has been successfully changed');
     },
-    onError: (error) => {
-      // TODO: Add notification
-      console.error(error);
-    },
+    onError: (error) => notifyUser.error('Task column change failed', error.message),
   });
 
   return {
     moveTask: moveTaskMutation.mutate,
     isMovingTask: moveTaskMutation.isPending,
+    isError: moveTaskMutation.isError,
+    error: moveTaskMutation.error,
   };
 };
