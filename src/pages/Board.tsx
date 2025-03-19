@@ -57,13 +57,19 @@ export default function Board() {
     return taskMap;
   }, [board]);
 
-  useEffect(() => {
-    if (board?.name && boards.length > 0) {
-      document.title = `${board.name} | Flow Forge`;
+  const hasBoards = Boolean(boards.length);
+  const boardTitle = useMemo(() => {
+    if (board?.name && hasBoards) {
+      return `${board.name} | Flow Forge`;
     }
-  }, [board?.name, boards.length]);
+    return 'Flow Forge';
+  }, [board?.name, hasBoards]);
 
-  if (boards.length === 0) {
+  useEffect(() => {
+    document.title = boardTitle;
+  }, [boardTitle]);
+
+  if (!hasBoards) {
     return <Home />;
   }
 
