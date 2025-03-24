@@ -1,4 +1,5 @@
 import { sanitizerConfig } from '@/shared/constants/html';
+import { ScrollArea } from '@mantine/core';
 import { RichTextEditor } from '@mantine/tiptap';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
@@ -43,7 +44,7 @@ export function DescriptionEditor({ content, onChange, editable = true }: Props)
   return (
     <RichTextEditor editor={editor}>
       {editable && (
-        <RichTextEditor.Toolbar sticky stickyOffset={68}>
+        <RichTextEditor.Toolbar sticky stickyOffset={0}>
           <RichTextEditor.ControlsGroup>
             <RichTextEditor.Bold />
             <RichTextEditor.Italic />
@@ -86,7 +87,10 @@ export function DescriptionEditor({ content, onChange, editable = true }: Props)
           </RichTextEditor.ControlsGroup>
         </RichTextEditor.Toolbar>
       )}
-      <RichTextEditor.Content />
+
+      <ScrollArea.Autosize mah={400}>
+        <RichTextEditor.Content />
+      </ScrollArea.Autosize>
     </RichTextEditor>
   );
 }
