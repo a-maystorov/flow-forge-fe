@@ -1,5 +1,5 @@
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { Box, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { Box, Stack, Text, Title, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import cx from 'clsx';
 import GripVerticalIcon from '../../assets/icons/GripVerticalIcon';
 import Task from '../../models/Task';
@@ -36,9 +36,15 @@ export function DndListHandle({ tasks, columnId, onTaskClick }: Props) {
                     <GripVerticalIcon w={20} h={20} />
                   </Box>
 
-                  <Title order={6} fw={500} className={classes.taskTitle}>
-                    {task.title}
-                  </Title>
+                  <Stack gap={0}>
+                    <Title order={6} fw={500} className={classes.taskTitle}>
+                      {task.title}
+                    </Title>
+
+                    <Text c="dimmed" fs="italic" hidden={task.subtasks.length === 0}>
+                      Subtasks: {task.subtasks.length}
+                    </Text>
+                  </Stack>
                 </Box>
               )}
             </Draggable>
