@@ -36,13 +36,19 @@ export function DndListHandle({ tasks, columnId, onTaskClick }: Props) {
                     <GripVerticalIcon w={20} h={20} />
                   </Box>
 
-                  <Stack gap={0}>
-                    <Title order={6} fw={500} className={classes.taskTitle}>
+                  <Stack gap={3}>
+                    <Title order={3} fw={700} className={classes.taskTitle}>
                       {task.title}
                     </Title>
 
-                    <Text c="dimmed" fs="italic" hidden={task.subtasks.length === 0}>
-                      Subtasks: {task.subtasks.length}
+                    <Text
+                      fz={theme.fontSizes.sm}
+                      c={theme.colors['medium-gray'][0]}
+                      fw={600}
+                      hidden={task.subtasks.length === 0}
+                    >
+                      {task.subtasks.filter((subtask) => subtask.completed).length} of{' '}
+                      {task.subtasks.length} subtasks
                     </Text>
                   </Stack>
                 </Box>
