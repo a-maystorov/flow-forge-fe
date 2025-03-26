@@ -149,7 +149,7 @@ export default function Board() {
         <TaskDetailsModal
           isOpen={taskDetailsOpened}
           onClose={taskDetailsHandlers.close}
-          task={selectedTask}
+          taskId={selectedTask._id}
           boardId={boardId}
           columnId={selectedTask.columnId}
         />

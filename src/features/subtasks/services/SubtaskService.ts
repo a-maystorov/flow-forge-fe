@@ -2,7 +2,7 @@ import { authService } from '@/features/auth/services';
 import Subtask from '@/models/Subtask';
 import axios, { AxiosInstance } from 'axios';
 
-class SubtaskService {
+export class SubtaskService {
   private http: AxiosInstance;
 
   constructor() {
@@ -15,6 +15,26 @@ class SubtaskService {
     return {
       'x-auth-token': authService.getToken(),
     };
+  }
+
+  async createSubtask(
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    subtaskData: {
+      title: string;
+      description?: string;
+      completed?: boolean;
+    }
+  ): Promise<Subtask> {
+    const res = await this.http.post<Subtask>(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}/subtasks`,
+      subtaskData,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
   }
 
   async createBatchSubtasks(
@@ -33,6 +53,41 @@ class SubtaskService {
       }
     );
     return res.data;
+  }
+
+  async updateSubtask(
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    subtaskId: string,
+    updates: {
+      title: string;
+      description?: string;
+      completed: boolean;
+    }
+  ): Promise<Subtask> {
+    const res = await this.http.put<Subtask>(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}/subtasks/${subtaskId}`,
+      updates,
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
+  }
+
+  async deleteSubtask(
+    boardId: string,
+    columnId: string,
+    taskId: string,
+    subtaskId: string
+  ): Promise<void> {
+    await this.http.delete(
+      `/boards/${boardId}/columns/${columnId}/tasks/${taskId}/subtasks/${subtaskId}`,
+      {
+        headers: this.getHeaders(),
+      }
+    );
   }
 }
 

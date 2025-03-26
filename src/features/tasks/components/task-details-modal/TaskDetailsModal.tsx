@@ -1,13 +1,25 @@
-import Task from '@/models/Task';
 import { DescriptionEditor } from '@/shared/components/description-editor';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
 import { notifyUser } from '@/utils/notificationUtils';
-import { Box, Button, Group, Modal, Stack, Text, TextInput } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Group,
+  Modal,
+  Stack,
+  Text,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
-import { useCallback, useEffect, useRef } from 'react';
-import { useDeleteTask, useUpdateTask } from '../../hooks';
+import { useCallback, useEffect, useState } from 'react';
+import { useDeleteTask, useTaskFromBoard, useUpdateTask } from '../../hooks';
+// TODO: move to shared
+import { CreateSubtaskModal } from '@/features/subtasks/components';
+import { useUpdateSubtask } from '@/features/subtasks/hooks/useUpdateSubtask';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
 interface FormValues {
@@ -17,35 +29,35 @@ interface FormValues {
 }
 
 interface Props {
-  task: Task;
+  taskId: string;
   boardId: string;
   columnId: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: Props) {
-  const editingNotificationRef = useRef(false);
-
+export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }: Props) {
+  const theme = useMantineTheme();
+  const { task, isFetchingTask } = useTaskFromBoard(boardId, taskId);
+  const { updateTask, isUpdatingTask } = useUpdateTask(boardId, columnId, taskId);
+  const { deleteTask } = useDeleteTask(boardId, columnId);
+  const { updateSubtask, isUpdatingSubtask } = useUpdateSubtask(boardId, columnId, taskId);
+  const [openSubtaskModal, setOpenSubtaskModal] = useState(false);
   const form = useForm<FormValues>({
     initialValues: {
       title: '',
       description: '',
       isEditing: false,
     },
-    validate: {
-      title: (value) => (value.trim() ? null : 'Title is required'),
-    },
   });
 
-  const { updateTask, isUpdatingTask } = useUpdateTask(boardId, columnId, task?._id || '');
-  const { deleteTask } = useDeleteTask(boardId, columnId);
-
+  // Update form values when task data changes or becomes available
   useEffect(() => {
     if (task) {
+      const sanitizedDescription = DOMPurify.sanitize(task.description || '', sanitizerConfig);
       form.setValues({
         title: task.title,
-        description: task.description || '',
+        description: sanitizedDescription,
         isEditing: false,
       });
     }
@@ -57,164 +69,217 @@ export function TaskDetailsModal({ task, boardId, columnId, isOpen, onClose }: P
   }, [form]);
 
   const cancelEditing = useCallback(() => {
-    form.setFieldValue('isEditing', false);
-  }, [form]);
+    if (task) {
+      form.setValues({
+        title: task.title,
+        description: task.description || '',
+        isEditing: false,
+      });
+    }
+  }, [form, task]);
 
-  const handleSubmit = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
-      form.onSubmit((values) => {
-        const finalDescription = values.isEditing
-          ? DOMPurify.sanitize(values.description, sanitizerConfig)
-          : values.description;
+  const handleCloseAttempt = useCallback(() => {
+    if (form.values.isEditing) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+        cancelEditing();
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  }, [form.values.isEditing, cancelEditing, onClose]);
 
-        const originalValues = {
-          title: task.title,
-          description: task.description || '',
-          isEditing: values.isEditing,
-        };
+  const handleFormSubmit = useCallback(
+    (values: FormValues) => {
+      if (!task) return;
 
-        updateTask(
-          {
-            title: values.title,
-            description: finalDescription,
+      const originalValues = {
+        title: task.title,
+        description: task.description || '',
+        isEditing: true,
+      };
+
+      const finalDescription = DOMPurify.sanitize(values.description, sanitizerConfig);
+
+      updateTask(
+        { title: values.title, description: finalDescription },
+        {
+          onSuccess: () => {
+            form.setValues({
+              ...values,
+              description: finalDescription,
+              isEditing: false,
+            });
           },
-          {
-            onSuccess: () => {
-              form.setValues({
-                ...values,
-                description: finalDescription,
-                isEditing: false,
-              });
-            },
-            onError: () => {
-              form.setValues(originalValues);
-            },
-          }
-        );
-      })(event);
+          onError: () => {
+            form.setValues(originalValues);
+          },
+        }
+      );
     },
     [form, task, updateTask]
   );
 
-  const handleDeleteTask = useCallback(() => {
-    deleteTask(task._id);
-    onClose();
-  }, [deleteTask, onClose, task._id]);
+  const handleSubtaskToggle = useCallback(
+    (subtaskId: string, completed: boolean) => {
+      if (!task) return;
 
-  const handleDescriptionChange = useCallback(
-    (content: string) => form.setFieldValue('description', content),
-    [form]
+      const subtaskToUpdate = task.subtasks.find((s) => s._id === subtaskId);
+      if (!subtaskToUpdate) return;
+
+      updateSubtask({
+        subtaskId,
+        title: subtaskToUpdate.title,
+        description: subtaskToUpdate.description || '',
+        completed,
+      });
+    },
+    [task, updateSubtask]
   );
 
-  const handleClose = useCallback(() => {
-    if (form.values.isEditing) {
-      if (!editingNotificationRef.current) {
-        editingNotificationRef.current = true;
-
-        notifyUser.warning(
-          'Unsaved changes',
-          'Please click "Cancel" to exit edit mode before closing this task.'
-        );
-
-        setTimeout(() => {
-          editingNotificationRef.current = false;
-        }, 1000);
-      }
-
-      return;
-    }
-
-    onClose();
-  }, [form.values.isEditing, onClose]);
+  if (!task && !isFetchingTask) {
+    return null;
+  }
 
   return (
-    <Modal.Root
+    <Modal
       opened={isOpen}
-      onClose={handleClose}
+      onClose={handleCloseAttempt}
+      title={
+        <Text size="lg" fw={600}>
+          {form.values.isEditing ? 'Edit Task' : 'Task Details'}
+        </Text>
+      }
       size="xl"
       aria-labelledby="task-details-title"
       trapFocus
     >
-      <Modal.Overlay />
-      <Modal.Content role="dialog" aria-modal="true">
-        <Modal.Header>
-          <Modal.Title id="task-details-title">Task Details</Modal.Title>
-          <TaskActionMenu onEdit={startEditing} onDelete={handleDeleteTask} />
-        </Modal.Header>
-        <Modal.Body>
-          <form onSubmit={handleSubmit}>
-            <Stack gap="md">
-              <Box>
-                <Group justify="space-between" align="flex-start">
-                  {form.values.isEditing ? (
-                    <TextInput
-                      label="Title"
-                      placeholder="Task title"
-                      required
-                      {...form.getInputProps('title')}
-                      autoFocus
-                      style={{ flexGrow: 1 }}
-                      aria-required="true"
-                    />
-                  ) : (
-                    <Box>
-                      <Text size="sm" fw={500} c="dimmed" id="task-title-label">
-                        Title
-                      </Text>
-                      <Text size="lg" fw={700} aria-labelledby="task-title-label">
-                        {form.values.title}
-                      </Text>
-                    </Box>
-                  )}
-                </Group>
-              </Box>
+      <Box>
+        {form.values.isEditing ? (
+          <form onSubmit={form.onSubmit(handleFormSubmit)}>
+            <TextInput
+              mb={16}
+              required
+              label="Title"
+              placeholder="Enter a title for this task"
+              {...form.getInputProps('title')}
+              aria-label="Task title"
+            />
 
-              <Box>
-                <Text size="sm" fw={500} c="dimmed" id="task-description-label">
+            <DescriptionEditor
+              content={form.values.description}
+              onChange={(value) => form.setFieldValue('description', value)}
+              editable={true}
+            />
+
+            <Group justify="flex-end" mt="md">
+              <Button
+                type="submit"
+                loading={isUpdatingTask}
+                disabled={!form.values.title}
+                aria-label="Save task changes"
+              >
+                Save
+              </Button>
+              <Button onClick={cancelEditing} variant="outline" aria-label="Cancel editing">
+                Cancel
+              </Button>
+            </Group>
+          </form>
+        ) : (
+          <>
+            <Group justify="space-between" mb="xs">
+              <Text fw={600} size="md">
+                {task?.title}
+              </Text>
+              <TaskActionMenu
+                onEdit={startEditing}
+                onDelete={() => {
+                  deleteTask(taskId, {
+                    onSuccess: () => {
+                      onClose();
+                    },
+                  });
+                }}
+                additionalActions={[
+                  {
+                    label: 'Add Subtask',
+                    onClick: () => setOpenSubtaskModal(true),
+                  },
+                ]}
+              />
+            </Group>
+
+            <Box mb="md">
+              <Text fw={500} size="md" mb="xs" aria-label="Subtasks">
+                Subtasks
+              </Text>
+
+              {task?.subtasks && task.subtasks.length > 0 && (
+                <Stack gap="xs">
+                  {task.subtasks.map((subtask) => (
+                    <Group key={subtask._id} gap="sm" wrap="nowrap" justify="space-between">
+                      <Group gap="sm" wrap="nowrap">
+                        <Checkbox
+                          checked={subtask.completed}
+                          onChange={() => handleSubtaskToggle(subtask._id, !subtask.completed)}
+                          aria-label={`Mark subtask ${subtask.title} as ${
+                            subtask.completed ? 'incomplete' : 'complete'
+                          }`}
+                          disabled={isUpdatingSubtask}
+                        />
+                        <Text
+                          style={{
+                            textDecoration: subtask.completed ? 'line-through' : 'none',
+                            color: subtask.completed ? theme.colors['lines-dark'][0] : undefined,
+                          }}
+                        >
+                          {subtask.title}
+                        </Text>
+                      </Group>
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => {
+                          notifyUser.info(
+                            'Coming Soon',
+                            'Subtask details modal will be implemented next'
+                          );
+                        }}
+                      >
+                        Details
+                      </Button>
+                    </Group>
+                  ))}
+                </Stack>
+              )}
+
+              {task?.subtasks && task.subtasks.length === 0 && (
+                <Text c="dimmed" size="sm">
+                  No subtasks yet. Add one to track progress.
+                </Text>
+              )}
+            </Box>
+
+            {task?.description && (
+              <Box mb="md">
+                <Text fw={500} size="md" mb="xs">
                   Description
                 </Text>
-
-                {form.values.isEditing ? (
-                  <DescriptionEditor
-                    content={form.values.description}
-                    onChange={handleDescriptionChange}
-                    aria-labelledby="task-description-label"
-                  />
-                ) : (
-                  <Box>
-                    <RichTextContent
-                      html={form.values.description}
-                      aria-labelledby="task-description-label"
-                    />
-                  </Box>
-                )}
+                <RichTextContent html={task.description} />
               </Box>
+            )}
+          </>
+        )}
+      </Box>
 
-              {form.values.isEditing && (
-                <Group justify="flex-end" mt="md">
-                  <Button
-                    onClick={cancelEditing}
-                    variant="subtle"
-                    color="gray"
-                    aria-label="Cancel editing"
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    loading={isUpdatingTask}
-                    aria-label="Save changes"
-                    aria-busy={isUpdatingTask}
-                  >
-                    Save Changes
-                  </Button>
-                </Group>
-              )}
-            </Stack>
-          </form>
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
+      <CreateSubtaskModal
+        isOpen={openSubtaskModal}
+        onClose={() => setOpenSubtaskModal(false)}
+        boardId={boardId}
+        columnId={columnId}
+        taskId={taskId}
+      />
+    </Modal>
   );
 }
