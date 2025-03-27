@@ -1,6 +1,6 @@
+import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { subtaskService } from '../services';
-import { notifyUser } from '@/utils/notificationUtils';
 
 export const useUpdateSubtask = (boardId: string, columnId: string, taskId: string) => {
   const queryClient = useQueryClient();

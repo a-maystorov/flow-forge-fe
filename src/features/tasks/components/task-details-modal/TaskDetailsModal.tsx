@@ -1,7 +1,9 @@
+import { CreateSubtaskModal, SubtaskDetailsModal } from '@/features/subtasks/components';
+import { useDeleteSubtask, useUpdateSubtask } from '@/features/subtasks/hooks';
+import Subtask from '@/models/Subtask';
 import { DescriptionEditor } from '@/shared/components/description-editor';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
-import { notifyUser } from '@/utils/notificationUtils';
 import {
   Box,
   Button,
@@ -18,8 +20,6 @@ import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useState } from 'react';
 import { useDeleteTask, useTaskFromBoard, useUpdateTask } from '../../hooks';
 // TODO: move to shared
-import { CreateSubtaskModal } from '@/features/subtasks/components';
-import { useUpdateSubtask } from '@/features/subtasks/hooks/useUpdateSubtask';
 import { RichTextContent } from '../rich-text-content/RichTextContent';
 
 interface FormValues {
@@ -43,6 +43,9 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
   const { deleteTask } = useDeleteTask(boardId, columnId);
   const { updateSubtask, isUpdatingSubtask } = useUpdateSubtask(boardId, columnId, taskId);
   const [openSubtaskModal, setOpenSubtaskModal] = useState(false);
+  const [selectedSubtask, setSelectedSubtask] = useState<Subtask | null>(null);
+  const [isSubtaskDetailsModalOpen, setIsSubtaskDetailsModalOpen] = useState(false);
+  const { deleteSubtask } = useDeleteSubtask(boardId, columnId, taskId);
   const form = useForm<FormValues>({
     initialValues: {
       title: '',
@@ -241,10 +244,8 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
                         variant="outline"
                         size="xs"
                         onClick={() => {
-                          notifyUser.info(
-                            'Coming Soon',
-                            'Subtask details modal will be implemented next'
-                          );
+                          setSelectedSubtask(subtask);
+                          setIsSubtaskDetailsModalOpen(true);
                         }}
                       >
                         Details
@@ -280,6 +281,28 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
         columnId={columnId}
         taskId={taskId}
       />
+
+      {selectedSubtask && (
+        <SubtaskDetailsModal
+          subtask={selectedSubtask}
+          boardId={boardId}
+          columnId={columnId}
+          taskId={taskId}
+          isOpen={isSubtaskDetailsModalOpen}
+          onClose={() => {
+            setIsSubtaskDetailsModalOpen(false);
+            setSelectedSubtask(null);
+          }}
+          onDelete={(subtaskId) => {
+            deleteSubtask(subtaskId, {
+              onSuccess: () => {
+                setIsSubtaskDetailsModalOpen(false);
+                setSelectedSubtask(null);
+              },
+            });
+          }}
+        />
+      )}
     </Modal>
   );
 }
