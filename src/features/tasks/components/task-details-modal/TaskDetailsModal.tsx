@@ -125,18 +125,31 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
   );
 
   const handleSubtaskToggle = useCallback(
-    (subtaskId: string, completed: boolean) => {
+    (subtaskId: string, newStatus: boolean) => {
       if (!task) return;
 
       const subtaskToUpdate = task.subtasks.find((s) => s._id === subtaskId);
       if (!subtaskToUpdate) return;
 
-      updateSubtask({
-        subtaskId,
-        title: subtaskToUpdate.title,
-        description: subtaskToUpdate.description || '',
-        completed,
-      });
+      // Only ask for confirmation when marking as completed
+      if (newStatus) {
+        if (window.confirm('Are you sure you want to mark this subtask as completed?')) {
+          updateSubtask({
+            subtaskId,
+            title: subtaskToUpdate.title,
+            description: subtaskToUpdate.description || '',
+            completed: newStatus,
+          });
+        }
+      } else {
+        // No confirmation needed for marking as incomplete
+        updateSubtask({
+          subtaskId,
+          title: subtaskToUpdate.title,
+          description: subtaskToUpdate.description || '',
+          completed: newStatus,
+        });
+      }
     },
     [task, updateSubtask]
   );
@@ -169,11 +182,17 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
             <TaskActionMenu
               onEdit={startEditing}
               onDelete={() => {
-                deleteTask(taskId, {
-                  onSuccess: () => {
-                    onClose();
-                  },
-                });
+                if (
+                  window.confirm(
+                    'Are you sure you want to delete this task? This action cannot be undone.'
+                  )
+                ) {
+                  deleteTask(taskId, {
+                    onSuccess: () => {
+                      onClose();
+                    },
+                  });
+                }
               }}
               additionalActions={[
                 {

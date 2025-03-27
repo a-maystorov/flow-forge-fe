@@ -1,3 +1,5 @@
+import { RichTextContent } from '@/features/tasks/components/rich-text-content/RichTextContent';
+import Subtask from '@/models/Subtask';
 import { DescriptionEditor } from '@/shared/components/description-editor';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
@@ -15,8 +17,6 @@ import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect } from 'react';
 import { useUpdateSubtask } from '../../hooks';
-import { RichTextContent } from '@/features/tasks/components/rich-text-content/RichTextContent';
-import Subtask from '@/models/Subtask';
 
 interface FormValues {
   title: string;
@@ -134,23 +134,29 @@ export function SubtaskDetailsModal({
   );
 
   const handleStatusToggle = useCallback(() => {
-    if (!subtask) return;
+    const newStatus = !form.values.completed;
 
-    const newCompletedStatus = !form.values.completed;
-
-    updateSubtask(
-      {
+    // Only ask for confirmation when marking as completed
+    if (newStatus) {
+      if (window.confirm('Are you sure you want to mark this subtask as completed?')) {
+        form.setFieldValue('completed', newStatus);
+        updateSubtask({
+          subtaskId: subtask._id,
+          title: form.values.title,
+          description: form.values.description,
+          completed: newStatus,
+        });
+      }
+    } else {
+      // No confirmation needed when marking as incomplete
+      form.setFieldValue('completed', newStatus);
+      updateSubtask({
         subtaskId: subtask._id,
         title: form.values.title,
         description: form.values.description,
-        completed: newCompletedStatus,
-      },
-      {
-        onSuccess: () => {
-          form.setFieldValue('completed', newCompletedStatus);
-        },
-      }
-    );
+        completed: newStatus,
+      });
+    }
   }, [form, subtask, updateSubtask]);
 
   if (!subtask) {
