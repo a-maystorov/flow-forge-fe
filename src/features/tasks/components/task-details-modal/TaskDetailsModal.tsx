@@ -2,6 +2,7 @@ import { CreateSubtaskModal, SubtaskDetailsModal } from '@/features/subtasks/com
 import { useDeleteSubtask, useUpdateSubtask } from '@/features/subtasks/hooks';
 import Subtask from '@/models/Subtask';
 import { DescriptionEditor } from '@/shared/components/description-editor';
+import { RichTextContent } from '@/shared/components/rich-text-content';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
 import {
@@ -20,8 +21,6 @@ import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useState } from 'react';
 import { useDeleteTask, useTaskFromBoard, useUpdateTask } from '../../hooks';
-// TODO: move to shared
-import { RichTextContent } from '../rich-text-content/RichTextContent';
 
 interface FormValues {
   title: string;

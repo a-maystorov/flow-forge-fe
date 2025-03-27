@@ -1,6 +1,6 @@
-import { RichTextContent } from '@/features/tasks/components/rich-text-content/RichTextContent';
 import Subtask from '@/models/Subtask';
 import { DescriptionEditor } from '@/shared/components/description-editor';
+import { RichTextContent } from '@/shared/components/rich-text-content';
 import { TaskActionMenu } from '@/shared/components/task-action-menu';
 import { sanitizerConfig } from '@/shared/constants/html';
 import {
