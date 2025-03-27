@@ -158,95 +158,109 @@ export function SubtaskDetailsModal({
   }
 
   return (
-    <Modal
+    <Modal.Root
       opened={isOpen}
       onClose={handleCloseAttempt}
-      title={
-        <Text size="lg" fw={600}>
-          {form.values.isEditing ? 'Edit Subtask' : 'Subtask Details'}
-        </Text>
-      }
       size="xl"
       aria-labelledby="subtask-details-title"
       trapFocus
     >
-      <Box>
-        {form.values.isEditing ? (
-          <form onSubmit={form.onSubmit(handleFormSubmit)}>
-            <TextInput
-              mb={16}
-              required
-              label="Title"
-              placeholder="Enter a title for this subtask"
-              {...form.getInputProps('title')}
-              aria-label="Subtask title"
+      <Modal.Overlay />
+      <Modal.Content role="dialog" aria-modal="true">
+        <Modal.Header>
+          <Modal.Title id="subtask-details-title">
+            <Text size="lg" fw={600}>
+              {form.values.isEditing ? 'Edit Subtask' : 'Subtask Details'}
+            </Text>
+          </Modal.Title>
+          {!form.values.isEditing && (
+            <TaskActionMenu
+              onEdit={startEditing}
+              onDelete={() => {
+                if (window.confirm('Are you sure you want to delete this subtask?')) {
+                  onDelete?.(subtask._id);
+                  onClose();
+                }
+              }}
             />
-
-            <DescriptionEditor
-              content={form.values.description}
-              onChange={(value) => form.setFieldValue('description', value)}
-              editable={true}
-            />
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                type="submit"
-                loading={isUpdatingSubtask}
-                disabled={!form.values.title}
-                aria-label="Save subtask changes"
-              >
-                Save
-              </Button>
-              <Button onClick={cancelEditing} variant="outline" aria-label="Cancel editing">
-                Cancel
-              </Button>
-            </Group>
-          </form>
-        ) : (
-          <>
-            <Group justify="space-between" mb="xs" align="center">
-              <Group gap="sm" wrap="nowrap">
-                <Checkbox
-                  checked={form.values.completed}
-                  onChange={handleStatusToggle}
-                  aria-label={`Mark subtask ${subtask.title} as ${
-                    form.values.completed ? 'incomplete' : 'complete'
-                  }`}
-                  disabled={isUpdatingSubtask}
+          )}
+        </Modal.Header>
+        <Modal.Body>
+          <Box>
+            {form.values.isEditing ? (
+              <form onSubmit={form.onSubmit(handleFormSubmit)}>
+                <TextInput
+                  mb={16}
+                  required
+                  label="Title"
+                  placeholder="Enter a title for this subtask"
+                  {...form.getInputProps('title')}
+                  aria-label="Subtask title"
                 />
-                <Text
-                  fw={600}
-                  size="md"
-                  style={{
-                    textDecoration: form.values.completed ? 'line-through' : 'none',
-                    color: form.values.completed ? theme.colors['lines-dark'][0] : undefined,
-                  }}
-                >
-                  {subtask.title}
-                </Text>
-              </Group>
-              <TaskActionMenu
-                onEdit={startEditing}
-                onDelete={() => {
-                  if (window.confirm('Are you sure you want to delete this subtask?')) {
-                    onDelete?.(subtask._id);
-                    onClose();
-                  }
-                }}
-              />
-            </Group>
 
-            {form.values.description && (
-              <Box mb="md" mt="lg">
-                <Text fw={500} size="md" mb="xs">
-                  Description
-                </Text>
-                <RichTextContent html={form.values.description} />
-              </Box>
+                <DescriptionEditor
+                  content={form.values.description}
+                  onChange={(value) => form.setFieldValue('description', value)}
+                  editable={true}
+                />
+
+                <Checkbox
+                  mt={16}
+                  label="Completed"
+                  {...form.getInputProps('completed', { type: 'checkbox' })}
+                  aria-label="Mark subtask as completed"
+                />
+
+                <Group justify="flex-end" mt="md">
+                  <Button
+                    type="submit"
+                    loading={isUpdatingSubtask}
+                    disabled={!form.values.title}
+                    aria-label="Save subtask changes"
+                  >
+                    Save
+                  </Button>
+                  <Button onClick={cancelEditing} variant="outline" aria-label="Cancel editing">
+                    Cancel
+                  </Button>
+                </Group>
+              </form>
+            ) : (
+              <>
+                <Group gap="sm" wrap="nowrap" mb="md" align="center">
+                  <Checkbox
+                    checked={form.values.completed}
+                    onChange={handleStatusToggle}
+                    aria-label={`Mark subtask ${subtask.title} as ${
+                      form.values.completed ? 'incomplete' : 'complete'
+                    }`}
+                    disabled={isUpdatingSubtask}
+                  />
+                  <Text
+                    fw={600}
+                    size="md"
+                    style={{
+                      textDecoration: form.values.completed ? 'line-through' : 'none',
+                      color: form.values.completed ? theme.colors['lines-dark'][0] : undefined,
+                    }}
+                  >
+                    {subtask.title}
+                  </Text>
+                </Group>
+
+                {form.values.description && (
+                  <Box mb="md">
+                    <Text fw={500} size="md" mb="xs">
+                      Description
+                    </Text>
+                    <RichTextContent html={form.values.description} />
+                  </Box>
+                )}
+              </>
             )}
-          </>
-        )}
-      </Box>
-    </Modal>
+          </Box>
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 }

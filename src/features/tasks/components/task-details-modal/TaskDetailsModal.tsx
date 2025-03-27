@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
   useMantineTheme,
+  type MantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
@@ -140,139 +141,150 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
     [task, updateSubtask]
   );
 
+  const getCompletedTextColor = (isCompleted: boolean, theme: MantineTheme) => {
+    return isCompleted ? theme.colors['lines-dark'][0] : undefined;
+  };
+
   if (!task && !isFetchingTask) {
     return null;
   }
 
   return (
-    <Modal
+    <Modal.Root
       opened={isOpen}
       onClose={handleCloseAttempt}
-      title={
-        <Text size="lg" fw={600}>
-          {form.values.isEditing ? 'Edit Task' : 'Task Details'}
-        </Text>
-      }
       size="xl"
       aria-labelledby="task-details-title"
       trapFocus
     >
-      <Box>
-        {form.values.isEditing ? (
-          <form onSubmit={form.onSubmit(handleFormSubmit)}>
-            <TextInput
-              mb={16}
-              required
-              label="Title"
-              placeholder="Enter a title for this task"
-              {...form.getInputProps('title')}
-              aria-label="Task title"
-            />
-
-            <DescriptionEditor
-              content={form.values.description}
-              onChange={(value) => form.setFieldValue('description', value)}
-              editable={true}
-            />
-
-            <Group justify="flex-end" mt="md">
-              <Button
-                type="submit"
-                loading={isUpdatingTask}
-                disabled={!form.values.title}
-                aria-label="Save task changes"
-              >
-                Save
-              </Button>
-              <Button onClick={cancelEditing} variant="outline" aria-label="Cancel editing">
-                Cancel
-              </Button>
-            </Group>
-          </form>
-        ) : (
-          <>
-            <Group justify="space-between" mb="xs">
-              <Text fw={600} size="md">
-                {task?.title}
-              </Text>
-              <TaskActionMenu
-                onEdit={startEditing}
-                onDelete={() => {
-                  deleteTask(taskId, {
-                    onSuccess: () => {
-                      onClose();
-                    },
-                  });
-                }}
-                additionalActions={[
-                  {
-                    label: 'Add Subtask',
-                    onClick: () => setOpenSubtaskModal(true),
+      <Modal.Overlay />
+      <Modal.Content role="dialog" aria-modal="true">
+        <Modal.Header>
+          <Modal.Title id="task-details-title">
+            <Text size="lg" fw={600}>
+              {form.values.isEditing ? 'Edit Task' : 'Task Details'}
+            </Text>
+          </Modal.Title>
+          {!form.values.isEditing && (
+            <TaskActionMenu
+              onEdit={startEditing}
+              onDelete={() => {
+                deleteTask(taskId, {
+                  onSuccess: () => {
+                    onClose();
                   },
-                ]}
-              />
-            </Group>
+                });
+              }}
+              additionalActions={[
+                {
+                  label: 'Add Subtask',
+                  onClick: () => setOpenSubtaskModal(true),
+                },
+              ]}
+            />
+          )}
+        </Modal.Header>
+        <Modal.Body>
+          <Box>
+            {form.values.isEditing ? (
+              <form onSubmit={form.onSubmit(handleFormSubmit)}>
+                <TextInput
+                  mb={16}
+                  required
+                  label="Title"
+                  placeholder="Enter a title for this task"
+                  {...form.getInputProps('title')}
+                  aria-label="Task title"
+                />
 
-            <Box mb="md">
-              <Text fw={500} size="md" mb="xs" aria-label="Subtasks">
-                Subtasks
-              </Text>
+                <DescriptionEditor
+                  content={form.values.description}
+                  onChange={(value) => form.setFieldValue('description', value)}
+                  editable={true}
+                />
 
-              {task?.subtasks && task.subtasks.length > 0 && (
-                <Stack gap="xs">
-                  {task.subtasks.map((subtask) => (
-                    <Group key={subtask._id} gap="sm" wrap="nowrap" justify="space-between">
-                      <Group gap="sm" wrap="nowrap">
-                        <Checkbox
-                          checked={subtask.completed}
-                          onChange={() => handleSubtaskToggle(subtask._id, !subtask.completed)}
-                          aria-label={`Mark subtask ${subtask.title} as ${
-                            subtask.completed ? 'incomplete' : 'complete'
-                          }`}
-                          disabled={isUpdatingSubtask}
-                        />
-                        <Text
-                          style={{
-                            textDecoration: subtask.completed ? 'line-through' : 'none',
-                            color: subtask.completed ? theme.colors['lines-dark'][0] : undefined,
-                          }}
-                        >
-                          {subtask.title}
-                        </Text>
-                      </Group>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        onClick={() => {
-                          setSelectedSubtask(subtask);
-                          setIsSubtaskDetailsModalOpen(true);
-                        }}
-                      >
-                        Details
-                      </Button>
-                    </Group>
-                  ))}
-                </Stack>
-              )}
-
-              {task?.subtasks && task.subtasks.length === 0 && (
-                <Text c="dimmed" size="sm">
-                  No subtasks yet. Add one to track progress.
+                <Group justify="flex-end" mt="md">
+                  <Button
+                    type="submit"
+                    loading={isUpdatingTask}
+                    disabled={!form.values.title}
+                    aria-label="Save task changes"
+                  >
+                    Save
+                  </Button>
+                  <Button onClick={cancelEditing} variant="outline" aria-label="Cancel editing">
+                    Cancel
+                  </Button>
+                </Group>
+              </form>
+            ) : (
+              <>
+                <Text fw={600} size="md" mb="md">
+                  {task?.title}
                 </Text>
-              )}
-            </Box>
 
-            {task?.description && (
-              <Box mb="md">
-                <Text fw={500} size="md" mb="xs">
-                  Description
-                </Text>
-                <RichTextContent html={task.description} />
-              </Box>
+                <Box mb="md">
+                  <Text fw={500} size="md" mb="xs" aria-label="Subtasks">
+                    Subtasks
+                  </Text>
+
+                  {task?.subtasks && task.subtasks.length > 0 && (
+                    <Stack gap="xs">
+                      {task.subtasks.map((subtask) => (
+                        <Group key={subtask._id} gap="sm" wrap="nowrap" justify="space-between">
+                          <Group gap="sm" wrap="nowrap">
+                            <Checkbox
+                              checked={subtask.completed}
+                              onChange={() => handleSubtaskToggle(subtask._id, !subtask.completed)}
+                              aria-label={`Mark subtask ${subtask.title} as ${
+                                subtask.completed ? 'incomplete' : 'complete'
+                              }`}
+                              disabled={isUpdatingSubtask}
+                            />
+                            <Text
+                              style={{
+                                textDecoration: subtask.completed ? 'line-through' : 'none',
+                                color: getCompletedTextColor(subtask.completed, theme),
+                              }}
+                            >
+                              {subtask.title}
+                            </Text>
+                          </Group>
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            onClick={() => {
+                              setSelectedSubtask(subtask);
+                              setIsSubtaskDetailsModalOpen(true);
+                            }}
+                          >
+                            Details
+                          </Button>
+                        </Group>
+                      ))}
+                    </Stack>
+                  )}
+
+                  {task?.subtasks && task.subtasks.length === 0 && (
+                    <Text c="dimmed" size="sm">
+                      No subtasks yet. Add one to track progress.
+                    </Text>
+                  )}
+                </Box>
+
+                {task?.description && (
+                  <Box mb="md">
+                    <Text fw={500} size="md" mb="xs">
+                      Description
+                    </Text>
+                    <RichTextContent html={task.description} />
+                  </Box>
+                )}
+              </>
             )}
-          </>
-        )}
-      </Box>
+          </Box>
+        </Modal.Body>
+      </Modal.Content>
 
       <CreateSubtaskModal
         isOpen={openSubtaskModal}
@@ -303,6 +315,6 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
           }}
         />
       )}
-    </Modal>
+    </Modal.Root>
   );
 }
