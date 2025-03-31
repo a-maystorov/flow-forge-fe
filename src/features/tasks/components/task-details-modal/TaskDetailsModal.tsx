@@ -69,6 +69,7 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
 
   const startEditing = useCallback(() => {
     form.setFieldValue('isEditing', true);
+    form.resetDirty();
   }, [form]);
 
   const cancelEditing = useCallback(() => {
@@ -82,15 +83,20 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
   }, [form, task]);
 
   const handleCloseAttempt = useCallback(() => {
-    if (form.values.isEditing) {
-      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
-        cancelEditing();
-        onClose();
-      }
-    } else {
+    if (!form.values.isEditing) {
       onClose();
+      return;
     }
-  }, [form.values.isEditing, cancelEditing, onClose]);
+
+    if (!form.isDirty()) {
+      cancelEditing();
+      return;
+    }
+
+    if (window.confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+      cancelEditing();
+    }
+  }, [form, cancelEditing, onClose]);
 
   const handleFormSubmit = useCallback(
     (values: FormValues) => {
