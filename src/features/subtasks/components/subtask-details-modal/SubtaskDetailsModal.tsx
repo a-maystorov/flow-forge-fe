@@ -1,3 +1,4 @@
+import { useBoard } from '@/features/boards/hooks/useBoard';
 import Subtask from '@/models/Subtask';
 import { DescriptionEditor } from '@/shared/components/description-editor';
 import { RichTextContent } from '@/shared/components/rich-text-content';
@@ -17,6 +18,7 @@ import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect } from 'react';
 import { useUpdateSubtask } from '../../hooks';
+import { getSubtaskFromBoard } from '../../selectors/subtaskSelectors';
 
 interface FormValues {
   title: string;
@@ -46,6 +48,10 @@ export function SubtaskDetailsModal({
 }: Props) {
   const theme = useMantineTheme();
   const { updateSubtask, isUpdatingSubtask } = useUpdateSubtask(boardId, columnId, taskId);
+  const { board } = useBoard(boardId);
+
+  // Get the latest subtask data from the board
+  const latestSubtask = getSubtaskFromBoard(board, taskId, subtask?._id) || subtask;
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -58,32 +64,35 @@ export function SubtaskDetailsModal({
 
   // Update form values when subtask data changes or becomes available
   useEffect(() => {
-    if (subtask) {
-      const sanitizedDescription = DOMPurify.sanitize(subtask.description || '', sanitizerConfig);
+    if (latestSubtask) {
+      const sanitizedDescription = DOMPurify.sanitize(
+        latestSubtask.description || '',
+        sanitizerConfig
+      );
       form.setValues({
-        title: subtask.title,
+        title: latestSubtask.title,
         description: sanitizedDescription,
-        completed: subtask.completed,
-        isEditing: false,
+        completed: latestSubtask.completed,
+        isEditing: form.values.isEditing, // Preserve editing state
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtask]); // Deliberately omitting form from dependencies to prevent infinite updates
+  }, [latestSubtask]); // Use latestSubtask instead of subtask to catch updates
 
   const startEditing = useCallback(() => {
     form.setFieldValue('isEditing', true);
   }, [form]);
 
   const cancelEditing = useCallback(() => {
-    if (subtask) {
+    if (latestSubtask) {
       form.setValues({
-        title: subtask.title,
-        description: subtask.description || '',
-        completed: subtask.completed,
+        title: latestSubtask.title,
+        description: latestSubtask.description || '',
+        completed: latestSubtask.completed,
         isEditing: false,
       });
     }
-  }, [form, subtask]);
+  }, [form, latestSubtask]);
 
   const handleCloseAttempt = useCallback(() => {
     if (form.values.isEditing) {
@@ -98,12 +107,12 @@ export function SubtaskDetailsModal({
 
   const handleFormSubmit = useCallback(
     (values: FormValues) => {
-      if (!subtask) return;
+      if (!latestSubtask) return;
 
       const originalValues = {
-        title: subtask.title,
-        description: subtask.description || '',
-        completed: subtask.completed,
+        title: latestSubtask.title,
+        description: latestSubtask.description || '',
+        completed: latestSubtask.completed,
         isEditing: true,
       };
 
@@ -111,7 +120,7 @@ export function SubtaskDetailsModal({
 
       updateSubtask(
         {
-          subtaskId: subtask._id,
+          subtaskId: latestSubtask._id,
           title: values.title,
           description: finalDescription,
           completed: values.completed,
@@ -130,7 +139,7 @@ export function SubtaskDetailsModal({
         }
       );
     },
-    [form, subtask, updateSubtask]
+    [form, latestSubtask, updateSubtask]
   );
 
   const handleStatusToggle = useCallback(() => {
@@ -141,7 +150,7 @@ export function SubtaskDetailsModal({
       if (window.confirm('Are you sure you want to mark this subtask as completed?')) {
         form.setFieldValue('completed', newStatus);
         updateSubtask({
-          subtaskId: subtask._id,
+          subtaskId: latestSubtask._id,
           title: form.values.title,
           description: form.values.description,
           completed: newStatus,
@@ -151,15 +160,15 @@ export function SubtaskDetailsModal({
       // No confirmation needed when marking as incomplete
       form.setFieldValue('completed', newStatus);
       updateSubtask({
-        subtaskId: subtask._id,
+        subtaskId: latestSubtask._id,
         title: form.values.title,
         description: form.values.description,
         completed: newStatus,
       });
     }
-  }, [form, subtask, updateSubtask]);
+  }, [form, latestSubtask, updateSubtask]);
 
-  if (!subtask) {
+  if (!latestSubtask) {
     return null;
   }
 
@@ -184,7 +193,7 @@ export function SubtaskDetailsModal({
               onEdit={startEditing}
               onDelete={() => {
                 if (window.confirm('Are you sure you want to delete this subtask?')) {
-                  onDelete?.(subtask._id);
+                  onDelete?.(latestSubtask._id);
                   onClose();
                 }
               }}
@@ -237,7 +246,7 @@ export function SubtaskDetailsModal({
                   <Checkbox
                     checked={form.values.completed}
                     onChange={handleStatusToggle}
-                    aria-label={`Mark subtask ${subtask.title} as ${
+                    aria-label={`Mark subtask ${latestSubtask.title} as ${
                       form.values.completed ? 'incomplete' : 'complete'
                     }`}
                     disabled={isUpdatingSubtask}
@@ -250,7 +259,7 @@ export function SubtaskDetailsModal({
                       color: form.values.completed ? theme.colors['lines-dark'][0] : undefined,
                     }}
                   >
-                    {subtask.title}
+                    {latestSubtask.title}
                   </Text>
                 </Group>
 
