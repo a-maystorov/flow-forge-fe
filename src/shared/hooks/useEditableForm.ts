@@ -39,6 +39,8 @@ export interface UseEditableFormResult<T extends EditableFormValues> {
   sanitizeContent: (content: string) => string;
 }
 
+// TODO: Breaks current functionality, needs refactoring.
+
 /**
  * A custom hook to manage editable forms with rich text descriptions.
  * Handles form state, editing mode, and HTML sanitization.

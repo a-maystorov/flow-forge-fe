@@ -12,6 +12,8 @@ export interface UseConfirmationDialogsResult {
   confirmToggleCompletion: (isCompleting: boolean, entityName?: string) => void;
 }
 
+// TODO: Breaks current functionality, needs refactoring.
+
 /**
  * A custom hook to manage confirmation dialogs for common actions
  * like closing with unsaved changes, deleting items, and marking items as completed.
