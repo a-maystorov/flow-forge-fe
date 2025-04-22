@@ -1,5 +1,6 @@
 import { CreateBoardButton } from '@/features/boards/components';
 import { useBoards } from '@/features/boards/hooks';
+import { ChatAside } from '@/features/ai-chat/components';
 import {
   AppShell,
   Box,
@@ -10,6 +11,7 @@ import {
   ScrollArea,
   Skeleton,
   Stack,
+  Text,
   Title,
   useMantineColorScheme,
   useMantineTheme,
@@ -43,6 +45,11 @@ export default function NavbarLayout() {
         width: 300,
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+      }}
+      aside={{
+        width: 320,
+        breakpoint: 'md',
+        collapsed: { mobile: true, desktop: false },
       }}
       padding="md"
       transitionDuration={500}
@@ -154,6 +161,18 @@ export default function NavbarLayout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      {/* Aside Chat Section */}
+      <AppShell.Aside
+        bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
+        style={{
+          borderColor: isDarkColorScheme
+            ? theme.colors['lines-dark'][0]
+            : theme.colors['lines-light'][0],
+        }}
+      >
+        <ChatAside />
+      </AppShell.Aside>
 
       {/* Footer Section */}
       <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm" hidden={desktopOpened}>
