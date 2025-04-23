@@ -1,6 +1,7 @@
 import { useUser } from '@/features/auth/hooks/useUser';
 import { authService } from '@/features/auth/services';
 import { ChatMessage as MessageType } from '@/models/ChatMessage';
+import { ChatIntent } from '@/models/Suggestion';
 import {
   AITypingStatusEvent,
   NewMessageEvent,
@@ -14,7 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useChatMessages, useSendMessage } from '../hooks';
 import { useSuggestionPreview } from '../hooks/useSuggestionPreview';
 import { useTypingStatus } from '../hooks/useTypingStatus';
-import { socketService } from '../services';
+import { socketService, chatService } from '../services';
 import ChatMessage from './ChatMessage';
 import { SuggestionPreview } from './suggestions';
 
@@ -133,7 +134,49 @@ export function ChatSession({ sessionId }: Props) {
     }
   };
 
-  const handleSubmit = () => {
+  // Function to determine the likely intent of a user message
+  const detectMessageIntent = (message: string): ChatIntent => {
+    // Simple intent detection based on message content
+    const lowerMsg = message.toLowerCase();
+
+    // Check for questions about capabilities
+    if (
+      lowerMsg.includes('what can you do') ||
+      lowerMsg.includes('help me with') ||
+      lowerMsg.includes('how can you') ||
+      lowerMsg.includes('show me what') ||
+      lowerMsg.includes('capabilities')
+    ) {
+      return 'capability_question';
+    }
+
+    // Check for task breakdown requests
+    if (
+      (lowerMsg.includes('break down') || lowerMsg.includes('breakdown')) &&
+      lowerMsg.includes('task')
+    ) {
+      return 'task_breakdown';
+    }
+
+    // Check for board creation requests
+    if (
+      lowerMsg.includes('create a board') ||
+      lowerMsg.includes('make a board') ||
+      lowerMsg.includes('new board')
+    ) {
+      return 'board_suggestion';
+    }
+
+    // Check for task improvement requests
+    if (lowerMsg.includes('improve this task') || lowerMsg.includes('better task')) {
+      return 'task_improvement';
+    }
+
+    // Default to general question
+    return 'general_question';
+  };
+
+  const handleSubmit = async () => {
     if (!message.trim() || isSending) {
       return;
     }
@@ -143,6 +186,9 @@ export function ChatSession({ sessionId }: Props) {
       notifyUser.error('Authentication Error', 'You need to be logged in to send messages');
       return;
     }
+
+    // Detect probable intent
+    const likelyIntent = detectMessageIntent(message);
 
     // Optimistically add the user message immediately
     const optimisticUserMessage: MessageType = {
@@ -169,14 +215,36 @@ export function ChatSession({ sessionId }: Props) {
     // Immediate scroll without animation for better perceived performance
     messagesEndRef.current?.scrollIntoView();
 
-    // Then trigger the API call and typing status updates
-    sendMessage(message);
-    updateTypingStatus(false);
-
-    // Set AI typing after message is visible
+    // Set AI typing indicator
     setTimeout(() => {
       setAITyping(true);
     }, 300);
+
+    try {
+      // Use different API methods based on the likely intent
+      if (likelyIntent === 'general_question' || likelyIntent === 'capability_question') {
+        // Use the new general question endpoint for general and capability questions
+        await chatService.askGeneralQuestion(sessionId, message);
+      } else {
+        // For other types of suggestions, use the standard message endpoint
+        await chatService.addMessage(sessionId, message);
+      }
+
+      // Update typing status
+      updateTypingStatus(false);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      notifyUser.error('Error', 'Failed to send message');
+
+      // Remove the optimistic message on error
+      queryClient.setQueryData(
+        ['chatMessages', sessionId],
+        (oldMessages: MessageType[] | undefined) => {
+          if (!oldMessages) return [];
+          return oldMessages.filter((msg) => msg._id !== optimisticUserMessage._id);
+        }
+      );
+    }
   };
 
   if (isLoading) {

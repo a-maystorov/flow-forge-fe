@@ -1,5 +1,6 @@
 import { ChatMessage } from '@/models/ChatMessage';
 import { ChatSession } from '@/models/ChatSession';
+import { ChatSuggestionResponse } from '@/models/Suggestion';
 import { authService } from '@/features/auth/services';
 import axios from 'axios';
 
@@ -86,6 +87,17 @@ class ChatService {
         headers: this.getHeaders(),
       }
     );
+  }
+
+  async askGeneralQuestion(sessionId: string, question: string): Promise<ChatSuggestionResponse> {
+    const res = await this.http.post<ChatSuggestionResponse>(
+      `/chat-suggestions/${sessionId}/general-question`,
+      { question },
+      {
+        headers: this.getHeaders(),
+      }
+    );
+    return res.data;
   }
 }
 

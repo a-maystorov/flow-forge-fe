@@ -1,5 +1,13 @@
 export type SuggestionStatus = 'pending' | 'accepted' | 'rejected' | 'modified';
 
+// Add chatIntent type for improved type safety
+export type ChatIntent =
+  | 'general_question'
+  | 'board_suggestion'
+  | 'task_breakdown'
+  | 'task_improvement'
+  | 'capability_question';
+
 export interface BaseEntity {
   id: string;
   title: string;
@@ -21,12 +29,14 @@ export interface BoardSuggestion {
     position: number;
     tasks: BaseTask[];
   }[];
+  thoughtProcess?: string; // New field explaining the AI's reasoning
 }
 
 export interface TaskBreakdownSuggestion {
   taskTitle: string;
   taskDescription: string;
   subtasks: BaseSubtask[];
+  thoughtProcess?: string; // New field explaining the AI's reasoning
 }
 
 export interface TaskImprovementSuggestion {
@@ -39,6 +49,7 @@ export interface TaskImprovementSuggestion {
     description: string;
   };
   reasoning: string;
+  thoughtProcess?: string; // New field explaining the AI's reasoning
 }
 
 export type SuggestionType = 'board' | 'task-breakdown' | 'task-improvement';
@@ -46,6 +57,30 @@ export type SuggestionContent =
   | BoardSuggestion
   | TaskBreakdownSuggestion
   | TaskImprovementSuggestion;
+
+// Response structure from chat-suggestions endpoints
+export interface ChatSuggestionResponse {
+  responseMessage: {
+    _id: string;
+    content: string;
+    role: 'assistant';
+    sessionId: string;
+    createdAt: string;
+    updatedAt: string;
+    metadata?: {
+      intent: ChatIntent;
+      confidence: number;
+    };
+  };
+  detectedIntent: ChatIntent;
+  confidence: number;
+  suggestions: {
+    boardSuggestion?: BoardSuggestion;
+    taskBreakdown?: TaskBreakdownSuggestion;
+    taskImprovement?: TaskImprovementSuggestion;
+  };
+  suggestionId?: string;
+}
 
 export interface SuggestionMetadata {
   taskId?: string;
@@ -67,4 +102,6 @@ export interface Suggestion {
   updatedAt: string;
   metadata?: SuggestionMetadata;
   relatedSuggestionId?: string;
+  intent?: ChatIntent;
+  thoughtProcess?: string;
 }

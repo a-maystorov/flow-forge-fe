@@ -16,11 +16,18 @@ interface Props {
 }
 
 // Function to detect if message contains a suggestion
-const detectSuggestion = (content: string) => {
-  // Check for typical suggestion patterns
+const detectSuggestion = (content: string, role: string) => {
+  // Only assistant messages can be suggestions
+  if (role !== 'assistant') return false;
+
+  // Simple check - look for Accept/Reject links or board structure keywords
   const hasSuggestionMarkers =
-    content.includes('Would you like to use this') &&
-    (content.includes('[Accept Suggestion]') || content.includes('[Reject Suggestion]'));
+    (content.includes('[Accept Suggestion]') && content.includes('[Reject Suggestion]')) ||
+    content.includes('Board Structure:') ||
+    (content.includes('Would you like to use this') &&
+      (content.includes('board') ||
+        content.includes('breakdown') ||
+        content.includes('improvement')));
 
   // Check for API endpoints that indicate suggestion actions
   const hasApiEndpoints = content.includes('/suggestions/');
@@ -166,42 +173,90 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
 
   // Check if the message contains a suggestion
   const isSuggestion = useMemo(() => {
-    return detectSuggestion(message.content);
-  }, [message.content]);
+    // For debugging
+    console.log(`Message role: ${message.role}`);
+    console.log(`Checking message: ${message.content.substring(0, 50)}...`);
+
+    const result = detectSuggestion(message.content, message.role);
+    console.log(`Is suggestion: ${result}`);
+    return result;
+  }, [message.content, message.role]);
 
   // Extract the AI thought process from the message (everything before the suggestion content)
   const thoughtProcess = useMemo(() => {
-    if (isSuggestion) {
-      // Find where the suggestion content begins
-      const suggestionStartIndex = message.content.search(
-        /would you like to use this|here's a|board structure:/i
-      );
+    if (isSuggestion && message.role === 'assistant') {
+      // Debug the metadata to see what's coming from the backend
+      console.log('Message metadata:', message.metadata);
 
-      if (suggestionStartIndex > 0) {
+      // Check if the message has a thoughtProcess field directly
+      if (message.metadata?.thoughtProcess) {
+        console.log('Found thoughtProcess in metadata:', message.metadata.thoughtProcess);
+        return DOMPurify.sanitize(message.metadata.thoughtProcess);
+      }
+
+      // For backward compatibility - extract from content if no thoughtProcess field
+      // Look for the beginning of the structured content (could be multiple patterns)
+      let startIndex = -1;
+
+      // Common markers that indicate the start of structured content rather than thought process
+      const structureMarkers = [
+        '[Accept Suggestion]',
+        'Would you like to use this',
+        'Board Structure:',
+        "Here's a board layout",
+        'To Do**',
+        '**To Do',
+        '## Board Structure',
+        '## Task Breakdown',
+        '## Task Improvement',
+      ];
+
+      // Find the earliest occurrence of any marker
+      structureMarkers.forEach((marker) => {
+        const idx = message.content.indexOf(marker);
+        if (idx !== -1 && (startIndex === -1 || idx < startIndex)) {
+          startIndex = idx;
+        }
+      });
+
+      if (startIndex > 0) {
         // Extract only the AI's reasoning/thought process before the suggestion
-        const processText = message.content.substring(0, suggestionStartIndex).trim();
+        let processText = message.content.substring(0, startIndex).trim();
 
-        // Add a generic closing sentence if the thought process is cut off abruptly
-        const cleanedText =
-          processText.endsWith('.') || processText.endsWith('?') || processText.endsWith('!')
-            ? processText
-            : `${processText}.`;
+        // For cleaner display, remove any trailing incomplete sentences
+        const lastSentenceBreak = Math.max(
+          processText.lastIndexOf('. '),
+          processText.lastIndexOf('! '),
+          processText.lastIndexOf('? ')
+        );
 
-        return DOMPurify.sanitize(cleanedText);
+        if (lastSentenceBreak > 0) {
+          processText = processText.substring(0, lastSentenceBreak + 1);
+        }
+
+        return DOMPurify.sanitize(processText);
       }
     }
 
     // If it's not a suggestion or we couldn't find the start point, return the original content
     return sanitizedContent;
-  }, [isSuggestion, message.content, sanitizedContent]);
+  }, [isSuggestion, message, sanitizedContent]);
 
   // Handle displaying only partial content in the chat to make it cleaner
   const displayContent = useMemo(() => {
-    if (isSuggestion) {
-      return thoughtProcess;
+    // For user messages, always show the original content
+    if (message.role === 'user') {
+      return sanitizedContent;
     }
+
+    // For AI messages that are suggestions, show the thought process
+    if (isSuggestion && message.role === 'assistant') {
+      return thoughtProcess || sanitizedContent;
+    }
+
+    // For all other messages, show the original content
     return sanitizedContent;
-  }, [isSuggestion, sanitizedContent, thoughtProcess]);
+  }, [isSuggestion, sanitizedContent, thoughtProcess, message.role]);
 
   // Extract suggestion ID from message content
   const suggestionId = useMemo(() => {
@@ -337,6 +392,7 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
           content={parseSuggestionContent(message.content, suggestionType as SuggestionType)}
           suggestionId={suggestionId}
           isLoading={false}
+          isProcessing={suggestionAccepted || suggestionRejected}
           onAccept={handleAccept}
           onReject={handleReject}
         />

@@ -5,11 +5,12 @@ import {
   TaskBreakdownSuggestion,
   TaskImprovementSuggestion,
 } from '@/models/Suggestion';
-import { Button, Modal, Tabs, Box, Text, LoadingOverlay } from '@mantine/core';
+import { Button, Modal, Tabs, Box, Text, LoadingOverlay, Divider } from '@mantine/core';
 import { FC, useState } from 'react';
 import { BoardSuggestionPreview } from './BoardSuggestionPreview';
 import { TaskBreakdownPreview } from './TaskBreakdownPreview';
 import { TaskImprovementPreview } from './TaskImprovementPreview';
+import DOMPurify from 'dompurify';
 
 interface SuggestionModalProps {
   opened: boolean;
@@ -20,6 +21,7 @@ interface SuggestionModalProps {
   isLoading: boolean;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
+  isProcessing?: boolean;
 }
 
 export const SuggestionModal: FC<SuggestionModalProps> = ({
@@ -31,6 +33,7 @@ export const SuggestionModal: FC<SuggestionModalProps> = ({
   isLoading,
   onAccept,
   onReject,
+  isProcessing = false,
 }) => {
   // Format the suggestion type for display
   const formattedType = type
@@ -43,6 +46,20 @@ export const SuggestionModal: FC<SuggestionModalProps> = ({
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
+
+  // Extract thoughtProcess if available
+  const thoughtProcess = (() => {
+    switch (type) {
+      case 'board':
+        return (content as BoardSuggestion).thoughtProcess;
+      case 'task-breakdown':
+        return (content as TaskBreakdownSuggestion).thoughtProcess;
+      case 'task-improvement':
+        return (content as TaskImprovementSuggestion).thoughtProcess;
+      default:
+        return null;
+    }
+  })();
 
   // Render the appropriate preview component based on the suggestion type
   const renderPreviewContent = () => {
@@ -100,13 +117,45 @@ export const SuggestionModal: FC<SuggestionModalProps> = ({
 
   return (
     <Modal opened={opened} onClose={onClose} title={`AI Suggestion: ${formattedType}`} size="lg">
+      {/* Thought process section */}
+      {thoughtProcess && (
+        <>
+          <Box mb="md">
+            <Text size="sm" fw={500} mb="xs">
+              AI Reasoning:
+            </Text>
+            <Text
+              size="sm"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(thoughtProcess) }}
+              style={{
+                backgroundColor: 'var(--mantine-color-gray-0)',
+                padding: '10px',
+                borderRadius: '5px',
+              }}
+            />
+          </Box>
+          <Divider my="md" />
+        </>
+      )}
+
+      {/* Suggestion content */}
       <Box style={{ position: 'relative', minHeight: '200px' }}>{renderPreviewContent()}</Box>
 
       <Box mt="xl" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-        <Button onClick={() => onReject(suggestionId)} variant="subtle" color="red">
+        <Button
+          onClick={() => onReject(suggestionId)}
+          variant="subtle"
+          color="red"
+          disabled={isProcessing}
+        >
           Reject
         </Button>
-        <Button onClick={() => onAccept(suggestionId)} variant="filled" color="green">
+        <Button
+          onClick={() => onAccept(suggestionId)}
+          variant="filled"
+          color="green"
+          disabled={isProcessing}
+        >
           Accept
         </Button>
       </Box>
