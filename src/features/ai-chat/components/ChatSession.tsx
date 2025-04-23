@@ -1,5 +1,5 @@
-import { authService } from '@/features/auth/services';
 import { useUser } from '@/features/auth/hooks/useUser';
+import { authService } from '@/features/auth/services';
 import { ChatMessage as MessageType } from '@/models/ChatMessage';
 import {
   AITypingStatusEvent,
@@ -12,15 +12,17 @@ import { Box, Button, Group, Loader, ScrollArea, Stack, Text, Textarea } from '@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useChatMessages, useSendMessage } from '../hooks';
+import { useSuggestionPreview } from '../hooks/useSuggestionPreview';
 import { useTypingStatus } from '../hooks/useTypingStatus';
 import { socketService } from '../services';
-import { ChatMessage as ChatMessageComponent } from './ChatMessage';
+import ChatMessage from './ChatMessage';
+import { SuggestionPreview } from './suggestions';
 
-interface ChatSessionProps {
+interface Props {
   sessionId: string;
 }
 
-export function ChatSession({ sessionId }: ChatSessionProps) {
+export function ChatSession({ sessionId }: Props) {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [userTyping, setUserTyping] = useState<string | null>(null);
@@ -31,6 +33,12 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
   const { data: messages, isLoading } = useChatMessages(sessionId);
   const { mutate: sendMessage, isPending: isSending } = useSendMessage(sessionId);
   const { mutate: updateTypingStatus } = useTypingStatus(sessionId);
+  const {
+    preview,
+    isLoading: isPreviewLoading,
+    acceptSuggestion,
+    rejectSuggestion,
+  } = useSuggestionPreview(sessionId);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -188,7 +196,12 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
         {messages && messages.length > 0 ? (
           <Stack gap="md">
             {messages.map((msg: MessageType) => (
-              <ChatMessageComponent key={msg._id} message={msg} />
+              <ChatMessage
+                key={msg._id}
+                message={msg}
+                onAcceptSuggestion={acceptSuggestion}
+                onRejectSuggestion={rejectSuggestion}
+              />
             ))}
             {(userTyping || aiTyping) && (
               <Box p="xs" style={{ fontStyle: 'italic' }}>
@@ -197,6 +210,31 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
                 </Text>
               </Box>
             )}
+
+            {/* Render suggestion preview if available */}
+            {preview.visible && preview.type && preview.content && (
+              <Box my="md">
+                <Box
+                  style={{
+                    position: 'relative',
+                    maxWidth: '85%',
+                    marginLeft: 'auto',
+                    borderRadius: 'var(--mantine-radius-md)',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <SuggestionPreview
+                    type={preview.type}
+                    content={preview.content}
+                    suggestionId={preview.suggestionId || ''}
+                    isLoading={isPreviewLoading}
+                    onAccept={acceptSuggestion}
+                    onReject={rejectSuggestion}
+                  />
+                </Box>
+              </Box>
+            )}
+
             <div ref={messagesEndRef} />
           </Stack>
         ) : (

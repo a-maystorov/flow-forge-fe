@@ -67,6 +67,26 @@ class ChatService {
       }
     );
   }
+
+  async acceptSuggestion(suggestionId: string): Promise<void> {
+    await this.http.post(
+      `/suggestions/${suggestionId}/accept`,
+      {},
+      {
+        headers: this.getHeaders(),
+      }
+    );
+  }
+
+  async rejectSuggestion(suggestionId: string): Promise<void> {
+    await this.http.post(
+      `/suggestions/${suggestionId}/reject`,
+      {},
+      {
+        headers: this.getHeaders(),
+      }
+    );
+  }
 }
 
 export const chatService = new ChatService();

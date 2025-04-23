@@ -1,21 +1,281 @@
 import RobotIcon from '@/assets/icons/RobotIcon';
 import UserIcon from '@/assets/icons/UserIcon';
 import { ChatMessage as ChatMessageType } from '@/models/ChatMessage';
-import { Avatar, Box, Card, Group, Text } from '@mantine/core';
+import { SuggestionType } from '@/models/Suggestion';
+import { Avatar, Badge, Box, Button, Card, Group, Text } from '@mantine/core';
 import { formatDistanceToNow } from 'date-fns';
 import DOMPurify from 'dompurify';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { chatService } from '../services';
+import { SuggestionModal } from './suggestions/SuggestionModal';
 
 interface Props {
   message: ChatMessageType;
+  onAcceptSuggestion?: (suggestionId: string) => void;
+  onRejectSuggestion?: (suggestionId: string) => void;
 }
 
-export function ChatMessage({ message }: Props) {
-  const isUser = message.role === 'user';
+// Function to detect if message contains a suggestion
+const detectSuggestion = (content: string) => {
+  // Check for typical suggestion patterns
+  const hasSuggestionMarkers =
+    content.includes('Would you like to use this') &&
+    (content.includes('[Accept Suggestion]') || content.includes('[Reject Suggestion]'));
 
+  // Check for API endpoints that indicate suggestion actions
+  const hasApiEndpoints = content.includes('/suggestions/');
+
+  return hasSuggestionMarkers && hasApiEndpoints;
+};
+
+// Extract suggestion ID from content
+const extractSuggestionId = (content: string) => {
+  const match = content.match(/\/suggestions\/([a-zA-Z0-9]+)/);
+  return match ? match[1] : null;
+};
+
+// Extract suggestion type based on content patterns
+const determineSuggestionType = (content: string) => {
+  if (content.includes('board layout') || content.includes('Board Layout')) {
+    return 'board';
+  } else if (content.includes('breakdown') || content.includes('Breakdown')) {
+    return 'task-breakdown';
+  } else if (content.includes('improvement') || content.includes('Improvement')) {
+    return 'task-improvement';
+  }
+  return 'board'; // Default fallback
+};
+
+// Parse the suggestion content to extract relevant data
+const parseSuggestionContent = (content: string, type: string) => {
+  // Extract title and items from the content
+  const lines = content.split('\n');
+  let title = '';
+  const items = [];
+
+  // Extract title from first line - look for patterns in your message
+  if (lines.length > 0) {
+    const titleMatch = lines[0].match(/Here's a (.+) for "(.*?)":/);
+    if (titleMatch && titleMatch[2]) {
+      title = titleMatch[2];
+    } else if (lines[0].includes('board layout for')) {
+      const simpleMatch = lines[0].match(/board layout for "(.*?)"/);
+      if (simpleMatch && simpleMatch[1]) {
+        title = simpleMatch[1];
+      } else {
+        title = 'Board Suggestion';
+      }
+    }
+  }
+
+  // Extract items from the message content
+  let inItemSection = false;
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // Skip empty lines and action buttons
+    if (!line || line.includes('[Accept Suggestion]') || line.includes('[Reject Suggestion]')) {
+      continue;
+    }
+
+    // Detect list items and sections
+    if (line.startsWith('**') && line.endsWith('**')) {
+      inItemSection = true;
+      items.push({
+        name: line.replace(/\*\*/g, ''),
+        content: [] as string[],
+      });
+    } else if (inItemSection && items.length > 0) {
+      // Add content to the current section
+      items[items.length - 1].content.push(line);
+    }
+  }
+
+  // Create appropriate suggestion content based on type
+  if (type === 'board') {
+    return {
+      boardName: title,
+      columns: items.map((item, index) => ({
+        name: item.name,
+        position: index,
+        tasks: item.content.map((task, taskIndex) => ({
+          id: `task-${index}-${taskIndex}`,
+          title: task,
+          description: '',
+          position: taskIndex,
+        })),
+      })),
+    };
+  } else if (type === 'task-breakdown') {
+    return {
+      taskTitle: title,
+      taskDescription: 'Task breakdown from AI suggestion',
+      subtasks: items.flatMap((item) =>
+        item.content.map((task, index) => ({
+          id: `subtask-${index}`,
+          title: task,
+          description: '',
+          completed: false,
+        }))
+      ),
+    };
+  } else {
+    // Task improvement
+    return {
+      originalTask: {
+        title: 'Original Task',
+        description: 'Original task description',
+      },
+      improvedTask: {
+        title: title || 'Improved Task',
+        description: items.flatMap((item) => item.content).join('\n'),
+      },
+      reasoning: 'AI suggested improvements to make the task more clear and actionable.',
+    };
+  }
+};
+
+export default function ChatMessage({ message, onAcceptSuggestion, onRejectSuggestion }: Props) {
+  const isUser = message.role === 'user';
+  const [suggestionAccepted, setSuggestionAccepted] = useState(false);
+  const [suggestionRejected, setSuggestionRejected] = useState(false);
+  const [suggestionModalOpen, setSuggestionModalOpen] = useState(false);
+
+  // Format the creation date for display
+  const formattedDate = useMemo(() => {
+    try {
+      // Check if createdAt is a valid date
+      const dateValue = message.createdAt;
+      if (!dateValue) return 'Just now';
+
+      // Simple validation to prevent invalid dates
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return 'Just now';
+
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.warn('Error formatting date:', error);
+      return 'Just now';
+    }
+  }, [message.createdAt]);
+
+  // Sanitize message content
   const sanitizedContent = useMemo(() => {
     return DOMPurify.sanitize(message.content);
   }, [message.content]);
+
+  // Check if the message contains a suggestion
+  const isSuggestion = useMemo(() => {
+    return detectSuggestion(message.content);
+  }, [message.content]);
+
+  // Extract the AI thought process from the message (everything before the suggestion content)
+  const thoughtProcess = useMemo(() => {
+    if (isSuggestion) {
+      // Find where the suggestion content begins
+      const suggestionStartIndex = message.content.search(
+        /would you like to use this|here's a|board structure:/i
+      );
+
+      if (suggestionStartIndex > 0) {
+        // Extract only the AI's reasoning/thought process before the suggestion
+        const processText = message.content.substring(0, suggestionStartIndex).trim();
+
+        // Add a generic closing sentence if the thought process is cut off abruptly
+        const cleanedText =
+          processText.endsWith('.') || processText.endsWith('?') || processText.endsWith('!')
+            ? processText
+            : `${processText}.`;
+
+        return DOMPurify.sanitize(cleanedText);
+      }
+    }
+
+    // If it's not a suggestion or we couldn't find the start point, return the original content
+    return sanitizedContent;
+  }, [isSuggestion, message.content, sanitizedContent]);
+
+  // Handle displaying only partial content in the chat to make it cleaner
+  const displayContent = useMemo(() => {
+    if (isSuggestion) {
+      return thoughtProcess;
+    }
+    return sanitizedContent;
+  }, [isSuggestion, sanitizedContent, thoughtProcess]);
+
+  // Extract suggestion ID from message content
+  const suggestionId = useMemo(() => {
+    if (isSuggestion) {
+      return extractSuggestionId(message.content);
+    }
+    return null;
+  }, [isSuggestion, message.content]);
+
+  // Determine the suggestion type
+  const suggestionType = useMemo(() => {
+    if (isSuggestion) {
+      return determineSuggestionType(message.content);
+    }
+    return '';
+  }, [isSuggestion, message.content]);
+
+  // Extract a short description of the suggestion
+  const suggestionDescription = useMemo(() => {
+    if (isSuggestion) {
+      const type = determineSuggestionType(message.content);
+      switch (type) {
+        case 'board':
+          return 'Board structure suggestion';
+        case 'task-breakdown':
+          return 'Task breakdown suggestion';
+        case 'task-improvement':
+          return 'Task improvement suggestion';
+        default:
+          return 'AI suggestion';
+      }
+    }
+    return '';
+  }, [isSuggestion, message.content]);
+
+  // Handle accept suggestion
+  const handleAccept = async (id: string) => {
+    try {
+      // Call your API to accept the suggestion using the chatService
+      if (onAcceptSuggestion) {
+        onAcceptSuggestion(id);
+      } else {
+        await chatService.acceptSuggestion(id);
+      }
+      setSuggestionAccepted(true);
+      setSuggestionModalOpen(false);
+    } catch (error) {
+      console.error('Failed to accept suggestion:', error);
+    }
+  };
+
+  // Handle reject suggestion
+  const handleReject = async (id: string) => {
+    try {
+      // Call your API to reject the suggestion using the chatService
+      if (onRejectSuggestion) {
+        onRejectSuggestion(id);
+      } else {
+        await chatService.rejectSuggestion(id);
+      }
+      setSuggestionRejected(true);
+      setSuggestionModalOpen(false);
+    } catch (error) {
+      console.error('Failed to reject suggestion:', error);
+    }
+  };
+
+  const handleOpenSuggestionModal = () => {
+    setSuggestionModalOpen(true);
+  };
+
+  const handleCloseSuggestionModal = () => {
+    setSuggestionModalOpen(false);
+  };
 
   return (
     <Box my="xs" style={{ alignSelf: isUser ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
@@ -35,21 +295,52 @@ export function ChatMessage({ message }: Props) {
             {isUser ? 'You' : 'Assistant'}
           </Text>
           <Text size="xs" c={isUser ? 'white' : 'dimmed'}>
-            {message.createdAt
-              ? formatDistanceToNow(new Date(message.createdAt)) + ' ago'
-              : 'Just now'}
+            {formattedDate}
           </Text>
         </Group>
 
         <div
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          dangerouslySetInnerHTML={{ __html: displayContent }}
           className="rich-text-content"
           style={{
             color: isUser ? 'white' : undefined,
             wordBreak: 'break-word',
           }}
         />
+
+        {isSuggestion && suggestionId && !suggestionAccepted && !suggestionRejected && (
+          <Box mt="md">
+            <Group>
+              <Badge color="blue" size="sm">
+                {suggestionDescription}
+              </Badge>
+              <Button
+                variant="light"
+                color="blue"
+                size="xs"
+                onClick={handleOpenSuggestionModal}
+                leftSection={<span>👁️</span>}
+              >
+                View Details
+              </Button>
+            </Group>
+          </Box>
+        )}
       </Card>
+
+      {/* Suggestion Modal */}
+      {isSuggestion && suggestionId && (
+        <SuggestionModal
+          opened={suggestionModalOpen}
+          onClose={handleCloseSuggestionModal}
+          type={suggestionType as SuggestionType}
+          content={parseSuggestionContent(message.content, suggestionType as SuggestionType)}
+          suggestionId={suggestionId}
+          isLoading={false}
+          onAccept={handleAccept}
+          onReject={handleReject}
+        />
+      )}
     </Box>
   );
 }

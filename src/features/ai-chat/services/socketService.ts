@@ -111,6 +111,18 @@ class SocketService {
     this.socket.emit('message_read', { messageId, sessionId: this.sessionId });
   }
 
+  on<T extends keyof EventsMap>(event: T, callback: EventCallback<T>) {
+    if (!this.socket) return;
+    this.socket.on(event as string, callback as (data: EventsMap[T]) => void);
+    return this;
+  }
+
+  off<T extends keyof EventsMap>(event: T, callback?: EventCallback<T>) {
+    if (!this.socket) return;
+    this.socket.off(event as string, callback as (data: EventsMap[T]) => void);
+    return this;
+  }
+
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
