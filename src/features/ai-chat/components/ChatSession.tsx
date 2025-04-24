@@ -1,21 +1,21 @@
 import { useUser } from '@/features/auth/hooks/useUser';
 import { authService } from '@/features/auth/services';
 import { ChatMessage as MessageType } from '@/models/ChatMessage';
-import { ChatIntent } from '@/models/Suggestion';
 import {
   AITypingStatusEvent,
   NewMessageEvent,
   SOCKET_EVENTS,
   TypingStatusEvent,
 } from '@/models/Socket';
+import { ChatIntent } from '@/models/Suggestion';
 import { notifyUser } from '@/utils/notificationUtils';
 import { Box, Button, Group, Loader, ScrollArea, Stack, Text, Textarea } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-import { useChatMessages, useSendMessage } from '../hooks';
+import { useChatInteraction, useChatMessages } from '../hooks';
 import { useSuggestionPreview } from '../hooks/useSuggestionPreview';
 import { useTypingStatus } from '../hooks/useTypingStatus';
-import { socketService, chatService } from '../services';
+import { socketService } from '../services';
 import ChatMessage from './ChatMessage';
 import { SuggestionPreview } from './suggestions';
 
@@ -32,7 +32,7 @@ export function ChatSession({ sessionId }: Props) {
   const { user } = useUser();
 
   const { data: messages, isLoading } = useChatMessages(sessionId);
-  const { mutate: sendMessage, isPending: isSending } = useSendMessage(sessionId);
+  const { mutate: sendMessage, isPending: isSending } = useChatInteraction(sessionId);
   const { mutate: updateTypingStatus } = useTypingStatus(sessionId);
   const {
     preview,
@@ -221,29 +221,34 @@ export function ChatSession({ sessionId }: Props) {
     }, 300);
 
     try {
-      // Use different API methods based on the likely intent
-      if (likelyIntent === 'general_question' || likelyIntent === 'capability_question') {
-        // Use the new general question endpoint for general and capability questions
-        await chatService.askGeneralQuestion(sessionId, message);
-      } else {
-        // For other types of suggestions, use the standard message endpoint
-        await chatService.addMessage(sessionId, message);
-      }
+      // Use the sendMessage hook with the detected intent
+      sendMessage(
+        {
+          message,
+          intent: likelyIntent,
+        },
+        {
+          onSuccess: () => {
+            // Update typing status
+            updateTypingStatus(false);
+          },
+          onError: (error) => {
+            console.error('Error sending message:', error);
 
-      // Update typing status
-      updateTypingStatus(false);
+            // Remove the optimistic message on error
+            queryClient.setQueryData(
+              ['chatMessages', sessionId],
+              (oldMessages: MessageType[] | undefined) => {
+                if (!oldMessages) return [];
+                return oldMessages.filter((msg) => msg._id !== optimisticUserMessage._id);
+              }
+            );
+          },
+        }
+      );
     } catch (error) {
       console.error('Error sending message:', error);
       notifyUser.error('Error', 'Failed to send message');
-
-      // Remove the optimistic message on error
-      queryClient.setQueryData(
-        ['chatMessages', sessionId],
-        (oldMessages: MessageType[] | undefined) => {
-          if (!oldMessages) return [];
-          return oldMessages.filter((msg) => msg._id !== optimisticUserMessage._id);
-        }
-      );
     }
   };
 
