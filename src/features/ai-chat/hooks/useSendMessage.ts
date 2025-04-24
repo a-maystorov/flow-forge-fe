@@ -1,6 +1,4 @@
 import { ChatMessage } from '@/models/ChatMessage';
-import { ChatIntent } from '@/models/Suggestion';
-import { User } from '@/models/User';
 import { notifyUser } from '@/utils/notificationUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from '../services';
@@ -17,37 +15,16 @@ import { chatService } from '../services';
 export const useChatInteraction = (sessionId: string | null) => {
   const queryClient = useQueryClient();
 
-  return useMutation<ChatMessage, Error, { message: string; intent?: ChatIntent }>({
-    mutationFn: async (params: { message: string; intent?: ChatIntent }) => {
-      const { message, intent } = params;
+  return useMutation<ChatMessage, Error, { message: string }>({
+    mutationFn: async (params: { message: string }) => {
+      const { message } = params;
 
       if (!sessionId) {
         throw new Error('No active session');
       }
 
-      if (intent === 'general_question' || intent === 'capability_question') {
-        const response = await chatService.askGeneralQuestion(sessionId, message);
-        const responseMsg = response.responseMessage;
-
-        const aiUser: User = {
-          _id: 'system',
-          email: 'system@flowforge.ai',
-          username: 'AI Assistant',
-          iat: Math.floor(Date.now() / 1000),
-        };
-
-        return {
-          _id: responseMsg._id,
-          sessionId: responseMsg.sessionId,
-          content: responseMsg.content,
-          createdAt: responseMsg.createdAt,
-          role: responseMsg.role,
-          user: aiUser,
-          metadata: responseMsg.metadata,
-        };
-      } else {
-        return chatService.addMessage(sessionId, message);
-      }
+      // Let the backend handle intent detection and message routing
+      return chatService.addMessage(sessionId, message);
     },
     onSuccess: (newMessage: ChatMessage) => {
       queryClient.setQueryData(
@@ -60,3 +37,6 @@ export const useChatInteraction = (sessionId: string | null) => {
     onError: (error: Error) => notifyUser.error('Failed to send message', error.message),
   });
 };
+
+// Re-export for backward compatibility
+export const useSendMessage = useChatInteraction;

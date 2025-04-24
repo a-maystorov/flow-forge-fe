@@ -2,9 +2,12 @@ import RobotIcon from '@/assets/icons/RobotIcon';
 import UserIcon from '@/assets/icons/UserIcon';
 import { ChatMessage as ChatMessageType } from '@/models/ChatMessage';
 import { SuggestionType } from '@/models/Suggestion';
+import { RichTextContent } from '@/shared/components/rich-text-content/RichTextContent';
+import { sanitizerConfig } from '@/shared/constants/html';
 import { Avatar, Badge, Box, Button, Card, Group, Text } from '@mantine/core';
 import { formatDistanceToNow } from 'date-fns';
 import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import { useMemo, useState } from 'react';
 import { chatService } from '../services';
 import { SuggestionModal } from './suggestions/SuggestionModal';
@@ -168,8 +171,25 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
 
   // Sanitize message content
   const sanitizedContent = useMemo(() => {
-    return DOMPurify.sanitize(message.content);
-  }, [message.content]);
+    if (
+      message.role === 'assistant' &&
+      (message.metadata?.intent === 'capability_question' ||
+        message.metadata?.intent === 'general_question')
+    ) {
+      // Convert markdown to HTML for capability or general questions
+      try {
+        // Use marked.parse with type assertion to handle the return type
+        const htmlContent = marked.parse(message.content) as string;
+        return DOMPurify.sanitize(htmlContent, sanitizerConfig);
+      } catch (error) {
+        console.error('Error parsing markdown:', error);
+        return DOMPurify.sanitize(message.content, sanitizerConfig);
+      }
+    }
+
+    // For all other messages, just sanitize
+    return DOMPurify.sanitize(message.content, sanitizerConfig);
+  }, [message.content, message.role, message.metadata?.intent]);
 
   // Check if the message contains a suggestion
   const isSuggestion = useMemo(() => {
@@ -191,7 +211,14 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
       // Check if the message has a thoughtProcess field directly
       if (message.metadata?.thoughtProcess) {
         console.log('Found thoughtProcess in metadata:', message.metadata.thoughtProcess);
-        return DOMPurify.sanitize(message.metadata.thoughtProcess);
+        // Convert thought process from markdown to HTML and sanitize it
+        try {
+          const htmlContent = marked.parse(message.metadata.thoughtProcess) as string;
+          return DOMPurify.sanitize(htmlContent, sanitizerConfig);
+        } catch (error) {
+          console.error('Error parsing thought process markdown:', error);
+          return DOMPurify.sanitize(message.metadata.thoughtProcess, sanitizerConfig);
+        }
       }
 
       // For backward compatibility - extract from content if no thoughtProcess field
@@ -223,18 +250,22 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
         // Extract only the AI's reasoning/thought process before the suggestion
         let processText = message.content.substring(0, startIndex).trim();
 
-        // For cleaner display, remove any trailing incomplete sentences
-        const lastSentenceBreak = Math.max(
-          processText.lastIndexOf('. '),
-          processText.lastIndexOf('! '),
-          processText.lastIndexOf('? ')
-        );
-
-        if (lastSentenceBreak > 0) {
-          processText = processText.substring(0, lastSentenceBreak + 1);
+        // Trim and clean up the thought process text
+        if (processText.length > 1000) {
+          const lastSentenceBreak = processText.lastIndexOf('. ', 1000);
+          if (lastSentenceBreak > 0) {
+            processText = processText.substring(0, lastSentenceBreak + 1);
+          }
         }
 
-        return DOMPurify.sanitize(processText);
+        // Convert thought process from markdown to HTML and sanitize it
+        try {
+          const htmlContent = marked.parse(processText) as string;
+          return DOMPurify.sanitize(htmlContent, sanitizerConfig);
+        } catch (error) {
+          console.error('Error parsing extracted thought process markdown:', error);
+          return DOMPurify.sanitize(processText, sanitizerConfig);
+        }
       }
     }
 
@@ -249,6 +280,13 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
       return sanitizedContent;
     }
 
+    // Special handling for capability questions and general information
+    if (message.role === 'assistant' && message.metadata?.intent === 'capability_question') {
+      // For capability questions, we need to ensure markdown is properly preserved
+      // We're using sanitizedContent since it already contains the sanitized HTML
+      return DOMPurify.sanitize(sanitizedContent, sanitizerConfig);
+    }
+
     // For AI messages that are suggestions, show the thought process
     if (isSuggestion && message.role === 'assistant') {
       return thoughtProcess || sanitizedContent;
@@ -256,7 +294,7 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
 
     // For all other messages, show the original content
     return sanitizedContent;
-  }, [isSuggestion, sanitizedContent, thoughtProcess, message.role]);
+  }, [isSuggestion, sanitizedContent, thoughtProcess, message.role, message.metadata?.intent]);
 
   // Extract suggestion ID from message content
   const suggestionId = useMemo(() => {
@@ -355,13 +393,11 @@ export default function ChatMessage({ message, onAcceptSuggestion, onRejectSugge
         </Group>
 
         <div
-          dangerouslySetInnerHTML={{ __html: displayContent }}
-          className="rich-text-content"
-          style={{
-            color: isUser ? 'white' : undefined,
-            wordBreak: 'break-word',
-          }}
-        />
+          className={isUser ? 'user-message' : 'assistant-message'}
+          style={{ color: isUser ? 'white' : undefined }}
+        >
+          <RichTextContent html={displayContent} />
+        </div>
 
         {isSuggestion && suggestionId && !suggestionAccepted && !suggestionRejected && (
           <Box mt="md">

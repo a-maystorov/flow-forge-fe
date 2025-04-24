@@ -1,13 +1,7 @@
 import { useUser } from '@/features/auth/hooks/useUser';
 import { authService } from '@/features/auth/services';
 import { ChatMessage as MessageType } from '@/models/ChatMessage';
-import {
-  AITypingStatusEvent,
-  NewMessageEvent,
-  SOCKET_EVENTS,
-  TypingStatusEvent,
-} from '@/models/Socket';
-import { ChatIntent } from '@/models/Suggestion';
+import { NewMessageEvent, SOCKET_EVENTS, TypingStatusEvent } from '@/models/Socket';
 import { notifyUser } from '@/utils/notificationUtils';
 import { Box, Button, Group, Loader, ScrollArea, Stack, Text, Textarea } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
@@ -27,7 +21,6 @@ export function ChatSession({ sessionId }: Props) {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [userTyping, setUserTyping] = useState<string | null>(null);
-  const [aiTyping, setAITyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
 
@@ -56,16 +49,8 @@ export function ChatSession({ sessionId }: Props) {
           setUserTyping(null);
         }
       },
-      [SOCKET_EVENTS.AI_TYPING]: (data: AITypingStatusEvent) => {
-        setAITyping(data.isTyping);
-      },
       [SOCKET_EVENTS.NEW_MESSAGE]: (data: NewMessageEvent) => {
         console.log('New message received:', data.message);
-
-        // Always turn off AI typing indicator immediately when any message is received
-        setAITyping(false);
-
-        // Update the React Query cache
         queryClient.setQueryData(
           ['chatMessages', sessionId],
           (oldMessages: MessageType[] | undefined) => {
@@ -81,7 +66,6 @@ export function ChatSession({ sessionId }: Props) {
           }
         );
 
-        // Force a refetch to ensure UI updates
         queryClient.invalidateQueries({ queryKey: ['chatMessages', sessionId] });
 
         setTimeout(() => {
@@ -90,7 +74,6 @@ export function ChatSession({ sessionId }: Props) {
       },
     };
 
-    console.log('Attempting to connect socket for session:', sessionId);
     socketService.connect(sessionId, token, callbacks);
 
     return () => {
@@ -115,16 +98,6 @@ export function ChatSession({ sessionId }: Props) {
     return () => clearTimeout(timer);
   }, [isTyping, updateTypingStatus]);
 
-  // Re-add effect to detect assistant messages and turn off typing indicator
-  useEffect(() => {
-    // If messages exist and the last message is from the assistant
-    if (messages && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
-      // Immediately turn off AI typing indicator
-      setAITyping(false);
-      console.log('Assistant message detected, turning off typing indicator');
-    }
-  }, [messages]);
-
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
 
@@ -134,108 +107,53 @@ export function ChatSession({ sessionId }: Props) {
     }
   };
 
-  // Function to determine the likely intent of a user message
-  const detectMessageIntent = (message: string): ChatIntent => {
-    // Simple intent detection based on message content
-    const lowerMsg = message.toLowerCase();
-
-    // Check for questions about capabilities
-    if (
-      lowerMsg.includes('what can you do') ||
-      lowerMsg.includes('help me with') ||
-      lowerMsg.includes('how can you') ||
-      lowerMsg.includes('show me what') ||
-      lowerMsg.includes('capabilities')
-    ) {
-      return 'capability_question';
-    }
-
-    // Check for task breakdown requests
-    if (
-      (lowerMsg.includes('break down') || lowerMsg.includes('breakdown')) &&
-      lowerMsg.includes('task')
-    ) {
-      return 'task_breakdown';
-    }
-
-    // Check for board creation requests
-    if (
-      lowerMsg.includes('create a board') ||
-      lowerMsg.includes('make a board') ||
-      lowerMsg.includes('new board')
-    ) {
-      return 'board_suggestion';
-    }
-
-    // Check for task improvement requests
-    if (lowerMsg.includes('improve this task') || lowerMsg.includes('better task')) {
-      return 'task_improvement';
-    }
-
-    // Default to general question
-    return 'general_question';
-  };
-
   const handleSubmit = async () => {
     if (!message.trim() || isSending) {
       return;
     }
 
-    // Check if user is authenticated
     if (!user) {
       notifyUser.error('Authentication Error', 'You need to be logged in to send messages');
       return;
     }
 
-    // Detect probable intent
-    const likelyIntent = detectMessageIntent(message);
-
-    // Optimistically add the user message immediately
     const optimisticUserMessage: MessageType = {
       _id: `temp-${Date.now()}`,
       content: message,
-      role: 'user',
       createdAt: new Date().toISOString(),
-      sessionId,
+      role: 'user',
       user: user,
+      sessionId,
     };
 
-    // First update state and clear input (for immediate UI feedback)
     setMessage('');
     setIsTyping(false);
 
-    // Then update the messages cache
     queryClient.setQueryData(
       ['chatMessages', sessionId],
       (oldMessages: MessageType[] | undefined) => {
-        return oldMessages ? [...oldMessages, optimisticUserMessage] : [optimisticUserMessage];
+        if (!oldMessages) {
+          return [optimisticUserMessage];
+        }
+        return [...oldMessages, optimisticUserMessage];
       }
     );
 
     // Immediate scroll without animation for better perceived performance
     messagesEndRef.current?.scrollIntoView();
 
-    // Set AI typing indicator
-    setTimeout(() => {
-      setAITyping(true);
-    }, 300);
-
     try {
-      // Use the sendMessage hook with the detected intent
       sendMessage(
         {
           message,
-          intent: likelyIntent,
         },
         {
           onSuccess: () => {
-            // Update typing status
             updateTypingStatus(false);
           },
           onError: (error) => {
             console.error('Error sending message:', error);
 
-            // Remove the optimistic message on error
             queryClient.setQueryData(
               ['chatMessages', sessionId],
               (oldMessages: MessageType[] | undefined) => {
@@ -276,7 +194,7 @@ export function ChatSession({ sessionId }: Props) {
                 onRejectSuggestion={rejectSuggestion}
               />
             ))}
-            {(userTyping || aiTyping) && (
+            {(userTyping || isSending) && (
               <Box p="xs" style={{ fontStyle: 'italic' }}>
                 <Text size="xs" c="dimmed">
                   {userTyping ? 'User is typing...' : 'AI is thinking...'}
