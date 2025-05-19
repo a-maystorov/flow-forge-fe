@@ -41,12 +41,18 @@ export function BoardColumns({ board, onAddTask, onTaskClick, onCreateColumn }: 
   }, [board]);
 
   return (
-    <Flex align="flex-start" h="100%" gap={theme.spacing['2lg']}>
+    <Flex
+      align="flex-start"
+      h="100%"
+      gap={theme.spacing['2lg']}
+      w="100%"
+      style={{ overflowX: 'auto', flexWrap: 'nowrap' }}
+    >
       {board.columns.map((column) => {
         const columnTasks = columnTasksMap.get(column._id) || [];
 
         return (
-          <Stack key={column._id} w={300}>
+          <Stack key={column._id} w={300} style={{ flexShrink: 0 }}>
             <Text fw={600} size="lg">
               {column.name}
             </Text>

@@ -17,6 +17,7 @@ export function AddColumnButton({ onClick }: Props) {
       data-dark={isDarkColorScheme || undefined}
       data-light={!isDarkColorScheme || undefined}
       onClick={onClick}
+      style={{ flexShrink: 0 }}
     >
       <Text fz={theme.fontSizes.xl} fw={600} className={classes.text}>
         + Add Column
