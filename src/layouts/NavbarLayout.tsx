@@ -1,21 +1,25 @@
-import { CreateBoardButton } from '@/features/boards/components';
-import { useBoards } from '@/features/boards/hooks';
+import { useUser } from '@/features/auth/hooks';
+import { CreateBoardButton, DeleteBoardModal } from '@/features/boards/components';
+import { useBoards, useDeleteBoard } from '@/features/boards/hooks';
+import { BoardActionMenu } from '@/shared/components/board-action-menu';
 import {
   AppShell,
   Box,
   Burger,
+  Button,
   Flex,
   Group,
-  rem,
   ScrollArea,
   Skeleton,
   Stack,
   Title,
+  rem,
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthActions from '../components/auth-actions';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
@@ -26,6 +30,7 @@ import ShowSidebarButton from '../components/show-sidebar-button';
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
@@ -34,6 +39,23 @@ export default function NavbarLayout() {
   const isDarkColorScheme = colorScheme === 'dark';
 
   const { boards, isFetchingBoards } = useBoards();
+  const { deleteBoard, isDeletingBoard } = useDeleteBoard();
+  const { boardId } = useParams();
+  const { isAuthenticated } = useUser();
+  const navigate = useNavigate();
+
+  const handleDeleteConfirm = () => {
+    if (!boardId) {
+      return;
+    }
+
+    deleteBoard(boardId, {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        navigate('/');
+      },
+    });
+  };
 
   return (
     <AppShell
@@ -79,7 +101,7 @@ export default function NavbarLayout() {
           />
 
           <Group visibleFrom="sm" wrap="nowrap">
-            <AuthActions direction="row" size={isMobile ? 'xs' : 'sm'} gap={theme.spacing.md} />
+            <BoardActionMenu onDeleteBoard={() => setIsDeleteModalOpen(true)} />
           </Group>
         </Flex>
       </AppShell.Header>
@@ -144,7 +166,21 @@ export default function NavbarLayout() {
             </Stack>
 
             <Box hiddenFrom="sm">
-              <AuthActions direction="column" size="sm" gap={theme.spacing.md} />
+              <Stack gap="sm">
+                <AuthActions direction="column" size="sm" gap={theme.spacing.md} />
+
+                {isAuthenticated && boardId && (
+                  <Button
+                    variant="outline"
+                    color="red"
+                    size="sm"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    fullWidth
+                  >
+                    Delete Board
+                  </Button>
+                )}
+              </Stack>
             </Box>
           </Stack>
         </AppShell.Section>
@@ -152,6 +188,12 @@ export default function NavbarLayout() {
 
       {/* Main Content Area */}
       <AppShell.Main>
+        <DeleteBoardModal
+          opened={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          loading={isDeletingBoard}
+        />
         <Outlet />
       </AppShell.Main>
 
