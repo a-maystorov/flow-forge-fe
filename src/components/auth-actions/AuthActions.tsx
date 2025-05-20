@@ -20,7 +20,7 @@ export default function AuthActions({ direction, size, gap }: Props) {
 
   const { isAuthenticated } = useUser();
   const { logout } = useLogout();
-  const { deleteBoard, isLoading } = useDeleteBoard();
+  const { deleteBoard, isDeletingBoard } = useDeleteBoard();
 
   const handleDeleteConfirm = () => {
     if (!boardId) {
@@ -42,7 +42,7 @@ export default function AuthActions({ direction, size, gap }: Props) {
           opened={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteConfirm}
-          loading={isLoading}
+          loading={isDeletingBoard}
         />
 
         <Flex direction={direction} gap={gap}>
