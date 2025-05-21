@@ -56,7 +56,7 @@ export function BoardActionMenu({ additionalActions = [], onDeleteBoard }: Props
           </Menu.Item>
         ))}
 
-        <Menu.Divider />
+        <Menu.Divider hidden={!boardId} />
 
         {isAuthenticated && boardId && onDeleteBoard && (
           <Menu.Item color="red" onClick={onDeleteBoard}>
