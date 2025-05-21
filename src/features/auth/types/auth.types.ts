@@ -3,20 +3,18 @@ export interface User {
   username?: string;
   email?: string;
   iat: number;
-  isGuest?: boolean;
-  guestExpiresAt?: string;
+  expiresAt?: string;
+  isTemporary: boolean;
 }
 
-export interface GuestSessionResponse {
+export interface TempSessionResponse {
   token: string;
-  isGuest: boolean;
   expiresAt: string;
   message: string;
 }
 
 export interface StoredSession {
   token: string;
-  isGuest: boolean;
   expiresAt?: string;
 }
 
@@ -28,4 +26,14 @@ export interface LoginCredentials {
 export interface SignupCredentials extends LoginCredentials {
   username: string;
   confirmPassword: string;
+}
+
+export interface RegisterResponse {
+  token: string;
+  message: string;
+}
+
+export interface ConvertTempAccountResponse {
+  token: string;
+  message: string;
 }

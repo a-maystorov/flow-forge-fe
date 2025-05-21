@@ -11,10 +11,10 @@ export function CreateBoardButton() {
   const { user } = useUser();
   const { boards } = useBoards();
 
-  const isGuestWithMaxBoards = user?.isGuest && (boards?.length ?? 0) >= 1;
+  const isUnregisteredWithMaxBoards = user?.isTemporary && (boards?.length ?? 0) >= 1;
 
   const button = (
-    <Box style={{ cursor: isGuestWithMaxBoards ? 'not-allowed' : 'pointer' }}>
+    <Box style={{ cursor: isUnregisteredWithMaxBoards ? 'not-allowed' : 'pointer' }}>
       <NavLink
         href="#"
         label={
@@ -26,20 +26,20 @@ export function CreateBoardButton() {
           </Group>
         }
         leftSection={<SplitBoardIcon h={16} w={16} />}
-        onClick={isGuestWithMaxBoards ? undefined : open}
+        onClick={isUnregisteredWithMaxBoards ? undefined : open}
         classNames={styles}
         py="md"
         px={{ base: '2lg', md: 'xl' }}
-        disabled={isGuestWithMaxBoards}
+        disabled={isUnregisteredWithMaxBoards}
       />
     </Box>
   );
 
   return (
     <>
-      {isGuestWithMaxBoards ? (
+      {isUnregisteredWithMaxBoards ? (
         <Tooltip
-          label="Guest users are limited to 1 board"
+          label="Unregistered users are limited to 1 board"
           position="right"
           withArrow
           offset={-32}

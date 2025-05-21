@@ -63,7 +63,7 @@ export function BoardColumns({ board, onAddTask, onTaskClick, onCreateColumn }: 
           </Stack>
         );
       })}
-      <AddColumnButton onClick={onCreateColumn} />
+      <AddColumnButton onClick={onCreateColumn} columnCount={board.columns.length} />
     </Flex>
   );
 }

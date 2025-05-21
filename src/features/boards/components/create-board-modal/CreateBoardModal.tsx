@@ -1,5 +1,17 @@
+import { useUser } from '@/features/auth/hooks';
 import { useCreateBatchColumns } from '@/features/columns/hooks';
-import { Box, Button, Flex, Group, Modal, Stack, Text, TextInput, Title } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Flex,
+  Group,
+  Modal,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { z } from 'zod';
 import { useCreateBoard } from '../../hooks';
@@ -26,6 +38,10 @@ interface Props {
 export function CreateBoardModal({ isOpen, onClose }: Props) {
   const { createBoard, isCreatingBoard } = useCreateBoard();
   const { createBatchColumns, isCreatingBatchColumns } = useCreateBatchColumns();
+  const { user } = useUser();
+
+  // Check if user is unregistered (temporary)
+  const isUnregisteredUser = user && !user.email;
 
   const form = useForm({
     initialValues: {
@@ -59,6 +75,10 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
   };
 
   const addColumn = () => {
+    // Prevent adding more than 3 columns for unregistered users
+    if (isUnregisteredUser && form.values.columns.length >= 3) {
+      return;
+    }
     form.insertListItem('columns', { name: '' });
   };
 
@@ -103,14 +123,36 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
                 </Group>
               ))}
 
-              <Button variant="light" fullWidth onClick={addColumn}>
-                <Group gap={4} align="center">
-                  <Text component="span" size="md" style={{ top: 1 }}>
-                    +
-                  </Text>
-                  <Title order={3}>Add New Column</Title>
-                </Group>
-              </Button>
+              {isUnregisteredUser && form.values.columns.length >= 3 ? (
+                <Tooltip
+                  label="Unregistered users are limited to 3 columns. Register to create more."
+                  position="top"
+                >
+                  <Button
+                    variant="light"
+                    fullWidth
+                    onClick={addColumn}
+                    disabled={true}
+                    style={{ cursor: 'not-allowed' }}
+                  >
+                    <Group gap={4} align="center">
+                      <Text component="span" size="md" style={{ top: 1 }}>
+                        +
+                      </Text>
+                      <Title order={3}>Add New Column</Title>
+                    </Group>
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Button variant="light" fullWidth onClick={addColumn}>
+                  <Group gap={4} align="center">
+                    <Text component="span" size="md" style={{ top: 1 }}>
+                      +
+                    </Text>
+                    <Title order={3}>Add New Column</Title>
+                  </Group>
+                </Button>
+              )}
             </Stack>
           </Stack>
 

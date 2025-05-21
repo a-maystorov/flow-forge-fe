@@ -3,8 +3,7 @@ export interface User {
   username?: string;
   email?: string;
   iat: number;
-  isGuest?: boolean;
-  guestExpiresAt?: string;
+  expiresAt?: string;
 }
 
 export type UserSignupPayload = Partial<User> & { password: string };

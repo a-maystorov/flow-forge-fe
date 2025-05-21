@@ -1,3 +1,4 @@
+import { TemporaryAccountBanner } from '@/components/temporary-account-banner';
 import { useUser } from '@/features/auth/hooks';
 import { CreateBoardButton, DeleteBoardModal } from '@/features/boards/components';
 import { useBoards, useDeleteBoard } from '@/features/boards/hooks';
@@ -194,6 +195,9 @@ export default function NavbarLayout() {
           onConfirm={handleDeleteConfirm}
           loading={isDeletingBoard}
         />
+        <Box mb="md">
+          <TemporaryAccountBanner />
+        </Box>
         <Outlet />
       </AppShell.Main>
 
