@@ -19,7 +19,11 @@ export function DndListHandle({ tasks, columnId, onTaskClick }: Props) {
   return (
     <Droppable droppableId={columnId} direction="vertical">
       {(provided) => (
-        <Box {...provided.droppableProps} ref={provided.innerRef}>
+        <Box
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+          style={{ minHeight: tasks.length === 0 ? '100px' : undefined }}
+        >
           {tasks.map((task, index) => (
             <Draggable key={task._id} draggableId={task._id} index={index}>
               {(provided, snapshot) => (
