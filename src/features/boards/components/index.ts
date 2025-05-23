@@ -3,3 +3,4 @@ export * from './create-board-button';
 export * from './create-board-modal';
 export * from './delete-board-modal';
 export * from './empty-board';
+export * from './update-board-modal';

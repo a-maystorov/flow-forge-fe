@@ -18,16 +18,22 @@ export function BoardColumns({ board, onAddTask, onTaskClick, onCreateColumn }: 
 
   const columnTasksMap = useMemo(() => {
     const taskMap = new Map();
+
+    if (!board?.columns) {
+      return taskMap;
+    }
+
     board.columns.forEach((col) => {
       taskMap.set(col._id, []);
     });
-
     board.columns.forEach((col) => {
-      col.tasks.forEach((task) => {
-        const tasks = taskMap.get(task.columnId) || [];
-        tasks.push(task);
-        taskMap.set(task.columnId, tasks);
-      });
+      if (col.tasks) {
+        col.tasks.forEach((task) => {
+          const tasks = taskMap.get(task.columnId) || [];
+          tasks.push(task);
+          taskMap.set(task.columnId, tasks);
+        });
+      }
     });
 
     taskMap.forEach((tasks, columnId) => {
@@ -48,7 +54,7 @@ export function BoardColumns({ board, onAddTask, onTaskClick, onCreateColumn }: 
       w="100%"
       style={{ overflowX: 'auto', flexWrap: 'nowrap' }}
     >
-      {board.columns.map((column) => {
+      {board?.columns?.map((column) => {
         const columnTasks = columnTasksMap.get(column._id) || [];
 
         return (
@@ -63,7 +69,7 @@ export function BoardColumns({ board, onAddTask, onTaskClick, onCreateColumn }: 
           </Stack>
         );
       })}
-      <AddColumnButton onClick={onCreateColumn} columnCount={board.columns.length} />
+      <AddColumnButton onClick={onCreateColumn} columnCount={board?.columns?.length || 0} />
     </Flex>
   );
 }

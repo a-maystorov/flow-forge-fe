@@ -30,6 +30,15 @@ class ColumnService {
     );
     return res.data;
   }
+
+  async updateColumn(boardId: string, columnId: string, name: string) {
+    const res = await this.http.put<Column>(
+      `/boards/${boardId}/columns/${columnId}`,
+      { name },
+      { headers: this.getHeaders() }
+    );
+    return res.data;
+  }
 }
 
 export const columnService = new ColumnService();

@@ -2,6 +2,7 @@ import DotsVerticalIcon from '@/assets/icons/DotsVerticalIcon';
 import TempUserLogoutModal from '@/components/modals/TempUserLogoutModal';
 import { ConvertAccountModal } from '@/components/temporary-account-banner';
 import { useLogout, useUser } from '@/features/auth/hooks';
+import { UpdateBoardModal } from '@/features/boards/components';
 import { Button, Menu } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -23,6 +24,7 @@ export function BoardActionMenu({ additionalActions = [], onDeleteBoard }: Props
   const { logout } = useLogout();
   const [convertModalOpened, convertModalHandlers] = useDisclosure(false);
   const [logoutModalOpened, logoutModalHandlers] = useDisclosure(false);
+  const [updateBoardModalOpened, updateBoardModalHandlers] = useDisclosure(false);
 
   const isTemporaryUser = user?.isTemporary;
   const location = useLocation();
@@ -78,10 +80,15 @@ export function BoardActionMenu({ additionalActions = [], onDeleteBoard }: Props
 
         <Menu.Divider hidden={!boardId} />
 
-        {isAuthenticated && boardId && onDeleteBoard && (
-          <Menu.Item color="red" onClick={onDeleteBoard}>
-            Delete Board
-          </Menu.Item>
+        {isAuthenticated && boardId && (
+          <>
+            <Menu.Item onClick={updateBoardModalHandlers.open}>Edit Board</Menu.Item>
+            {onDeleteBoard && (
+              <Menu.Item color="red" onClick={onDeleteBoard}>
+                Delete Board
+              </Menu.Item>
+            )}
+          </>
         )}
       </Menu.Dropdown>
 
@@ -94,6 +101,14 @@ export function BoardActionMenu({ additionalActions = [], onDeleteBoard }: Props
             onConfirm={handleConfirmLogout}
           />
         </>
+      )}
+
+      {boardId && (
+        <UpdateBoardModal
+          isOpen={updateBoardModalOpened}
+          onClose={updateBoardModalHandlers.close}
+          boardId={boardId}
+        />
       )}
     </Menu>
   );
