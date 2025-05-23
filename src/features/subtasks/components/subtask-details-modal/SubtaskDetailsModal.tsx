@@ -50,7 +50,6 @@ export function SubtaskDetailsModal({
   const { updateSubtask, isUpdatingSubtask } = useUpdateSubtask(boardId, columnId, taskId);
   const { board } = useBoard(boardId);
 
-  // Get the latest subtask data from the board
   const latestSubtask = getSubtaskFromBoard(board, taskId, subtask?._id) || subtask;
 
   const form = useForm<FormValues>({
@@ -62,7 +61,6 @@ export function SubtaskDetailsModal({
     },
   });
 
-  // Update form values when subtask data changes or becomes available
   useEffect(() => {
     if (latestSubtask) {
       const sanitizedDescription = DOMPurify.sanitize(

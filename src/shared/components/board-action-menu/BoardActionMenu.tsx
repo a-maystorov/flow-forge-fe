@@ -24,12 +24,9 @@ export function BoardActionMenu({ additionalActions = [], onDeleteBoard }: Props
   const [convertModalOpened, convertModalHandlers] = useDisclosure(false);
   const [logoutModalOpened, logoutModalHandlers] = useDisclosure(false);
 
-  // Check if user is a temporary user (via isTemporary flag from JWT)
   const isTemporaryUser = user?.isTemporary;
   const location = useLocation();
   const { boardId } = useParams();
-
-  // Handler for confirming logout
   const handleConfirmLogout = () => {
     logoutModalHandlers.close();
     logout();

@@ -40,7 +40,6 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
   const { createBatchColumns, isCreatingBatchColumns } = useCreateBatchColumns();
   const { user } = useUser();
 
-  // Check if user is unregistered (temporary)
   const isUnregisteredUser = user && !user.email;
 
   const form = useForm({
@@ -75,10 +74,10 @@ export function CreateBoardModal({ isOpen, onClose }: Props) {
   };
 
   const addColumn = () => {
-    // Prevent adding more than 3 columns for unregistered users
     if (isUnregisteredUser && form.values.columns.length >= 3) {
       return;
     }
+
     form.insertListItem('columns', { name: '' });
   };
 

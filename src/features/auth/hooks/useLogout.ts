@@ -14,21 +14,8 @@ export function useLogout() {
     },
   });
 
-  // This is a special version of logout that confirms with the user first
-  const logoutWithConfirm = () => {
-    // Just use the browser's native confirm dialog
-    if (
-      window.confirm(
-        'Are you sure you want to log out? As a temporary user, all your boards and data will be permanently deleted when your account expires.'
-      )
-    ) {
-      logoutMutation.mutate();
-    }
-  };
-
   return {
     logout: logoutMutation.mutate,
-    logoutWithConfirm,
     isLoading: logoutMutation.isPending,
     error: logoutMutation.error?.message,
   };

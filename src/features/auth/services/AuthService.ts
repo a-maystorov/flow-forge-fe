@@ -81,10 +81,7 @@ class AuthService {
 
   async createTempSession(): Promise<void> {
     try {
-      // Check if we have a stored tempUserId from a previous session
       const tempUserId = localStorage.getItem('tempUserId');
-
-      // Send the tempUserId if available so the backend can reuse the same user
       const response = await this.http.post<TempSessionResponse>(
         '/auth/temp-session',
         tempUserId ? { tempUserId } : {}
@@ -93,7 +90,6 @@ class AuthService {
       const { token, expiresAt } = response.data;
       localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify({ token, expiresAt }));
 
-      // Clear the stored tempUserId as it's now been used
       if (tempUserId) {
         localStorage.removeItem('tempUserId');
       }
@@ -108,7 +104,6 @@ class AuthService {
   async logout(): Promise<void> {
     const user = this.getUser();
     if (user?.isTemporary) {
-      // Store the temp user ID for possible reuse
       localStorage.setItem('tempUserId', user._id);
     }
     localStorage.removeItem(AUTH_TOKEN_KEY);
