@@ -201,10 +201,18 @@ export default function NavbarLayout() {
         <Outlet />
       </AppShell.Main>
 
-      {/* Footer Section */}
-      <AppShell.Footer withBorder={false} pl={0} pb="xl" visibleFrom="sm" hidden={desktopOpened}>
-        <ShowSidebarButton onClick={toggleDesktop} />
-      </AppShell.Footer>
+      {!desktopOpened && (
+        <Box
+          visibleFrom="sm"
+          style={{
+            position: 'fixed',
+            bottom: 50,
+            left: 0,
+          }}
+        >
+          <ShowSidebarButton onClick={toggleDesktop} />
+        </Box>
+      )}
     </AppShell>
   );
 }
