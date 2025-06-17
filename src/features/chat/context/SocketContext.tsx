@@ -41,11 +41,18 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [activeChatId]);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+        setIsConnected(false);
+      }
+      return;
+    }
+
     const token = authService.getToken();
 
     if (!token) {
-      console.error('No authentication token found via AuthService');
-      notifyUser.error('Connection error', 'Authentication failed. Please try logging in again.');
       return;
     }
 
@@ -83,12 +90,18 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     socketInstance.on('connect_error', (err) => {
       console.error('Socket connection error:', err);
-      notifyUser.error('Connection error', 'Failed to connect to chat server');
+
+      if (isAuthenticated) {
+        notifyUser.error('Connection error', 'Connection failed. Please check your network.');
+      }
     });
 
     socketInstance.on('error', (error) => {
       console.error('Socket error:', error);
-      notifyUser.error('Chat error', error.message || 'An error occurred');
+
+      if (isAuthenticated) {
+        notifyUser.error('Chat error', error.message || 'An error occurred');
+      }
     });
 
     socketInstance.on('chat message', (msg) => {
@@ -130,6 +143,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
           });
 
           queryClient.invalidateQueries({ queryKey: ['chats', parsedMsg.chatId] });
+          queryClient.invalidateQueries({ queryKey: ['chatMessages', parsedMsg.chatId] });
         }
       } catch (error) {
         console.error('Error processing message:', error);
@@ -137,7 +151,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     });
 
     socketInstance.on('chat created', (chat) => {
-      console.log('Chat created:', chat);
       const chatId = chat._id || chat.chatId;
       if (chatId) {
         setActiveChatId(chatId);
@@ -147,12 +160,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     });
 
     socketInstance.on('chat selected', (data) => {
-      console.log('Chat selected:', data);
       queryClient.invalidateQueries({ queryKey: ['chats', data.chatId] });
     });
 
     socketInstance.on('chats list', (chats) => {
-      console.log('Received chats list:', chats);
       queryClient.setQueryData(['chats'], chats);
     });
 
@@ -163,6 +174,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setSocket(null);
       setIsConnected(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, queryClient]);
 
   const selectChat = useCallback(

@@ -25,13 +25,7 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const handleSubmit = form.onSubmit((values) => {
     setError(null);
     try {
-      // Create chat via socket
       createChat(values.title);
-
-      // Show success notification
-      notifyUser.success('Chat created', 'New chat has been created');
-
-      // Reset form and close modal
       form.reset();
       onClose();
     } catch (err) {

@@ -8,7 +8,6 @@ import {
   Loader,
   Stack,
   Text,
-  useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -18,14 +17,13 @@ import { CreateChatModal } from './CreateChatModal';
 interface ChatListProps {
   chats: Chat[];
   isLoading?: boolean;
+  onSelectChat?: (chatId: string) => void;
 }
 
-export function ChatList({ chats, isLoading: propIsLoading }: ChatListProps) {
+export function ChatList({ chats, isLoading: propIsLoading, onSelectChat }: ChatListProps) {
   const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] =
     useDisclosure(false);
   const theme = useMantineTheme();
-  const { colorScheme } = useMantineColorScheme();
-  const isDarkColorScheme = colorScheme === 'dark';
   const { selectChat, activeChatId, isLoading: contextIsLoading, isConnected } = useSocket();
 
   // Use loading state from props or context
@@ -33,6 +31,9 @@ export function ChatList({ chats, isLoading: propIsLoading }: ChatListProps) {
 
   const handleSelectChat = (chatId: string) => {
     selectChat(chatId);
+    if (onSelectChat) {
+      onSelectChat(chatId);
+    }
   };
 
   return (
@@ -53,7 +54,7 @@ export function ChatList({ chats, isLoading: propIsLoading }: ChatListProps) {
           </ActionIcon>
         </Group>
 
-        <Box style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <Box>
           {isLoading ? (
             <Flex align="center" justify="center" h={100}>
               <Loader size="sm" />
@@ -72,29 +73,17 @@ export function ChatList({ chats, isLoading: propIsLoading }: ChatListProps) {
                 chats?.map((chat) => (
                   <Button
                     key={chat._id}
-                    variant={chat._id === activeChatId ? 'filled' : 'light'}
+                    variant="outline"
                     color={chat._id === activeChatId ? theme.colors['main-purple'][0] : undefined}
                     onClick={() => handleSelectChat(chat._id)}
-                    className={`${activeChatId === chat._id ? 'selected-chat' : ''}`}
-                    style={{
-                      cursor: 'pointer',
-                      borderColor:
-                        activeChatId === chat._id
-                          ? theme.colors['main-purple'][isDarkColorScheme ? 8 : 0]
-                          : isDarkColorScheme
-                            ? theme.colors['lines-dark'][0]
-                            : theme.colors['lines-light'][0],
-                      borderWidth: activeChatId === chat._id ? 2 : 1,
-                    }}
                     justify="flex-start"
-                    fullWidth
                   >
-                    <Flex direction="column" align="flex-start" w="100%">
+                    <Stack gap={0} align="flex-start">
                       <Text lineClamp={1}>{chat.title}</Text>
                       <Text size="xs" c="dimmed">
                         {new Date(chat.updatedAt).toLocaleString()}
                       </Text>
-                    </Flex>
+                    </Stack>
                   </Button>
                 ))
               )}

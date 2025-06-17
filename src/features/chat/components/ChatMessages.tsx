@@ -1,7 +1,6 @@
+import { useUser } from '@/features/auth/hooks';
 import Chat from '@/models/Chat';
 import Message from '@/models/Message';
-import { useUser } from '@/features/auth/hooks';
-import { useSocket } from '../context/SocketContext';
 import {
   Box,
   Flex,
@@ -12,29 +11,26 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useSocket } from '../context/SocketContext';
 
 interface ChatMessagesProps {
   chat: Chat | undefined;
+  messages?: Message[];
+  isLoading?: boolean;
 }
 
-export function ChatMessages({ chat }: ChatMessagesProps) {
+export function ChatMessages({ chat, messages = [], isLoading: propIsLoading }: ChatMessagesProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
-  const { chatMessages, isLoading, activeChatId } = useSocket();
+  const { isLoading: socketLoading } = useSocket();
+
+  // Use loading state from props or socket context
+  const isLoading = propIsLoading !== undefined ? propIsLoading : socketLoading;
 
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
   const isDarkColorScheme = colorScheme === 'dark';
-
-  // Use messages from the socket context or fallback to chat.messages
-  const messages = useMemo(() => {
-    if (!activeChatId) {
-      return [];
-    }
-
-    return chatMessages.filter((message) => message.chatId === activeChatId);
-  }, [chatMessages, activeChatId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -86,19 +82,18 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
             return (
               <Paper
                 key={messageId}
-                p="xs"
+                p="xl"
                 shadow="xs"
                 radius="md"
                 mb="sm"
                 bg={
                   isCurrentUser
-                    ? theme.colors['main-purple'][isDarkColorScheme ? 8 : 0]
+                    ? theme.colors['main-purple'][0]
                     : isDarkColorScheme
                       ? theme.colors.dark[6]
                       : theme.colors.gray[0]
                 }
                 style={{
-                  maxWidth: '80%',
                   alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
                   marginLeft: isCurrentUser ? 'auto' : undefined,
                   opacity: message.loading ? 0.7 : 1,

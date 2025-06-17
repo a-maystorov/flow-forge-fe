@@ -35,7 +35,7 @@ import ShowSidebarButton from '../components/show-sidebar-button';
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
-  const [asideOpened, { toggle: toggleAside }] = useDisclosure(false);
+  const [asideOpened, { toggle: toggleAside }] = useDisclosure(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const theme = useMantineTheme();

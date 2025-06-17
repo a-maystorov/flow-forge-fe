@@ -1,5 +1,6 @@
 import { authService } from '@/features/auth/services';
 import Chat from '@/models/Chat';
+import Message from '@/models/Message';
 import axios from 'axios';
 
 class ChatService {
@@ -20,6 +21,13 @@ class ChatService {
 
   async getChat(chatId: string) {
     const res = await this.http.get<Chat>(`/chats/${chatId}`, {
+      headers: this.getHeaders(),
+    });
+    return res.data;
+  }
+
+  async getChatMessages(chatId: string) {
+    const res = await this.http.get<Message[]>(`/chats/${chatId}/messages`, {
       headers: this.getHeaders(),
     });
     return res.data;
