@@ -2,6 +2,7 @@ import { TemporaryAccountBanner } from '@/components/temporary-account-banner';
 import { useUser } from '@/features/auth/hooks';
 import { CreateBoardButton, DeleteBoardModal } from '@/features/boards/components';
 import { useBoards, useDeleteBoard } from '@/features/boards/hooks';
+import { ChatPanel } from '@/features/chat/components';
 import { BoardActionMenu } from '@/shared/components/board-action-menu';
 import {
   ActionIcon,
@@ -218,14 +219,10 @@ export default function NavbarLayout() {
             ? theme.colors['lines-dark'][0]
             : theme.colors['lines-light'][0],
         }}
-        p="md"
+        px={0}
+        py={0}
       >
-        <AppShell.Section>
-          <Title order={4}>Chat</Title>
-        </AppShell.Section>
-        <AppShell.Section grow my="md" component={ScrollArea}>
-          <Box>Chat content will go here</Box>
-        </AppShell.Section>
+        <ChatPanel />
       </AppShell.Aside>
 
       {!desktopOpened && (
@@ -249,7 +246,7 @@ export default function NavbarLayout() {
         size="xl"
         style={{
           position: 'fixed',
-          bottom: 30,
+          bottom: 60,
           right: 30,
           zIndex: 999,
         }}
