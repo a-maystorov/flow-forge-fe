@@ -4,6 +4,7 @@ import { CreateBoardButton, DeleteBoardModal } from '@/features/boards/component
 import { useBoards, useDeleteBoard } from '@/features/boards/hooks';
 import { BoardActionMenu } from '@/shared/components/board-action-menu';
 import {
+  ActionIcon,
   AppShell,
   Box,
   Burger,
@@ -21,6 +22,8 @@ import {
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import ChatIcon from '../assets/icons/ChatIcon';
+import ChatOffIcon from '../assets/icons/ChatOffIcon';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthActions from '../components/auth-actions';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
@@ -31,6 +34,7 @@ import ShowSidebarButton from '../components/show-sidebar-button';
 export default function NavbarLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const [asideOpened, { toggle: toggleAside }] = useDisclosure(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const theme = useMantineTheme();
@@ -66,6 +70,11 @@ export default function NavbarLayout() {
         width: 300,
         breakpoint: 'sm',
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+      }}
+      aside={{
+        width: 300,
+        breakpoint: 'sm',
+        collapsed: { mobile: !asideOpened, desktop: !asideOpened },
       }}
       padding="md"
       transitionDuration={500}
@@ -201,6 +210,24 @@ export default function NavbarLayout() {
         <Outlet />
       </AppShell.Main>
 
+      {/* Aside Section */}
+      <AppShell.Aside
+        bg={isDarkColorScheme ? theme.colors['dark-gray'][0] : theme.colors.white[0]}
+        style={{
+          borderColor: isDarkColorScheme
+            ? theme.colors['lines-dark'][0]
+            : theme.colors['lines-light'][0],
+        }}
+        p="md"
+      >
+        <AppShell.Section>
+          <Title order={4}>Chat</Title>
+        </AppShell.Section>
+        <AppShell.Section grow my="md" component={ScrollArea}>
+          <Box>Chat content will go here</Box>
+        </AppShell.Section>
+      </AppShell.Aside>
+
       {!desktopOpened && (
         <Box
           visibleFrom="sm"
@@ -213,6 +240,23 @@ export default function NavbarLayout() {
           <ShowSidebarButton onClick={toggleDesktop} />
         </Box>
       )}
+
+      {/* Chat Toggle Button */}
+      <ActionIcon
+        variant="filled"
+        color={theme.colors['main-purple'][0]}
+        radius="xl"
+        size="xl"
+        style={{
+          position: 'fixed',
+          bottom: 30,
+          right: 30,
+          zIndex: 999,
+        }}
+        onClick={toggleAside}
+      >
+        {asideOpened ? <ChatOffIcon w={24} h={24} /> : <ChatIcon w={24} h={24} />}
+      </ActionIcon>
     </AppShell>
   );
 }
