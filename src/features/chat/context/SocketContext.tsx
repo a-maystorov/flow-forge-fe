@@ -36,7 +36,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useUser();
   const queryClient = useQueryClient();
 
-  // Clear messages when active chat changes
   useEffect(() => {
     setChatMessages([]);
   }, [activeChatId]);
@@ -50,21 +49,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Use a URL object to properly construct the socket server URL
     let socketUrl;
     try {
-      // Get base URL from environment variable
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-      // Parse the URL
       const url = new URL(apiBaseUrl);
-      // Socket.io should connect to the base URL without paths
       socketUrl = `${url.protocol}//${url.host}`;
-      console.log('Connecting to socket server at:', socketUrl);
     } catch (error) {
       console.error('Error parsing API URL:', error);
-      // Fallback to direct localhost connection
-      socketUrl = 'http://localhost:3000';
-      console.log('Using fallback socket URL:', socketUrl);
     }
 
     const socketInstance = io(socketUrl, {
@@ -84,12 +75,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     socketInstance.on('connect', () => {
       setIsConnected(true);
-      console.log('Socket connected');
     });
 
     socketInstance.on('disconnect', () => {
       setIsConnected(false);
-      console.log('Socket disconnected');
     });
 
     socketInstance.on('connect_error', (err) => {
