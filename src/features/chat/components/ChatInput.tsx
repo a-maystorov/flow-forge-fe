@@ -4,7 +4,7 @@ import {
   ActionIcon,
   Box,
   Flex,
-  TextInput,
+  Textarea,
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
@@ -46,6 +46,15 @@ export function ChatInput({ disabled }: ChatInputProps) {
     }
   });
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (form.values.message.trim()) {
+        handleSubmit();
+      }
+    }
+  };
+
   return (
     <Box
       component="form"
@@ -56,16 +65,26 @@ export function ChatInput({ disabled }: ChatInputProps) {
           isDarkColorScheme ? theme.colors['lines-dark'][0] : theme.colors['lines-light'][0]
         }`,
         position: 'relative',
-        zIndex: 10, // Ensure chat input is above other elements
-        marginBottom: '8px', // Add some space at bottom to avoid overlay
+        zIndex: 10,
+        marginBottom: '8px',
       }}
     >
       <Flex gap="sm">
-        <TextInput
+        <Textarea
           placeholder="Type your message..."
           flex={1}
+          autosize
+          minRows={1}
+          maxRows={4}
           {...form.getInputProps('message')}
           disabled={disabled || !activeChatId || isSending}
+          onKeyDown={handleKeyDown}
+          styles={{
+            input: {
+              wordWrap: 'break-word',
+              whiteSpace: 'pre-wrap',
+            },
+          }}
         />
         <ActionIcon
           type="submit"

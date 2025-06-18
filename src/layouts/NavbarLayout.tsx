@@ -24,7 +24,6 @@ import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import ChatIcon from '../assets/icons/ChatIcon';
-import ChatOffIcon from '../assets/icons/ChatOffIcon';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthActions from '../components/auth-actions';
 import ColorSchemeToggle from '../components/color-scheme-toggle';
@@ -73,7 +72,7 @@ export default function NavbarLayout() {
         collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
       }}
       aside={{
-        width: 300,
+        width: 400,
         breakpoint: 'sm',
         collapsed: { mobile: !asideOpened, desktop: !asideOpened },
       }}
@@ -219,10 +218,8 @@ export default function NavbarLayout() {
             ? theme.colors['lines-dark'][0]
             : theme.colors['lines-light'][0],
         }}
-        px={0}
-        py={0}
       >
-        <ChatPanel />
+        <ChatPanel onClose={toggleAside} />
       </AppShell.Aside>
 
       {!desktopOpened && (
@@ -238,22 +235,24 @@ export default function NavbarLayout() {
         </Box>
       )}
 
-      {/* Chat Toggle Button */}
-      <ActionIcon
-        variant="filled"
-        color={theme.colors['main-purple'][0]}
-        radius="xl"
-        size="xl"
-        style={{
-          position: 'fixed',
-          bottom: 60,
-          right: 30,
-          zIndex: 999,
-        }}
-        onClick={toggleAside}
-      >
-        {asideOpened ? <ChatOffIcon w={24} h={24} /> : <ChatIcon w={24} h={24} />}
-      </ActionIcon>
+      {/* Chat Toggle Button - Only show when aside is closed */}
+      {!asideOpened && (
+        <ActionIcon
+          variant="filled"
+          color={theme.colors['main-purple'][0]}
+          radius="xl"
+          size="xl"
+          style={{
+            position: 'fixed',
+            bottom: 60,
+            right: 30,
+            zIndex: 999,
+          }}
+          onClick={toggleAside}
+        >
+          <ChatIcon w={24} h={24} />
+        </ActionIcon>
+      )}
     </AppShell>
   );
 }
