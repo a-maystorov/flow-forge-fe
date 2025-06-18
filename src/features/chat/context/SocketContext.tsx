@@ -1,5 +1,6 @@
 import { useUser } from '@/features/auth/hooks';
 import { authService } from '@/features/auth/services/AuthService';
+import { chatService } from '@/features/chat/services/ChatService';
 import Message from '@/models/Message';
 import { notifyUser } from '@/utils/notificationUtils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ interface SocketContextType {
   selectChat: (chatId: string) => void;
   createChat: (title: string) => void;
   sendMessage: (content: string) => void;
+  deleteChat: (chatId: string) => Promise<void>;
   activeChatId: string | null;
   isLoading: boolean;
   chatMessages: Message[];
@@ -208,6 +210,34 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     [socket, activeChatId]
   );
 
+  const deleteChat = useCallback(
+    async (chatId: string) => {
+      try {
+        setIsLoading(true);
+        await chatService.deleteChat(chatId);
+
+        // Clear active chat if deleted
+        if (activeChatId === chatId) {
+          setActiveChatId(null);
+          setChatMessages([]);
+        }
+
+        // Invalidate queries to update UI
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+        notifyUser.success('Chat deleted', 'Chat has been successfully deleted');
+      } catch (error) {
+        console.error('Error deleting chat:', error);
+        notifyUser.error(
+          'Delete failed',
+          error instanceof Error ? error.message : 'Failed to delete chat'
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [activeChatId, queryClient]
+  );
+
   const value = {
     socket,
     isConnected,
@@ -215,6 +245,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     selectChat,
     createChat,
     sendMessage,
+    deleteChat,
     activeChatId,
     chatMessages,
   };

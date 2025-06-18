@@ -32,6 +32,13 @@ class ChatService {
     });
     return res.data;
   }
+
+  async deleteChat(chatId: string) {
+    const res = await this.http.delete(`/chats/${chatId}`, {
+      headers: this.getHeaders(),
+    });
+    return res.data;
+  }
 }
 
 export const chatService = new ChatService();
