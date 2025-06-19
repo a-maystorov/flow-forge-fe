@@ -12,6 +12,7 @@ interface SocketContextType {
   isConnected: boolean;
   selectChat: (chatId: string) => void;
   createChat: (title: string) => void;
+  createChatFromBoard: (boardId: string, title?: string) => void;
   sendMessage: (content: string) => void;
   deleteChat: (chatId: string) => Promise<void>;
   activeChatId: string | null;
@@ -140,6 +141,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
                 updatedAt: parsedMsg.updatedAt || new Date().toISOString(),
                 userId: parsedMsg.userId || parsedMsg.from || 'unknown',
                 action: parsedMsg.action,
+                data: parsedMsg.data || undefined,
+                boardContext: parsedMsg.boardContext || undefined,
               } as Message,
             ];
           });
@@ -196,7 +199,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       if (!socket) return;
 
       setIsLoading(true);
-      socket.emit('create chat', title || 'New Chat');
+      socket.emit('new chat', title || 'New Chat');
+    },
+    [socket]
+  );
+
+  const createChatFromBoard = useCallback(
+    (boardId: string, title?: string) => {
+      if (!socket) return;
+
+      setIsLoading(true);
+      socket.emit('new chat from board', { boardId, title });
     },
     [socket]
   );
@@ -216,13 +229,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         await chatService.deleteChat(chatId);
 
-        // Clear active chat if deleted
         if (activeChatId === chatId) {
           setActiveChatId(null);
           setChatMessages([]);
         }
 
-        // Invalidate queries to update UI
         queryClient.invalidateQueries({ queryKey: ['chats'] });
         notifyUser.success('Chat deleted', 'Chat has been successfully deleted');
       } catch (error) {
@@ -244,6 +255,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     selectChat,
     createChat,
+    createChatFromBoard,
     sendMessage,
     deleteChat,
     activeChatId,

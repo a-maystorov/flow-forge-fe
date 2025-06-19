@@ -3,6 +3,7 @@ import { notifyUser } from '@/utils/notificationUtils';
 import { Button, Group, Modal, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface CreateChatModalProps {
   opened: boolean;
@@ -10,8 +11,13 @@ interface CreateChatModalProps {
 }
 
 export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
-  const { createChat, isLoading } = useSocket();
+  const { createChat, createChatFromBoard, isLoading } = useSocket();
   const [error, setError] = useState<string | null>(null);
+  const { boardId } = useParams<{ boardId: string }>();
+
+  // Check if we're in a board context
+  // This covers both /boards/:boardId and any other paths that might have boardId param
+  const hasBoardContext = !!boardId;
 
   const form = useForm({
     initialValues: {
@@ -25,7 +31,11 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const handleSubmit = form.onSubmit((values) => {
     setError(null);
     try {
-      createChat(values.title);
+      if (hasBoardContext) {
+        createChatFromBoard(boardId, values.title);
+      } else {
+        createChat(values.title);
+      }
       form.reset();
       onClose();
     } catch (err) {
@@ -42,7 +52,12 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   };
 
   return (
-    <Modal title="Create New Chat" opened={opened} onClose={handleClose} size="sm">
+    <Modal
+      title={hasBoardContext ? 'Create Board Chat' : 'Create New Chat'}
+      opened={opened}
+      onClose={handleClose}
+      size="sm"
+    >
       <form onSubmit={handleSubmit}>
         <TextInput
           label="Chat Title"
