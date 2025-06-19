@@ -17,6 +17,7 @@ interface SocketContextType {
   deleteChat: (chatId: string) => Promise<void>;
   activeChatId: string | null;
   isLoading: boolean;
+  isAiResponding: boolean;
   chatMessages: Message[];
 }
 
@@ -34,6 +35,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAiResponding, setIsAiResponding] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const { isAuthenticated, user } = useUser();
@@ -112,6 +114,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         const parsedMsg = typeof msg === 'string' ? JSON.parse(msg) : msg;
 
         if (parsedMsg.chatId) {
+          // If we're receiving a message from the AI, set isAiResponding to false
+          if (
+            parsedMsg.from === 'AI Assistant' ||
+            parsedMsg.from === 'ai' ||
+            parsedMsg.userId === 'ai'
+          ) {
+            setIsAiResponding(false);
+          }
+
           setChatMessages((prev) => {
             if (parsedMsg.id) {
               const existing = prev.findIndex((m) => m.id === parsedMsg.id);
@@ -218,9 +229,47 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     (content: string) => {
       if (!socket || !activeChatId) return;
 
+      // Create a temporary user message to display immediately
+      const tempUserMessage: Message = {
+        _id: `temp-user-${Date.now()}`,
+        chatId: activeChatId,
+        content: content,
+        from: 'User',
+        userId: user?._id || 'user',
+        loading: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // First add the user message to display immediately
+      setChatMessages((prev) => [...prev, tempUserMessage]);
+
+      // Wait a small delay before showing the AI responding state
+      // This ensures the user message appears first
+      setTimeout(() => {
+        // Set the AI to responding state
+        setIsAiResponding(true);
+
+        // Add a placeholder AI message to indicate loading
+        const aiPlaceholder: Message = {
+          _id: `temp-ai-${Date.now()}`,
+          chatId: activeChatId,
+          content: '',
+          from: 'AI Assistant',
+          userId: 'ai',
+          loading: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Add AI placeholder message
+        setChatMessages((prev) => [...prev, aiPlaceholder]);
+      }, 100);
+
+      // Send the message to the server
       socket.emit('chat message', content);
     },
-    [socket, activeChatId]
+    [socket, activeChatId, user]
   );
 
   const deleteChat = useCallback(
@@ -253,6 +302,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket,
     isConnected,
     isLoading,
+    isAiResponding,
     selectChat,
     createChat,
     createChatFromBoard,

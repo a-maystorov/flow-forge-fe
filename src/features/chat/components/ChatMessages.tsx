@@ -10,7 +10,7 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 
 interface ChatMessagesProps {
@@ -21,7 +21,7 @@ interface ChatMessagesProps {
 export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMessagesProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const { user } = useUser();
-  const { isLoading: socketLoading } = useSocket();
+  const { isLoading: socketLoading, isAiResponding } = useSocket();
 
   const isLoading = propIsLoading !== undefined ? propIsLoading : socketLoading;
 
@@ -29,11 +29,26 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
   const { colorScheme } = useMantineColorScheme();
   const isDarkColorScheme = colorScheme === 'dark';
 
+  const [dots, setDots] = useState('');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => {
+        if (prev === '') return '.';
+        if (prev === '.') return '..';
+        if (prev === '..') return '...';
+        return '';
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (viewportRef.current) {
       viewportRef.current.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isAiResponding]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -95,18 +110,84 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
             </Text>
           </Flex>
         ) : (
-          messages.map((message: Message, index) => {
-            const messageId = message._id || message.id || `temp-${index}`;
-            const messageContent = message.content || message.message || '';
-            const isCurrentUser = message.userId === user?._id || message.from === 'User';
-            const timestamp = message.createdAt
-              ? new Date(message.createdAt).toLocaleTimeString()
-              : new Date().toLocaleTimeString();
+          <>
+            {messages.map((message: Message, index) => {
+              const messageId = message._id || message.id || `temp-${index}`;
+              const messageContent = message.content || message.message || '';
+              const isCurrentUser = message.userId === user?._id || message.from === 'User';
+              const timestamp = message.createdAt
+                ? new Date(message.createdAt).toLocaleTimeString()
+                : new Date().toLocaleTimeString();
 
-            return (
+              return (
+                <Paper
+                  key={messageId}
+                  p="xl"
+                  shadow="xs"
+                  radius="md"
+                  mb="sm"
+                  bg={
+                    isDarkColorScheme
+                      ? theme.colors['very-dark-gray'][0]
+                      : theme.colors['light-gray'][0]
+                  }
+                  style={{
+                    alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
+                    marginLeft: isCurrentUser ? 'auto' : undefined,
+                    opacity: message.loading ? 0.7 : 1,
+                    position: 'relative',
+                  }}
+                >
+                  <Box mb={4} style={{ width: '100%' }}>
+                    {message.loading &&
+                      (message.from === 'AI Assistant' || message.from === 'ai') && (
+                        <Flex align="center" mb={6}>
+                          <Text
+                            c="dimmed"
+                            style={{
+                              fontStyle: 'italic',
+                              position: 'relative',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            AI Assistant is typing{dots}
+                          </Text>
+                        </Flex>
+                      )}
+                    {message.loading &&
+                      message.from !== 'ai' &&
+                      message.from !== 'AI Assistant' && (
+                        <Text span c="dimmed" fs="italic" mb={2} display="block">
+                          (sending...)
+                        </Text>
+                      )}
+                    <Text
+                      style={{
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap',
+                        width: '100%',
+                      }}
+                    >
+                      {messageContent}
+                    </Text>
+                  </Box>
+                  {message.error && (
+                    <Text size="xs" c="red" mt={2}>
+                      Error sending message. Please try again.
+                    </Text>
+                  )}
+                  <Text size="xs" c="dimmed" ta="right" mt={4}>
+                    {timestamp}
+                  </Text>
+                </Paper>
+              );
+            })}
+
+            {/* Add a dedicated typing indicator at the bottom when AI is responding */}
+            {isAiResponding && (
               <Paper
-                key={messageId}
-                p="xl"
+                p="md"
                 shadow="xs"
                 radius="md"
                 mb="sm"
@@ -116,38 +197,20 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                     : theme.colors['light-gray'][0]
                 }
                 style={{
-                  alignSelf: isCurrentUser ? 'flex-end' : 'flex-start',
-                  marginLeft: isCurrentUser ? 'auto' : undefined,
-                  opacity: message.loading ? 0.7 : 1,
+                  position: 'relative',
+                  alignSelf: 'flex-start',
+                  maxWidth: '80%',
                 }}
               >
-                <Box mb={4} style={{ width: '100%' }}>
-                  {message.loading && (
-                    <Text span c="dimmed" fs="italic" mb={2} display="block">
-                      (sending...)
-                    </Text>
-                  )}
-                  <Text
-                    style={{
-                      wordBreak: 'break-word',
-                      whiteSpace: 'pre-wrap',
-                      width: '100%',
-                    }}
-                  >
-                    {messageContent}
+                <Flex align="center">
+                  <Loader size="xs" mr="xs" />
+                  <Text c="dimmed" style={{ fontStyle: 'italic' }}>
+                    AI Assistant is typing{dots}
                   </Text>
-                </Box>
-                {message.error && (
-                  <Text size="xs" c="red" mt={2}>
-                    Error sending message. Please try again.
-                  </Text>
-                )}
-                <Text size="xs" c="dimmed" ta="right" mt={4}>
-                  {timestamp}
-                </Text>
+                </Flex>
               </Paper>
-            );
-          })
+            )}
+          </>
         )}
       </Box>
     </ScrollArea>
