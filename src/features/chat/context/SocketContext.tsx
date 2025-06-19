@@ -1,7 +1,7 @@
 import { useUser } from '@/features/auth/hooks';
 import { authService } from '@/features/auth/services/AuthService';
 import { chatService } from '@/features/chat/services/ChatService';
-import Message from '@/models/Message';
+import Message, { MessageRole } from '@/models/Message';
 import { notifyUser } from '@/utils/notificationUtils';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -121,6 +121,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
             parsedMsg.userId === 'ai'
           ) {
             setIsAiResponding(false);
+
+            // If this is an AI message with board context, extract it
+            if (parsedMsg.boardContext) {
+              console.log('Board Context received:', parsedMsg.boardContext);
+            }
           }
 
           setChatMessages((prev) => {
@@ -144,7 +149,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
                 id: parsedMsg.id,
                 chatId: parsedMsg.chatId,
                 content: parsedMsg.content || parsedMsg.message || '',
-                from: parsedMsg.from,
+                role: parsedMsg.role,
                 message: parsedMsg.message || '',
                 loading: parsedMsg.loading,
                 error: parsedMsg.error,
@@ -234,7 +239,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         _id: `temp-user-${Date.now()}`,
         chatId: activeChatId,
         content: content,
-        from: 'User',
+        role: MessageRole.USER,
         userId: user?._id || 'user',
         loading: false,
         createdAt: new Date().toISOString(),
@@ -255,7 +260,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
           _id: `temp-ai-${Date.now()}`,
           chatId: activeChatId,
           content: '',
-          from: 'AI Assistant',
+          role: MessageRole.ASSISTANT,
           userId: 'ai',
           loading: true,
           createdAt: new Date().toISOString(),
