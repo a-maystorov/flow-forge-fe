@@ -1,5 +1,6 @@
 import { useUser } from '@/features/auth/hooks';
 import Message from '@/models/Message';
+import { RichTextContent } from '@/shared/components/rich-text-content/RichTextContent';
 import {
   Box,
   Flex,
@@ -10,6 +11,7 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
+import { marked } from 'marked';
 import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 
@@ -87,6 +89,16 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
     );
   }
 
+  /**
+   * Converts markdown to HTML using the synchronous version of marked
+   */
+  function convertMarkdownToHtml(markdown: string): string {
+    if (!markdown) {
+      return '';
+    }
+    return marked.parse(markdown, { async: false });
+  }
+
   return (
     <ScrollArea
       h="100%"
@@ -162,15 +174,19 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                           (sending...)
                         </Text>
                       )}
-                    <Text
-                      style={{
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap',
-                        width: '100%',
-                      }}
-                    >
-                      {messageContent}
-                    </Text>
+                    {message.from === 'AI Assistant' || message.from === 'ai' ? (
+                      <RichTextContent html={convertMarkdownToHtml(messageContent)} />
+                    ) : (
+                      <Text
+                        style={{
+                          wordBreak: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          width: '100%',
+                        }}
+                      >
+                        <RichTextContent html={convertMarkdownToHtml(messageContent)} />
+                      </Text>
+                    )}
                   </Box>
                   {message.error && (
                     <Text size="xs" c="red" mt={2}>
