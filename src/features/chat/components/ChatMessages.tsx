@@ -180,7 +180,7 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                       <Text
                         style={{
                           wordBreak: 'break-word',
-                          whiteSpace: 'pre-wrap',
+                          whiteSpace: 'pre-line',
                           width: '100%',
                         }}
                       >
