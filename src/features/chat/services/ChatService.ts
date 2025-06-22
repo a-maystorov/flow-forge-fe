@@ -39,6 +39,13 @@ class ChatService {
     });
     return res.data;
   }
+
+  async updateChat(chatId: string, updateData: Partial<Chat>) {
+    const res = await this.http.patch<Chat>(`/chats/${chatId}`, updateData, {
+      headers: this.getHeaders(),
+    });
+    return res.data;
+  }
 }
 
 export const chatService = new ChatService();

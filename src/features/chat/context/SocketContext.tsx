@@ -125,6 +125,30 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
             // If this is an AI message with board context, extract it
             if (parsedMsg.boardContext) {
               console.log('Board Context received:', parsedMsg.boardContext);
+
+              // Get the current chat to check for an existing boardId association
+              if (parsedMsg.chatId) {
+                chatService
+                  .getChat(parsedMsg.chatId)
+                  .then(() => {
+                    // Update the chat messages to include the boardContext in the message
+                    setChatMessages((prevMessages) => {
+                      return prevMessages.map((msg) => {
+                        // If this is the message we just received, add the boardContext
+                        if (msg._id === parsedMsg._id || msg.id === parsedMsg._id) {
+                          return { ...msg, boardContext: parsedMsg.boardContext };
+                        }
+                        return msg;
+                      });
+                    });
+
+                    // Ensure we invalidate the chat query to reflect the updated boardContext
+                    queryClient.invalidateQueries({ queryKey: ['chats', parsedMsg.chatId] });
+                  })
+                  .catch((error) => {
+                    console.error('Error fetching chat for boardContext association:', error);
+                  });
+              }
             }
           }
 

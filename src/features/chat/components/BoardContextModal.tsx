@@ -2,16 +2,48 @@ import CheckIcon from '@/assets/icons/CheckIcon';
 import CircleDotIcon from '@/assets/icons/CircleDotIcon';
 import LayoutColumnsIcon from '@/assets/icons/LayoutColumnsIcon';
 import { BoardContext } from '@/models/BoardContext';
+import { notifyUser } from '@/utils/notificationUtils';
 import { Box, Button, Divider, Flex, Modal, ScrollArea, Text, Title } from '@mantine/core';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useBoardContextOperations } from '../hooks';
+import { chatService } from '../services/ChatService';
 
 interface BoardContextModalProps {
   isOpen: boolean;
   onClose: () => void;
   boardContext?: BoardContext;
+  chat: { _id: string; boardId?: string };
 }
 
-export function BoardContextModal({ isOpen, onClose, boardContext }: BoardContextModalProps) {
-  if (!boardContext) return null;
+export function BoardContextModal({ isOpen, onClose, boardContext, chat }: BoardContextModalProps) {
+  const { handleBoardContext, isLoading } = useBoardContextOperations();
+  const [isAccepting, setIsAccepting] = useState(false);
+  const queryClient = useQueryClient();
+
+  if (!boardContext) {
+    return null;
+  }
+
+  const handleAccept = async () => {
+    if (!boardContext) return;
+
+    setIsAccepting(true);
+    try {
+      const freshChat = await chatService.getChat(chat._id);
+
+      if (freshChat) {
+        handleBoardContext(freshChat, boardContext);
+        queryClient.invalidateQueries({ queryKey: ['chats', chat._id] });
+        onClose();
+      }
+    } catch (error) {
+      console.error('[ERROR] BoardContextModal - Error accepting board context:', error);
+      notifyUser.error('Error', 'Failed to accept board');
+    } finally {
+      setIsAccepting(false);
+    }
+  };
 
   return (
     <Modal
@@ -90,11 +122,15 @@ export function BoardContextModal({ isOpen, onClose, boardContext }: BoardContex
         <Divider my="md" />
 
         <Flex justify="flex-end" gap="md">
-          <Button variant="default" onClick={onClose}>
+          <Button variant="default" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button leftSection={<CheckIcon w={16} h={16} />} onClick={onClose}>
-            Looks Good
+          <Button
+            leftSection={<CheckIcon w={16} h={16} />}
+            onClick={handleAccept}
+            loading={isLoading || isAccepting}
+          >
+            Accept
           </Button>
         </Flex>
       </Box>

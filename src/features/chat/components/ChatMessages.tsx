@@ -183,9 +183,15 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                         </Text>
                       )}
                       {message.role === MessageRole.ASSISTANT ? (
-                        <Box>
+                        <Text
+                          style={{
+                            wordBreak: 'break-word',
+                            whiteSpace: 'pre-line',
+                            width: '100%',
+                          }}
+                        >
                           <RichTextContent html={convertMarkdownToHtml(messageContent)} />
-                        </Box>
+                        </Text>
                       ) : (
                         <Text
                           style={{
@@ -258,6 +264,7 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
         boardContext={chat?.boardContext}
         isOpen={boardContextModalOpen}
         onClose={() => setBoardContextModalOpen(false)}
+        chat={chat || { _id: '' }}
       />
     </>
   );

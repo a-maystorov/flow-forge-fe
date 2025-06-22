@@ -8,6 +8,7 @@ interface Chat {
   updatedAt: string;
   lastMessageAt: string;
   boardContext?: BoardContext;
+  boardId?: string;
 }
 
 export default Chat;
