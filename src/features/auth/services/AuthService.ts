@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import type {
   ConvertTempAccountResponse,
@@ -11,11 +11,13 @@ import type {
 const AUTH_TOKEN_KEY = 'authToken';
 
 class AuthService {
-  private http = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
-  });
+  private http: AxiosInstance;
 
   constructor() {
+    this.http = axios.create({
+      baseURL: import.meta.env.VITE_API_BASE_URL,
+    });
+
     this.http.interceptors.request.use((config) => {
       const token = this.getToken();
       if (token) {
@@ -23,6 +25,31 @@ class AuthService {
       }
       return config;
     });
+
+    this.http.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          this.logout();
+          window.location.href = '/welcome';
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return true;
+    }
+
+    try {
+      const decoded = jwtDecode<{ exp: number }>(token);
+      return decoded.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
   }
 
   private getStoredSession(): StoredSession | null {
@@ -42,6 +69,10 @@ class AuthService {
 
     try {
       const decoded = jwtDecode<User>(token);
+      if (this.isTokenExpired()) {
+        this.logout();
+        return null;
+      }
       return decoded;
     } catch {
       return null;
