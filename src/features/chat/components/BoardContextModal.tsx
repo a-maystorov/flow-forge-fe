@@ -49,11 +49,8 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Title order={3} fw={600}>
-          Board Suggestion
-        </Title>
-      }
+      title="Board Suggestion"
+      styles={{ title: { fontWeight: 600 } }}
       size="xl"
       padding="md"
     >
@@ -61,7 +58,7 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
         <Box mb="lg">
           <Flex align="center" gap="sm" mb="xs">
             <LayoutColumnsIcon w={20} h={20} />
-            <Title order={4}>{boardContext.name}</Title>
+            <Title order={3}>{boardContext.name}</Title>
           </Flex>
           <Text c="dimmed">{boardContext.description}</Text>
         </Box>
@@ -73,7 +70,7 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
             <Box key={column._id} mb="xl">
               <Flex align="center" mb="sm">
                 <Box w={4} h={24} mr={10} />
-                <Title order={5} fw={600}>
+                <Title order={4} fw={600}>
                   {column.name}
                 </Title>
                 {column.tasks.length > 0 && (
@@ -86,7 +83,7 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
               {column.tasks.length > 0 ? (
                 column.tasks.map((task) => (
                   <Box key={task._id} p="md" mb="md">
-                    <Title order={6} fw={600} mb="xs">
+                    <Title order={5} fw={600} mb="xs">
                       {task.title}
                     </Title>
                     <Text size="sm" mb="md" lineClamp={2}>

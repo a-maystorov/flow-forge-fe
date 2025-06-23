@@ -173,7 +173,7 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                         </Text>
                       )}
                       {message.role === MessageRole.ASSISTANT ? (
-                        <Text
+                        <Box
                           style={{
                             wordBreak: 'break-word',
                             whiteSpace: 'pre-line',
@@ -181,9 +181,9 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                           }}
                         >
                           <RichTextContent html={convertMarkdownToHtml(messageContent)} />
-                        </Text>
+                        </Box>
                       ) : (
-                        <Text
+                        <Box
                           style={{
                             wordBreak: 'break-word',
                             whiteSpace: 'pre-line',
@@ -191,7 +191,7 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                           }}
                         >
                           <RichTextContent html={convertMarkdownToHtml(messageContent)} />
-                        </Text>
+                        </Box>
                       )}
                     </Box>
                     {message.error && (
