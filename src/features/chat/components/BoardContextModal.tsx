@@ -2,6 +2,8 @@ import CheckIcon from '@/assets/icons/CheckIcon';
 import CircleDotIcon from '@/assets/icons/CircleDotIcon';
 import LayoutColumnsIcon from '@/assets/icons/LayoutColumnsIcon';
 import { BoardContext } from '@/models/BoardContext';
+import { RichTextContent } from '@/shared/components/rich-text-content';
+import { convertMarkdownToHtml } from '@/utils/markdownUtils';
 import { notifyUser } from '@/utils/notificationUtils';
 import { Box, Button, Divider, Flex, Modal, ScrollArea, Text, Title } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
@@ -87,7 +89,7 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
                       {task.title}
                     </Title>
                     <Text size="sm" mb="md" lineClamp={2}>
-                      {task.description}
+                      <RichTextContent html={convertMarkdownToHtml(task.description)} />
                     </Text>
 
                     {task.subtasks.length > 0 && (
