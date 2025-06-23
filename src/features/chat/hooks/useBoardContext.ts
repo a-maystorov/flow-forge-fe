@@ -22,21 +22,18 @@ export const useBoardContextOperations = () => {
           queryClient.invalidateQueries({ queryKey: ['chats', chatId] });
           queryClient.invalidateQueries({ queryKey: ['chats'] });
 
-          queryClient.invalidateQueries({ queryKey: ['boards', newBoard._id] });
           queryClient.invalidateQueries({ queryKey: ['boards'] });
-
-          await queryClient.refetchQueries({ queryKey: ['boards', newBoard._id], exact: true });
-          await queryClient.refetchQueries({ queryKey: ['boards'], exact: true });
+          queryClient.invalidateQueries({ queryKey: ['board', newBoard._id] });
 
           notifications.show({
-            title: 'board created',
+            title: 'Board created',
             message: 'board has been successfully created',
             color: 'green',
           });
         } catch (error) {
           console.error('Error updating chat with board ID:', error);
           notifications.show({
-            title: 'board created',
+            title: 'Board created',
             message: 'board created but failed to link with chat',
             color: 'yellow',
           });
@@ -45,7 +42,7 @@ export const useBoardContextOperations = () => {
     },
     onError: (error) => {
       notifications.show({
-        title: 'board creation failed',
+        title: 'Board creation failed',
         message: error.message || 'failed to create board',
         color: 'red',
       });
@@ -56,27 +53,23 @@ export const useBoardContextOperations = () => {
     {
       mutationFn: ({ boardId, boardContext }) => {
         if (!boardId) {
-          return Promise.reject(new Error('board id is required for updating'));
+          return Promise.reject(new Error('Board id is required for updating'));
         }
         return boardContextService.updateBoardFromContext(boardId, boardContext);
       },
       onSuccess: async (_, { boardId }) => {
-        queryClient.invalidateQueries({ queryKey: ['boards', boardId] });
         queryClient.invalidateQueries({ queryKey: ['boards'] });
-        queryClient.invalidateQueries({ queryKey: ['chats'] });
-
-        await queryClient.refetchQueries({ queryKey: ['boards', boardId], exact: true });
-        await queryClient.refetchQueries({ queryKey: ['boards'], exact: true });
+        queryClient.invalidateQueries({ queryKey: ['board', boardId] });
 
         notifications.show({
-          title: 'board updated',
+          title: 'Board updated',
           message: 'board has been successfully updated',
           color: 'green',
         });
       },
       onError: (error) => {
         notifications.show({
-          title: 'board update failed',
+          title: 'Board update failed',
           message: error.message || 'failed to update board',
           color: 'red',
         });
