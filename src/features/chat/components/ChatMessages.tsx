@@ -2,6 +2,7 @@ import LayoutColumnsIcon from '@/assets/icons/LayoutColumnsIcon';
 import { useUser } from '@/features/auth/hooks';
 import Message, { MessageRole } from '@/models/Message';
 import { RichTextContent } from '@/shared/components/rich-text-content/RichTextContent';
+import { convertMarkdownToHtml } from '@/utils/markdownUtils';
 import {
   Box,
   Button,
@@ -13,7 +14,6 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { marked } from 'marked';
 import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useChat } from '../hooks/useChat';
@@ -93,16 +93,6 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
         </Text>
       </Flex>
     );
-  }
-
-  /**
-   * Converts markdown to HTML using the synchronous version of marked
-   */
-  function convertMarkdownToHtml(markdown: string): string {
-    if (!markdown) {
-      return '';
-    }
-    return marked.parse(markdown, { async: false });
   }
 
   return (

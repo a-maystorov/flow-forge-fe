@@ -19,6 +19,7 @@ import DOMPurify from 'dompurify';
 import { useCallback, useEffect } from 'react';
 import { useUpdateSubtask } from '../../hooks';
 import { getSubtaskFromBoard } from '../../selectors/subtaskSelectors';
+import { convertMarkdownToHtml } from '@/utils/markdownUtils';
 
 interface FormValues {
   title: string;
@@ -272,7 +273,7 @@ export function SubtaskDetailsModal({
                     <Text fw={500} size="md" mb="xs">
                       Description
                     </Text>
-                    <RichTextContent html={form.values.description} />
+                    <RichTextContent html={convertMarkdownToHtml(form.values.description)} />
                   </Box>
                 )}
               </>
