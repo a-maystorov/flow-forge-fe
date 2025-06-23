@@ -92,13 +92,13 @@ export default function NavbarLayout() {
       >
         <Flex h="100%" justify="space-between" align="center">
           <Title visibleFrom="sm" lineClamp={1} data-board-title>
-            Select a board
+            {boardId ? boards?.find((board) => board._id === boardId)?.name : 'Select a board'}
           </Title>
 
           <Flex hiddenFrom="sm" align="center" gap="md">
             <KanbanLogo w={24} h={24} />
             <Title lineClamp={1} data-board-title>
-              Select a board
+              {boardId ? boards?.find((board) => board._id === boardId)?.name : 'Select a board'}
             </Title>
           </Flex>
 
