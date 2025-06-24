@@ -64,10 +64,8 @@ export function SubtaskDetailsModal({
 
   useEffect(() => {
     if (latestSubtask) {
-      const sanitizedDescription = DOMPurify.sanitize(
-        latestSubtask.description || '',
-        sanitizerConfig
-      );
+      const htmlContent = convertMarkdownToHtml(latestSubtask.description || '');
+      const sanitizedDescription = DOMPurify.sanitize(htmlContent, sanitizerConfig);
       form.setValues({
         title: latestSubtask.title,
         description: sanitizedDescription,
@@ -85,9 +83,11 @@ export function SubtaskDetailsModal({
 
   const cancelEditing = useCallback(() => {
     if (latestSubtask) {
+      const htmlContent = convertMarkdownToHtml(latestSubtask.description || '');
+      const sanitizedDescription = DOMPurify.sanitize(htmlContent, sanitizerConfig);
       form.setValues({
         title: latestSubtask.title,
-        description: latestSubtask.description || '',
+        description: sanitizedDescription,
         completed: latestSubtask.completed,
         isEditing: false,
       });
@@ -132,6 +132,7 @@ export function SubtaskDetailsModal({
         },
         {
           onSuccess: () => {
+            // When setting form values after success, the finalDescription is already sanitized HTML
             form.setValues({
               ...values,
               description: finalDescription,

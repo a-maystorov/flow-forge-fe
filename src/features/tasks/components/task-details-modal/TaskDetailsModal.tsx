@@ -55,10 +55,10 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
     },
   });
 
-  // Update form values when task data changes or becomes available
   useEffect(() => {
     if (task) {
-      const sanitizedDescription = DOMPurify.sanitize(task.description || '', sanitizerConfig);
+      const htmlContent = convertMarkdownToHtml(task.description || '');
+      const sanitizedDescription = DOMPurify.sanitize(htmlContent, sanitizerConfig);
       form.setValues({
         title: task.title,
         description: sanitizedDescription,
@@ -75,9 +75,11 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
 
   const cancelEditing = useCallback(() => {
     if (task) {
+      const htmlContent = convertMarkdownToHtml(task.description || '');
+      const sanitizedDescription = DOMPurify.sanitize(htmlContent, sanitizerConfig);
       form.setValues({
         title: task.title,
-        description: task.description || '',
+        description: sanitizedDescription,
         isEditing: false,
       });
     }
