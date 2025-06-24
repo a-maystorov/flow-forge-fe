@@ -1,15 +1,16 @@
 interface Props {
   w: number;
   h: number;
+  c?: string;
 }
 
-export default function CircleDotIcon({ w, h }: Props) {
+export default function CircleDotIcon({ w, h, c }: Props) {
   return (
     <svg
       width={w}
       height={h}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={c}
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"

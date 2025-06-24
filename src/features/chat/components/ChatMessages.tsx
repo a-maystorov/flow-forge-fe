@@ -1,4 +1,5 @@
 import LayoutColumnsIcon from '@/assets/icons/LayoutColumnsIcon';
+
 import { useUser } from '@/features/auth/hooks';
 import Message, { MessageRole } from '@/models/Message';
 import { RichTextContent } from '@/shared/components/rich-text-content/RichTextContent';
@@ -37,6 +38,10 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
   const isDarkColorScheme = colorScheme === 'dark';
 
   const [dots, setDots] = useState('');
+
+  // Find the last AI message
+  const lastAiMessageId = messages.filter((m) => m.role === MessageRole.ASSISTANT).pop()?._id;
+
   const [boardContextModalOpen, setBoardContextModalOpen] = useState(false);
 
   useEffect(() => {
@@ -200,17 +205,21 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                       </Text>
                     )}
                     <Flex justify="space-between" align="center" gap="sm" mt={4}>
-                      {message.role === MessageRole.ASSISTANT && chat?.boardContext && (
-                        <Button
-                          variant="light"
-                          color="blue"
-                          size="xs"
-                          leftSection={<LayoutColumnsIcon w={16} h={16} />}
-                          onClick={() => setBoardContextModalOpen(true)}
-                        >
-                          Preview
-                        </Button>
-                      )}
+                      {message.role === MessageRole.ASSISTANT &&
+                        chat?.boardContext &&
+                        (chat?.boardContext.name ||
+                          (chat?.boardContext.columns && chat?.boardContext.columns.length > 0)) &&
+                        message._id === lastAiMessageId && (
+                          <Button
+                            variant="light"
+                            color="blue"
+                            size="xs"
+                            leftSection={<LayoutColumnsIcon w={16} h={16} />}
+                            onClick={() => setBoardContextModalOpen(true)}
+                          >
+                            Preview
+                          </Button>
+                        )}
                       <Text size="xs" c="dimmed">
                         {timestamp}
                       </Text>
