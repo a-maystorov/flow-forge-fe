@@ -21,6 +21,7 @@ import { useForm } from '@mantine/form';
 import DOMPurify from 'dompurify';
 import { useCallback, useEffect, useState } from 'react';
 import { useDeleteTask, useTaskFromBoard, useUpdateTask } from '../../hooks';
+import { convertMarkdownToHtml } from '@/utils/markdownUtils';
 
 interface FormValues {
   title: string;
@@ -301,7 +302,7 @@ export function TaskDetailsModal({ taskId, boardId, columnId, isOpen, onClose }:
                     <Text fw={500} size="md" mb="xs">
                       Description
                     </Text>
-                    <RichTextContent html={task.description} />
+                    <RichTextContent html={convertMarkdownToHtml(task.description)} />
                   </Box>
                 )}
               </>

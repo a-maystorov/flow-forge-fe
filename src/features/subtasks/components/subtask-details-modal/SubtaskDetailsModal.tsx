@@ -19,6 +19,7 @@ import DOMPurify from 'dompurify';
 import { useCallback, useEffect } from 'react';
 import { useUpdateSubtask } from '../../hooks';
 import { getSubtaskFromBoard } from '../../selectors/subtaskSelectors';
+import { convertMarkdownToHtml } from '@/utils/markdownUtils';
 
 interface FormValues {
   title: string;
@@ -71,11 +72,11 @@ export function SubtaskDetailsModal({
         title: latestSubtask.title,
         description: sanitizedDescription,
         completed: latestSubtask.completed,
-        isEditing: form.values.isEditing, // Preserve editing state
+        isEditing: form.values.isEditing,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [latestSubtask]); // Use latestSubtask instead of subtask to catch updates
+  }, [latestSubtask]);
 
   const startEditing = useCallback(() => {
     form.setFieldValue('isEditing', true);
@@ -149,7 +150,6 @@ export function SubtaskDetailsModal({
   const handleStatusToggle = useCallback(() => {
     const newStatus = !form.values.completed;
 
-    // Only ask for confirmation when marking as completed
     if (newStatus) {
       if (window.confirm('Are you sure you want to mark this subtask as completed?')) {
         form.setFieldValue('completed', newStatus);
@@ -161,7 +161,6 @@ export function SubtaskDetailsModal({
         });
       }
     } else {
-      // No confirmation needed when marking as incomplete
       form.setFieldValue('completed', newStatus);
       updateSubtask({
         subtaskId: latestSubtask._id,
@@ -272,7 +271,7 @@ export function SubtaskDetailsModal({
                     <Text fw={500} size="md" mb="xs">
                       Description
                     </Text>
-                    <RichTextContent html={form.values.description} />
+                    <RichTextContent html={convertMarkdownToHtml(form.values.description)} />
                   </Box>
                 )}
               </>
