@@ -28,7 +28,6 @@ import { useEffect, useState } from 'react';
 import { useBoardContextOperations } from '../hooks';
 import { chatService } from '../services/ChatService';
 
-// Extended interfaces for comparison objects
 interface ComparisonColumn extends Column {
   isNew?: boolean;
   isChanged?: boolean;
@@ -92,26 +91,19 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
     }
   };
 
-  // Function to identify what's new or changed in the suggested board compared to current board
   const getChanges = () => {
     if (!currentBoard) return boardContext;
 
-    // Deep clone to avoid modifying the original objects
     const changesContext = JSON.parse(JSON.stringify(boardContext));
 
-    // Process columns
     changesContext.columns = changesContext.columns.map((suggestedColumn: ComparisonColumn) => {
       const typedColumn = suggestedColumn as ComparisonColumn;
-      // First try to find by exact name match
       let existingColumn = currentBoard.columns.find(
         (col) => col.name.toLowerCase() === typedColumn.name.toLowerCase()
       );
-
-      // If no match by name, try to find by ID if available
       if (!existingColumn && typedColumn._id) {
         existingColumn = currentBoard.columns.find((col) => col._id === typedColumn._id);
 
-        // If found by ID but names don't match, it's been renamed
         if (
           existingColumn &&
           existingColumn.name.toLowerCase() !== typedColumn.name.toLowerCase()
@@ -121,50 +113,38 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
       }
 
       if (!existingColumn) {
-        // New column
         typedColumn.isNew = true;
         return typedColumn;
       }
-
-      // Existing column - check for task changes
       typedColumn.tasks = typedColumn.tasks.map((suggestedTask: ComparisonTask) => {
         const typedTask = suggestedTask as ComparisonTask;
-        // Find matching task by title (case insensitive)
         const existingTask = existingColumn?.tasks.find(
           (task) => task.title.toLowerCase() === typedTask.title.toLowerCase()
         );
 
         if (!existingTask) {
-          // New task
           typedTask.isNew = true;
           return typedTask;
         }
 
-        // Check if description is different
         if (typedTask.description !== existingTask.description) {
           typedTask.isChanged = true;
         }
-
-        // Check subtasks
         typedTask.subtasks = typedTask.subtasks.map((suggestedSubtask: ComparisonSubtask) => {
           const typedSubtask = suggestedSubtask as ComparisonSubtask;
-          // Find matching subtask by title (case insensitive)
           const existingSubtask = existingTask.subtasks.find(
             (subtask) => subtask.title.toLowerCase() === typedSubtask.title.toLowerCase()
           );
 
           if (!existingSubtask) {
-            // New subtask
             typedSubtask.isNew = true;
           } else if (typedSubtask.description !== existingSubtask.description) {
-            // Changed subtask
             typedSubtask.isChanged = true;
           }
 
           return typedSubtask;
         });
 
-        // Check for deleted subtasks
         const deletedSubtasks = existingTask.subtasks.filter(
           (existingSubtask) =>
             !typedTask.subtasks.some(
@@ -173,7 +153,6 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
             )
         );
 
-        // Add deleted subtasks with isDeleted flag
         deletedSubtasks.forEach((deletedSubtask) => {
           const subtaskToAdd = JSON.parse(JSON.stringify(deletedSubtask)) as ComparisonSubtask;
           subtaskToAdd.isDeleted = true;
@@ -183,7 +162,6 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
         return typedTask;
       });
 
-      // Check for deleted tasks
       const deletedTasks = existingColumn?.tasks.filter(
         (existingTask) =>
           !typedColumn.tasks.some(
@@ -192,14 +170,12 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
           )
       );
 
-      // Add deleted tasks with isDeleted flag
       deletedTasks.forEach((deletedTask) => {
         const taskToAdd = JSON.parse(JSON.stringify(deletedTask)) as ComparisonTask;
         taskToAdd.isDeleted = true;
         typedColumn.tasks.push(taskToAdd);
       });
 
-      // Only include tasks that are new or changed
       if (activeTab === 'changes') {
         typedColumn.tasks = typedColumn.tasks.filter(
           (task: ComparisonTask) =>
@@ -213,7 +189,6 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
       return typedColumn;
     });
 
-    // Check for deleted columns
     const deletedColumns = currentBoard.columns.filter(
       (existingColumn) =>
         !changesContext.columns.some(
@@ -222,14 +197,12 @@ export function BoardContextModal({ isOpen, onClose, boardContext, chat }: Board
         )
     );
 
-    // Add deleted columns with isDeleted flag
     deletedColumns.forEach((deletedColumn) => {
       const columnToAdd = JSON.parse(JSON.stringify(deletedColumn)) as ComparisonColumn;
       columnToAdd.isDeleted = true;
       changesContext.columns.push(columnToAdd);
     });
 
-    // In changes view, only show columns that have new/modified/deleted content or are new/deleted themselves
     if (activeTab === 'changes') {
       changesContext.columns = changesContext.columns.filter(
         (col: ComparisonColumn) =>

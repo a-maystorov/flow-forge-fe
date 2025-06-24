@@ -228,7 +228,6 @@ export function ChatMessages({ messages = [], isLoading: propIsLoading }: ChatMe
                 );
               })}
 
-              {/* Add a dedicated typing indicator at the bottom when AI is responding */}
               {isAiResponding && (
                 <Paper
                   p="md"

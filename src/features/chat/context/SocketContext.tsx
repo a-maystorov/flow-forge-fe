@@ -114,7 +114,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         const parsedMsg = typeof msg === 'string' ? JSON.parse(msg) : msg;
 
         if (parsedMsg.chatId) {
-          // If we're receiving a message from the AI, set isAiResponding to false
           if (
             parsedMsg.from === 'AI Assistant' ||
             parsedMsg.from === 'ai' ||
@@ -122,19 +121,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
           ) {
             setIsAiResponding(false);
 
-            // If this is an AI message with board context, extract it
             if (parsedMsg.boardContext) {
-              console.log('Board Context received:', parsedMsg.boardContext);
-
-              // Get the current chat to check for an existing boardId association
               if (parsedMsg.chatId) {
                 chatService
                   .getChat(parsedMsg.chatId)
                   .then(() => {
-                    // Update the chat messages to include the boardContext in the message
                     setChatMessages((prevMessages) => {
                       return prevMessages.map((msg) => {
-                        // If this is the message we just received, add the boardContext
                         if (msg._id === parsedMsg._id || msg.id === parsedMsg._id) {
                           return { ...msg, boardContext: parsedMsg.boardContext };
                         }
@@ -142,7 +135,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
                       });
                     });
 
-                    // Ensure we invalidate the chat query to reflect the updated boardContext
                     queryClient.invalidateQueries({ queryKey: ['chats', parsedMsg.chatId] });
                   })
                   .catch((error) => {
@@ -258,7 +250,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     (content: string) => {
       if (!socket || !activeChatId) return;
 
-      // Create a temporary user message to display immediately
       const tempUserMessage: Message = {
         _id: `temp-user-${Date.now()}`,
         chatId: activeChatId,
@@ -270,16 +261,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         updatedAt: new Date().toISOString(),
       };
 
-      // First add the user message to display immediately
       setChatMessages((prev) => [...prev, tempUserMessage]);
 
-      // Wait a small delay before showing the AI responding state
-      // This ensures the user message appears first
       setTimeout(() => {
-        // Set the AI to responding state
         setIsAiResponding(true);
-
-        // Add a placeholder AI message to indicate loading
         const aiPlaceholder: Message = {
           _id: `temp-ai-${Date.now()}`,
           chatId: activeChatId,
@@ -291,11 +276,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
           updatedAt: new Date().toISOString(),
         };
 
-        // Add AI placeholder message
         setChatMessages((prev) => [...prev, aiPlaceholder]);
       }, 100);
 
-      // Send the message to the server
       socket.emit('chat message', content);
     },
     [socket, activeChatId, user]

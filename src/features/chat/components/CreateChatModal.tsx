@@ -15,8 +15,6 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const [error, setError] = useState<string | null>(null);
   const { boardId } = useParams<{ boardId: string }>();
 
-  // Check if we're in a board context
-  // This covers both /boards/:boardId and any other paths that might have boardId param
   const hasBoardContext = !!boardId;
 
   const form = useForm({
