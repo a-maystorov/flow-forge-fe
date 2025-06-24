@@ -5,8 +5,9 @@
 ![Vite](https://img.shields.io/badge/Vite-6.2.1-646CFF?logo=vite&logoColor=white)
 ![Mantine](https://img.shields.io/badge/Mantine-7.15.1-339AF0?logo=mantine&logoColor=white)
 ![React Query](https://img.shields.io/badge/React_Query-5.62.3-FF4154?logo=reactquery&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-4.7.1-010101?logo=socket.io&logoColor=white)
 
-A modern, feature-rich task management application that helps teams organize work efficiently. Flow Forge provides an intuitive drag-and-drop interface for managing tasks across customizable boards, columns, and workflows.
+A modern, feature-rich task management application that helps teams organize work efficiently. Flow Forge provides an intuitive drag-and-drop interface for managing tasks across customizable boards, columns, and workflows, enhanced with AI-powered assistance.
 
 ## 🚀 Features
 
@@ -15,9 +16,11 @@ A modern, feature-rich task management application that helps teams organize wor
 - **Subtask Support**: Break down complex tasks into manageable subtasks for better tracking
 - **Rich Text Editor**: Format task descriptions with bold, italic, links, and other formatting options
 - **User Authentication**: Secure login/signup with support for both permanent and temporary user sessions
-- **Persistent Sessions**: Temporary users can resume their work across browser sessions
+- **Persistent Temporary Sessions**: Temporary users can resume their work across browser sessions using secure localStorage persistence
+- **AI Chat Assistant**: Get real-time help and guidance with the integrated chat assistant
 - **Responsive Design**: Fully responsive interface that works on desktop and mobile devices
 - **Dark Mode Support**: Built-in dark theme for comfortable viewing in all environments
+- **Smart UX**: Contextual confirmation dialogs that only appear when changes are actually made
 
 ## 🛠️ Technology Stack
 
@@ -30,8 +33,9 @@ A modern, feature-rich task management application that helps teams organize wor
 - **@hello-pangea/dnd**: For drag-and-drop functionality
 - **Mantine UI**: For modern, accessible UI components
 - **TanStack React Query**: For efficient server state management
-- **TipTap**: For rich text editing capabilities
+- **@mantine/tiptap**: For rich text editing capabilities
 - **DOMPurify**: For secure HTML sanitization
+- **Socket.IO**: For real-time chat communications
 - **Zod**: For runtime validation
 
 ### Development Tools
@@ -100,20 +104,23 @@ npm run dev
 - **Modern React Patterns**: Custom hooks, context API, and functional components
 - **Optimized Performance**: Proper state management and memoization
 - **Type Safety**: Comprehensive TypeScript types throughout the codebase
-- **Consistent Data Fetching**: React Query with proper cache invalidation strategies
+- **Consistent Data Fetching**: React Query with proper cache invalidation strategies instead of manual cache updates
 - **Clean Code**: Component composition, separation of concerns, and code reusability
-- **Security**: HTML sanitization for user-generated content
+- **Security**: Consistent HTML sanitization for user-generated content using DOMPurify
 - **Responsive Design**: Mobile-first approach with responsive components
 - **Accessibility**: ARIA attributes and keyboard navigation support
+- **Real-time Communication**: WebSocket integration for instant messaging
 
 ## 📝 Development Approach
 
 This project demonstrates:
 
 - **Attention to Detail**: Smart UX decisions like showing confirmation dialogs only when actual changes are made
-- **Security Focus**: Proper sanitization of user input with DOMPurify
-- **Performance Optimization**: Efficient state management and API caching
+- **Security Focus**: Proper sanitization of user input with DOMPurify applied consistently
+- **Performance Optimization**: Efficient state management and API caching with optimized invalidation patterns
 - **Clean Architecture**: Feature-based organization with clear separation of concerns
+- **Persistence Strategy**: Secure and seamless user session management using JWT tokens and localStorage
+- **Real-time Capabilities**: Socket-based communications for instant assistance
 
 ## 📚 Learning Outcomes
 
