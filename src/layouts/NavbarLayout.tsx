@@ -22,7 +22,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { useState } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
 import ChatIcon from '../assets/icons/ChatIcon';
 import KanbanLogo from '../assets/icons/KanbanLogo';
 import AuthActions from '../components/auth-actions';
@@ -95,7 +95,14 @@ export default function NavbarLayout() {
             {boardId ? boards?.find((board) => board._id === boardId)?.name : 'Select a board'}
           </Title>
 
-          <Flex hiddenFrom="sm" align="center" gap="md">
+          <Flex
+            hiddenFrom="sm"
+            align="center"
+            gap="md"
+            component={Link}
+            to="/"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <KanbanLogo w={24} h={24} />
             <Title lineClamp={1} data-board-title>
               {boardId ? boards?.find((board) => board._id === boardId)?.name : 'Select a board'}
@@ -126,7 +133,13 @@ export default function NavbarLayout() {
         }}
       >
         <AppShell.Section p={{ base: '2lg', md: 'xl' }} mb="md" visibleFrom="sm">
-          <Flex align="center" gap="md">
+          <Flex
+            align="center"
+            gap="md"
+            component={Link}
+            to="/"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <KanbanLogo w={24} h={24} />
             <Title>flowforge</Title>
           </Flex>
