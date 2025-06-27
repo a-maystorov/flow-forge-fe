@@ -51,6 +51,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         socket.disconnect();
         setSocket(null);
         setIsConnected(false);
+        setIsLoading(false);
       }
       return;
     }
@@ -232,8 +233,19 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
       setIsLoading(true);
       socket.emit('new chat', title || 'New Chat');
+
+      const handleNewChatResponse = () => {
+        setIsLoading(false);
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+      };
+
+      socket.once('new chat created', handleNewChatResponse);
+
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     },
-    [socket]
+    [socket, queryClient]
   );
 
   const createChatFromBoard = useCallback(
@@ -242,8 +254,19 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
       setIsLoading(true);
       socket.emit('new chat from board', { boardId, title });
+
+      const handleNewChatResponse = () => {
+        setIsLoading(false);
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+      };
+
+      socket.once('new chat created', handleNewChatResponse);
+
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     },
-    [socket]
+    [socket, queryClient]
   );
 
   const sendMessage = useCallback(
