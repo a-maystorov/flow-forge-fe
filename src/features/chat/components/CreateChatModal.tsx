@@ -3,7 +3,7 @@ import { notifyUser } from '@/utils/notificationUtils';
 import { Button, Group, Modal, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface CreateChatModalProps {
   opened: boolean;
@@ -14,6 +14,7 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const { createChat, createChatFromBoard, isLoading } = useSocket();
   const [error, setError] = useState<string | null>(null);
   const { boardId } = useParams<{ boardId: string }>();
+  const navigate = useNavigate();
 
   const hasBoardContext = !!boardId;
 
@@ -36,6 +37,7 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
       }
       form.reset();
       onClose();
+      navigate('/');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create chat';
       setError(errorMessage);

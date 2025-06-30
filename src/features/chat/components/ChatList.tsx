@@ -14,7 +14,9 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../context/SocketContext';
+import { chatService } from '../services/ChatService';
 
 interface ChatListProps {
   chats: Chat[];
@@ -27,13 +29,28 @@ export function ChatList({ chats, isLoading: propIsLoading, onSelectChat }: Chat
     useDisclosure(false);
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
   const { selectChat, deleteChat, isLoading: contextIsLoading, isConnected } = useSocket();
+  const navigate = useNavigate();
 
   const isLoading = propIsLoading !== undefined ? propIsLoading : contextIsLoading;
 
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = async (chatId: string) => {
     selectChat(chatId);
+
     if (onSelectChat) {
       onSelectChat(chatId);
+    }
+
+    try {
+      const chat = await chatService.getChat(chatId);
+
+      if (chat.boardId) {
+        navigate(`/boards/${chat.boardId}`);
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error fetching chat for navigation:', error);
+      navigate('/');
     }
   };
 

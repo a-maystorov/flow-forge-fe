@@ -2,6 +2,7 @@ import Board from '@/models/Board';
 import { BoardContext } from '@/models/BoardContext';
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { boardContextService } from '../services/BoardContextService';
 import { chatService } from '../services/ChatService';
 
@@ -11,6 +12,7 @@ import { chatService } from '../services/ChatService';
  */
 export const useBoardContextOperations = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const createMutation = useMutation<Board, Error, { boardContext: BoardContext; chatId: string }>({
     mutationFn: ({ boardContext }) => boardContextService.createBoardFromContext(boardContext),
@@ -30,6 +32,8 @@ export const useBoardContextOperations = () => {
             message: 'board has been successfully created',
             color: 'green',
           });
+
+          navigate(`/boards/${newBoard._id}`);
         } catch (error) {
           console.error('Error updating chat with board ID:', error);
           notifications.show({
