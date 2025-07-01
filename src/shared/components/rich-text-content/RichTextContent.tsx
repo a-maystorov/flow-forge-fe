@@ -1,5 +1,4 @@
 import { sanitizerConfig } from '@/shared/constants/html';
-import { Box } from '@mantine/core';
 import DOMPurify from 'dompurify';
 import styles from './RichTextContent.module.css';
 
@@ -12,7 +11,7 @@ export function RichTextContent({ html, onClick }: Props) {
   const sanitizedHtml = DOMPurify.sanitize(html, sanitizerConfig);
 
   return (
-    <Box
+    <span
       dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
       onClick={onClick}
       className={`${styles.container} ${onClick ? '' : styles.readOnly}`}

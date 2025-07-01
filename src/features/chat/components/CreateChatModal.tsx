@@ -1,6 +1,6 @@
 import { useSocket } from '@/features/chat/context/SocketContext';
 import { notifyUser } from '@/utils/notificationUtils';
-import { Button, Group, Modal, TextInput } from '@mantine/core';
+import { Button, Group, Modal, TextInput, Checkbox, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -21,6 +21,8 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const form = useForm({
     initialValues: {
       title: '',
+      // Temporary flag to control board-linking behavior
+      linkToBoard: Boolean(hasBoardContext),
     },
     validate: {
       title: (value) => (value.trim() ? null : 'Title is required'),
@@ -30,7 +32,7 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
   const handleSubmit = form.onSubmit((values) => {
     setError(null);
     try {
-      if (hasBoardContext) {
+      if (hasBoardContext && values.linkToBoard) {
         createChatFromBoard(boardId, values.title);
       } else {
         createChat(values.title);
@@ -59,14 +61,25 @@ export function CreateChatModal({ opened, onClose }: CreateChatModalProps) {
       size="sm"
     >
       <form onSubmit={handleSubmit}>
-        <TextInput
-          label="Chat Title"
-          placeholder="Enter chat title"
-          required
-          error={error}
-          {...form.getInputProps('title')}
-          data-autofocus
-        />
+        <Stack gap="md">
+          <TextInput
+            label="Chat Title"
+            placeholder="Enter chat title"
+            required
+            error={error}
+            {...form.getInputProps('title')}
+            data-autofocus
+          />
+
+          {hasBoardContext && (
+            <Checkbox
+              label="Link this chat to the current board"
+              description="Chat will be associated with this board and have access to board data"
+              checked={Boolean(form.values.linkToBoard)}
+              onChange={(event) => form.setFieldValue('linkToBoard', event.currentTarget.checked)}
+            />
+          )}
+        </Stack>
 
         <Group justify="flex-end" mt="xl">
           <Button variant="subtle" onClick={handleClose} disabled={isLoading}>
