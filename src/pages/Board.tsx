@@ -1,5 +1,7 @@
 import { BoardColumns, EmptyBoard } from '@/features/boards/components';
 import { useBoard, useBoards } from '@/features/boards/hooks';
+import { useSocket } from '@/features/chat/context';
+import { chatService } from '@/features/chat/services/ChatService';
 import { CreateColumnModal } from '@/features/columns/components';
 import { CreateTaskModal } from '@/features/tasks/components/create-task-modal';
 import { TaskDetailsModal } from '@/features/tasks/components/task-details-modal';
@@ -21,6 +23,7 @@ type ModalAction =
 
 export default function Board() {
   const { boardId } = useParams();
+  const { selectChat, activeChatId, clearActiveChatId } = useSocket();
 
   const { boards = [] } = useBoards();
   const { board, isFetchingBoard } = useBoard(boardId);
@@ -44,6 +47,30 @@ export default function Board() {
   useEffect(() => {
     document.title = boardTitle;
   }, [boardTitle]);
+
+  useEffect(() => {
+    if (boardId) {
+      const findAndSelectChat = async () => {
+        try {
+          const chats = await chatService.getChats();
+          const matchingChat = chats.find((chat) => chat.boardId === boardId);
+
+          if (matchingChat) {
+            if (activeChatId !== matchingChat._id) {
+              selectChat(matchingChat._id);
+            }
+          } else {
+            clearActiveChatId();
+          }
+        } catch (error) {
+          console.error('Error finding chat for board:', error);
+          clearActiveChatId();
+        }
+      };
+
+      findAndSelectChat();
+    }
+  }, [boardId, selectChat, activeChatId, clearActiveChatId]);
 
   const handleModalAction = useCallback(
     (action: ModalAction) => {

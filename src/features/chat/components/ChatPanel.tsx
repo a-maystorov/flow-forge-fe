@@ -3,6 +3,7 @@ import { ChevronLeftIcon } from '@/assets/icons/ChevronLeftIcon';
 import { useSocket } from '@/features/chat/context';
 import { useChat, useChatMessages, useChats } from '@/features/chat/hooks';
 import Message from '@/models/Message';
+import { isValidObjectId } from '@/utils/mongoUtils';
 import {
   ActionIcon,
   AppShell,
@@ -39,6 +40,10 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   const { messages: persistentMessages, isFetchingMessages } = useChatMessages(
     activeChatId || undefined
   );
+
+  const shouldShowMessages = useMemo(() => {
+    return isMessageView && activeChatId && isValidObjectId(activeChatId);
+  }, [isMessageView, activeChatId]);
 
   /**
    * Deduplicates and merges messages from two sources (persistent DB and real-time socket)
@@ -202,7 +207,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
           ) : (
             <Box style={{ position: 'relative', width: '100%', height: '100%' }}>
               {/* Chat list view */}
-              <Box display={isMessageView ? 'none' : 'block'}>
+              <Box display={shouldShowMessages ? 'none' : 'block'}>
                 <ChatList
                   chats={chats || []}
                   isLoading={isFetchingChats}
@@ -212,7 +217,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
 
               {/* Message view */}
               <Box
-                display={isMessageView ? 'block' : 'none'}
+                display={shouldShowMessages ? 'block' : 'none'}
                 style={{
                   height: '100%',
                   position: 'absolute',

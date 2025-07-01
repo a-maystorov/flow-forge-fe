@@ -11,6 +11,7 @@ interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
   selectChat: (chatId: string) => void;
+  clearActiveChatId: () => void;
   createChat: (title: string) => void;
   createChatFromBoard: (boardId: string, title?: string) => void;
   sendMessage: (content: string) => void;
@@ -227,6 +228,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     [socket]
   );
 
+  const clearActiveChatId = useCallback(() => {
+    setActiveChatId(null);
+    setChatMessages([]);
+  }, []);
+
   const createChat = useCallback(
     (title: string) => {
       if (!socket) return;
@@ -339,6 +345,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     isAiResponding,
     selectChat,
+    clearActiveChatId,
     createChat,
     createChatFromBoard,
     sendMessage,
